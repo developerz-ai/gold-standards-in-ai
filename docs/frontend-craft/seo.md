@@ -2,6 +2,8 @@
 
 Make every public page discoverable, shareable, and fast. SEO is the sum of many small correct things — content, meta, structured data, sitemaps, media, and performance. Bake it into the template so it's automatic, not a launch-day scramble.
 
+> ⚠️ **SEO (and SSR) is for public pages only.** Closed platforms behind a login get no SEO benefit — crawlers never authenticate — so those are plain **SPAs, no SSR** ([frontend-solidjs](../stack/frontend-solidjs.md#the-rule-ssr-is-only-for-seo)). Everything below applies to the public marketing/content site, not the app behind auth.
+
 ## Render content so crawlers see it
 - **SSR/SSG for public content** ([SolidStart](../stack/frontend-solidjs.md)) — don't hide text behind client-only JS. The HTML response must contain the words you want ranked.
 - **Semantic HTML** — one `<h1>` per page, ordered `<h2>/<h3>`, `<nav>/<main>/<article>/<footer>`, real `<a href>` links. Crawlers and screen readers both win.

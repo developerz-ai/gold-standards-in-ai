@@ -7,6 +7,8 @@ This repo is a **knowledge base for coding agents** (and the humans who run them
 
 Point any agent at this repo before it starts a new project. The more an agent knows about how we work — conventions, tooling, the exact commands, where things go — the better and faster it builds. 🚀
 
+Think of it as **the judgment of a senior engineer with 30 years of experience who also tracks the latest tech** — distilled into docs. An agent that reads it inherits that judgment by default: it reaches for the right tool, the modern pattern, and the boring-correct choice without being told each time. 🧓⚡
+
 > 🎯 **Who this is for:** AI-first orgs where **agents write ~100% of the code** and humans review, steer, and operate. Every standard here optimizes for that reality — make the repo so legible and so well-tooled that an agent ships production-quality work autonomously, and a human verifies it at the PR. If humans still write most of your code, much of this still helps, but the rules are tuned for full autonomy.
 
 ## 🧭 Start here

@@ -5,9 +5,14 @@ SolidJS is the default web UI: React-like ergonomics, fine-grained reactivity, t
 ## Pick the right Solid flavor
 | App type | Tooling |
 |---|---|
-| SPA (dashboard, wallet, admin) | Solid + **Vite** + `@solidjs/router` |
-| SSR / SEO (marketing, content) | **SolidStart** on **Vinxi** |
+| **Closed platform behind login** (dashboard, wallet, admin) | **SPA** — Solid + **Vite** + `@solidjs/router` |
+| **Public site** for SEO (marketing, content, blog, docs) | **SSR/SSG** — **SolidStart** on **Vinxi** |
 | Browser extension | **WXT** (`@wxt-dev/module-solid`) |
+
+### The rule: SSR is only for SEO
+- **SSR exists to get content crawled and to render fast for first-time visitors.** Use it for **public** pages → [../frontend-craft/seo.md](../frontend-craft/seo.md).
+- **Anything behind a login is a SPA — no SSR.** There's no SEO value behind auth (crawlers never see it), so SSR only adds server complexity, session/auth-on-the-server headaches, and a render path you don't need. Ship a static SPA shell, fetch data client-side with [TanStack Query](#conventions).
+- A product often has **both**: an SSR marketing site *and* a SPA app — separate `apps/` in the [monorepo](../architecture/monorepo.md) (e.g. `apps/marketing` SSR, `apps/dashboard` SPA).
 
 Deps: `solid-js`, `@solidjs/router`, `@tanstack/solid-query` (server state), `tailwindcss`.
 
