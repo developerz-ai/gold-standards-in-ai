@@ -65,6 +65,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [agent-sdk.md](docs/ai-agents/agent-sdk.md) — 🧬 building agents with the AI Agent SDK
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
+- [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
 
 ### 6. ☸️ Infrastructure
 - [infrastructure/README.md](docs/infrastructure/README.md) — the index
@@ -72,6 +73,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [servers-and-dns.md](docs/infrastructure/servers-and-dns.md) — 🖥️ OVH VPS/dedicated · 🌐 ClouDNS · ✉️ self-hosted mail
 - [sso-zitadel.md](docs/infrastructure/sso-zitadel.md) — 🔑 one SSO for many apps (Zitadel + GitHub)
 - [secrets.md](docs/infrastructure/secrets.md) — 🔐 sealed-secrets, Vaultwarden, `.env.example`
+- [observability.md](docs/infrastructure/observability.md) — 🚨 Sentry error monitoring as an agent work-queue
 
 ### 7. 🎨 Frontend craft
 - [frontend-craft/README.md](docs/frontend-craft/README.md) — the index

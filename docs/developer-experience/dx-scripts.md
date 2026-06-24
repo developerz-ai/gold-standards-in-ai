@@ -108,6 +108,16 @@ Run them directly: `bun scripts/dns/upsert.ts example.com A @ 1.2.3.4`.
 - **Typecheck the scripts too:** `tsc -p scripts/tsconfig.json` in `bin/check`.
 - **`lib/` is unit-tested** — pure helpers are the easiest, highest-value tests in the repo → [../architecture/testing.md](../architecture/testing.md).
 
+## A `./tmp/` scratch dir
+Give the agent a gitignored `./tmp/` for intermediate work — generated keys, scratch scripts, downloaded artifacts, command output it wants to re-read, a place to stage files before moving them. It keeps junk out of the source tree and out of commits.
+```gitignore
+# .gitignore
+/tmp/
+```
+- One per repo (and the agent's own session scratch dir for truly throwaway files).
+- Anything that should persist graduates out of `tmp/` into a real path; everything else is safe to wipe.
+- Never put secrets meant for commit here; `tmp/` is disposable by definition.
+
 ## Rules
 - **Wrap every external system** (hosting, CI, DNS, DB, monitoring) in a script the agent can run — this is how it works end-to-end ([philosophy #2](../00-philosophy.md)).
 - **Read-only where it counts** — DB scripts use a read-only role.

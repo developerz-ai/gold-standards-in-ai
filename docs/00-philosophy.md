@@ -16,6 +16,15 @@ The human-in-the-loop points that stay human (or human-supervised):
 
 If humans still write most of your code, most of this still helps — but the rules are tuned for full autonomy.
 
+### The quality net: defense in depth
+A coding agent is fast but fallible — it *will* miss things. So quality doesn't rest on the agent being perfect; it rests on layers that catch what it misses:
+
+1. **Tests** ensure high quality — they prove the change does what it should and catch regressions. The agent writes them and runs them every loop. [→ testing](architecture/testing.md)
+2. **Automated AI review** on every PR catches what the coding agent missed — bugs, security issues, convention drift — at machine speed. [→ AI review](developer-experience/linting-ci.md)
+3. **Human review + supervised deploy** is the final gate.
+
+Each layer assumes the one before it is imperfect. That's what makes shipping at agent speed *safe*.
+
 ## The five principles
 
 ### 1. 🏎️ Great DX *is* agent speed

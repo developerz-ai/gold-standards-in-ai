@@ -27,7 +27,7 @@ Retry the connection with backoff; cache the tool list (HTTP streamable transpor
 ## High-value MCP servers to wire up
 | Server | The agent gains |
 |---|---|
-| Playwright | drive a browser, screenshot, verify UI |
+| **Playwright** ([playwright-mcp](https://github.com/microsoft/playwright-mcp), headless) | drive a browser, screenshot, read the a11y tree — *see* the UI |
 | **Sentry / error monitor** | read production errors + stack traces, triage, fix |
 | Issue tracker | open/update issues, milestones |
 | **DB gateway** | audited, SSO-gated, read-only DB queries — no credential ever on the client |
