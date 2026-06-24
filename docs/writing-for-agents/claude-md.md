@@ -36,6 +36,30 @@ scripts/deploy production    # deploy
 ## Keep it under 600 lines
 It's read every turn — bloat is a token tax forever. 500 well-structured lines cover complex production apps. See [compressed-config.md](compressed-config.md) for how to compress without losing signal.
 
+## Keep it small — index, don't inline
+The root file is a **router, not an encyclopedia.** Put the always-needed rules + exact commands inline; for everything deep, **point at where it lives** so the agent loads it *only when relevant*. `CLAUDE.md` is read every turn; `docs/` is read on demand — that split is what keeps it lean ([planning-and-docs](planning-and-docs.md)).
+
+```markdown
+## Where to look (load on demand)
+- Architecture & ADRs → `docs/architecture/`
+- API reference        → `docs/api.md`
+- Deploy runbook       → `docs/deploy.md`
+- Auth model           → `packages/auth/CLAUDE.md`
+- Per-app specifics    → `apps/<app>/CLAUDE.md`
+- Scripts catalog      → run `bun scripts/help.ts`
+```
+
+Rules:
+- **Reference, don't paste.** `Webhook flow → src/payments/stripe_webhook.ts` beats pasting the code.
+- **Push detail down to where it's used** — a per-subdir `CLAUDE.md` next to the code it describes; the root just names it. Same [layered pattern](#layered-claudemd-monorepo) as a monorepo.
+- **One source of truth.** If it's in a doc, link the doc — don't duplicate it in `CLAUDE.md` (two copies drift).
+- **A link earns its place** only if the agent will need that detail sometime. Otherwise drop it.
+
+> **Same principle for scripts.** Don't list every script in `CLAUDE.md` — expose a `scripts/help.ts` catalog and a `scripts/lib/` of reusable modules; `CLAUDE.md` just says "run `bun scripts/help.ts`." The doc stays small, the agent discovers depth on demand → [../developer-experience/dx-scripts.md](../developer-experience/dx-scripts.md).
+
+### CLAUDE.md vs AGENTS.md
+Same file, two names — `CLAUDE.md` is read by Claude Code; `AGENTS.md` is the cross-tool convention other agents read. Keep **one** as the source of truth and make the other a one-line pointer (`See CLAUDE.md`) or a symlink, so they never drift. The content rules here apply to both.
+
 ## Response rules belong at the top
 Behavioral instructions shape output style across the whole session:
 
