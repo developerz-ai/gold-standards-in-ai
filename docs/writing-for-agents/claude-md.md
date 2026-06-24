@@ -57,8 +57,31 @@ Rules:
 
 > **Same principle for scripts.** Don't list every script in `CLAUDE.md` — expose a `scripts/help.ts` catalog and a `scripts/lib/` of reusable modules; `CLAUDE.md` just says "run `bun scripts/help.ts`." The doc stays small, the agent discovers depth on demand → [../developer-experience/dx-scripts.md](../developer-experience/dx-scripts.md).
 
-### CLAUDE.md vs AGENTS.md
-Same file, two names — `CLAUDE.md` is read by Claude Code; `AGENTS.md` is the cross-tool convention other agents read. Keep **one** as the source of truth and make the other a one-line pointer (`See CLAUDE.md`) or a symlink, so they never drift. The content rules here apply to both.
+### CLAUDE.md vs AGENTS.md — symlink for one source of truth
+Same file, two names — `CLAUDE.md` is read by Claude Code; `AGENTS.md` is the cross-tool convention other agents read. **Don't maintain two copies — symlink them** so there's exactly one source of truth:
+```bash
+ln -s CLAUDE.md AGENTS.md      # AGENTS.md → CLAUDE.md; edit one, both update
+git add AGENTS.md              # git stores the symlink itself
+```
+
+### Symlink all shared AI config
+Apply the same `ln` trick to anything an agent reads that should be identical across a project — so you edit once and every consumer sees it:
+- **`AGENTS.md` → `CLAUDE.md`** (above).
+- **Per-app files that mirror the root** in a [monorepo](../architecture/monorepo.md): if every app should see the org rules, symlink rather than copy.
+- **Shared skills/commands/hooks:** keep canonical ones in a root `.claude/` and symlink the dir (or individual files) into apps that need them:
+  ```bash
+  ln -s ../../.claude/skills/deploy apps/web/.claude/skills/deploy
+  ```
+- **The gold standards themselves:** symlink this repo's docs into a project so the agent reads them in-tree:
+  ```bash
+  ln -s ../gold-standards-in-ai/docs docs/standards
+  ```
+
+Rules:
+- **One real file, many symlinks** — never duplicate; copies drift, symlinks can't.
+- **Use relative symlinks** inside a repo so they resolve after clone anywhere.
+- **Symlinks-in-git just work** because [everyone's on a Linux dev VPS](../developer-experience/dev-vps.md) — no Windows checkout quirk. (Set `git config core.symlinks true`.)
+- The content rules in this doc apply to whatever the canonical file is.
 
 ## Response rules belong at the top
 Behavioral instructions shape output style across the whole session:
