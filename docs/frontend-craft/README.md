@@ -9,6 +9,7 @@ Cross-cutting concerns that make a UI feel professional and work for real users 
 | [dates-money-timezones.md](dates-money-timezones.md) | 🕰️ Per-user timezones · 💰 currency formatting |
 | [captcha.md](captcha.md) | 🛡️ hCaptcha + keeping the app AI-testable |
 | [css-scss-craft.md](css-scss-craft.md) | 💅 CSS3 + SCSS showcase: animations, gradients, tokens, modern CSS |
+| [pwa-offline.md](pwa-offline.md) | 📲 PWA, responsive, web workers & offline-first |
 
 ## 👀 Let the agent SEE the UI — Playwright MCP (headless)
 A coding agent can't make a web app *look nice* if it's working blind. Give it eyes: wire up [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) (headless) so the agent can open the running app, navigate, screenshot, read the accessibility tree, and iterate on the visual result.
@@ -26,3 +27,4 @@ claude mcp add playwright -- npx @playwright/mcp@latest --headless
 - **Locale- and timezone-correct dates & money** — never hardcode a format or assume a timezone.
 - **CAPTCHA where bots hit you** — with an AI-debug escape hatch so [agents can still test the app](../writing-for-agents/memory-and-mcp.md#make-your-app-ai-debuggable).
 - **Design tokens** — semantic CSS variables, not hardcoded colors.
+- **Responsive + installable** — mobile-first fluid layouts; PWA, web workers, and offline-first where the use case warrants → [pwa-offline.md](pwa-offline.md).

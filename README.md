@@ -82,6 +82,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [dates-money-timezones.md](docs/frontend-craft/dates-money-timezones.md) — 🕰️ per-user timezones · 💰 money formatting
 - [captcha.md](docs/frontend-craft/captcha.md) — 🛡️ hCaptcha (and keeping the app AI-testable)
 - [css-scss-craft.md](docs/frontend-craft/css-scss-craft.md) — 💅 CSS3 + SCSS showcase: animations, gradients, tokens
+- [pwa-offline.md](docs/frontend-craft/pwa-offline.md) — 📲 PWA, responsive, web workers & offline-first
 
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index
