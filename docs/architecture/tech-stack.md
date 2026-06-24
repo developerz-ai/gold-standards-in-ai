@@ -21,6 +21,8 @@ Defaults, not dogma. Start here; deviate with a reason. The point of having a de
 | Object storage | **Cloudflare R2** | S3-compatible, no egress fees |
 | Lint/format | **Biome** | one Rust binary, replaces ESLint+Prettier |
 | CI | **GitHub Actions on Blacksmith** | fast runners → [linting-ci](../developer-experience/linting-ci.md) |
+| Hosting | **OVH & Hetzner** (VPS / dedicated) | value hardware, self-hosted → [servers](../infrastructure/servers-and-dns.md) |
+| Image registry | **GHCR** (public) · **DOCR / DigitalOcean** (private) | tag `latest` + `<sha>` |
 | Deploy (big) | **k3s + ArgoCD** | GitOps → [infrastructure](../infrastructure/kubernetes-gitops.md) |
 | AI | **Vercel AI SDK** + **OpenRouter** / **z.ai** / **Anthropic** | → [ai-agents](../ai-agents/README.md) |
 | Mobile | **Swift** (iOS) + **Kotlin** (Android) | native, shared backend → [mobile](../stack/mobile.md) |

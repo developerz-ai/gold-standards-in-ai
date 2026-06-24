@@ -54,7 +54,7 @@ jobs:
 ```
 
 ## Build & deploy pipeline
-On merge to `main`: build a Docker image, push to a registry (GHCR public / DOCR private) tagged `latest` + `<sha>`. Deployment is pulled in-cluster by ArgoCD Image Updater — **CI holds zero cluster credentials**, the handoff is image-only. Details: [../infrastructure/kubernetes-gitops.md](../infrastructure/kubernetes-gitops.md).
+On merge to `main`: build a Docker image, push to a registry — **GHCR** (`ghcr.io`, public) or **DOCR** (DigitalOcean Container Registry, private) — tagged `latest` + `<sha>`. Deployment is pulled in-cluster by ArgoCD Image Updater — **CI holds zero cluster credentials**, the handoff is image-only. Registries + hosting: [../infrastructure/servers-and-dns.md](../infrastructure/servers-and-dns.md) · pipeline: [../infrastructure/kubernetes-gitops.md](../infrastructure/kubernetes-gitops.md).
 
 ```yaml
 # deploy.yml (matrix per app)

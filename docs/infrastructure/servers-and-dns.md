@@ -2,10 +2,11 @@
 
 Self-hosted on value hardware. Own the stack, control the cost, run where you deploy.
 
-## Servers — OVH VPS / dedicated
-- **OVH** for VPS and dedicated boxes — strong price/performance, no per-request cloud tax.
+## Servers — OVH & Hetzner (VPS / dedicated)
+- **OVH** and **Hetzner** for VPS and dedicated boxes — both give strong price/performance with no per-request cloud tax. Pick whichever has the right box/region; mix freely.
 - A small project = **one VPS + Docker Compose**. A big one = a pool of VPSes running [k3s](kubernetes-gitops.md).
-- Each [dev gets their own VPS](../developer-experience/dev-vps.md) from the same provider.
+- Each [dev gets their own VPS](../developer-experience/dev-vps.md) from the same providers.
+- The hosts run the workloads; **container images live in a registry** (below), pulled at deploy time.
 
 ### Server inventory as data
 Keep servers in a committed inventory (`servers/<region>/<pool>/<id>.yml`), never hand-parsed — load it through a `lib/inventory/load.ts` helper:
@@ -33,6 +34,19 @@ bun scripts/servers/bootstrap.ts <selector> # hostname, keys, sysctls, ufw, dock
 bun scripts/servers/exec.ts <selector> <cmd># SSH (ProxyJump-aware for mesh hosts)
 ```
 Selectors (`--all`, `--pool <p>`, `--role <r>`, `--tag <t>`) come from the YAML inventory. All SSH/HTTP goes through `scripts/lib/` ([DX scripts](../developer-experience/dx-scripts.md)).
+
+## Container registries — DigitalOcean (DOCR) + GHCR
+Hosts are cattle; the **image is the artifact**. Store images in a registry and pull them at deploy time — CI builds + pushes, the cluster pulls.
+
+| Registry | Use for |
+|---|---|
+| **GHCR** (GitHub Container Registry) — `ghcr.io/<org>/<app>` | **public** images, OSS, anything tied to the GitHub org |
+| **DOCR** (DigitalOcean Container Registry) — `registry.digitalocean.com/<org>/<app>` | **private** app images |
+
+- Tag every push `latest` + `<sha>` (multi-arch amd64+arm64 via Buildx when targets differ).
+- The cluster pulls with a registry pull-secret per app (a [sealed secret](secrets.md)); **CI never holds cluster credentials** — the handoff is image-only.
+- [ArgoCD Image Updater](kubernetes-gitops.md) watches both registries' `:latest` digest and rolls the new image in-cluster.
+- Build/push pipeline + layer caching: [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md).
 
 ## Network — mesh VPN + bastion
 - **Mesh VPN** (e.g. Headscale/WireGuard) for **server-to-server** traffic only (app → database over internal IPs).
