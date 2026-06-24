@@ -83,6 +83,8 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [captcha.md](docs/frontend-craft/captcha.md) — 🛡️ hCaptcha (and keeping the app AI-testable)
 - [css-scss-craft.md](docs/frontend-craft/css-scss-craft.md) — 💅 CSS3 + SCSS showcase: animations, gradients, tokens
 - [pwa-offline.md](docs/frontend-craft/pwa-offline.md) — 📲 PWA, responsive, web workers & offline-first
+- [assets-optimization.md](docs/frontend-craft/assets-optimization.md) — 🗜️ optimized images/video/WebP & fonts, optimize before commit
+- [seo.md](docs/frontend-craft/seo.md) — 🔍 SEO: meta, Open Graph, JSON-LD, sitemap, media, Core Web Vitals
 
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index
