@@ -39,6 +39,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [compressed-config.md](docs/writing-for-agents/compressed-config.md) — 🗜️ write config that costs fewer tokens
 - [behavioral-rules.md](docs/writing-for-agents/behavioral-rules.md) — 🎯 steer *how* the agent codes
 - [planning-and-docs.md](docs/writing-for-agents/planning-and-docs.md) — 📐 planning, docs & the initial idea
+- [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature`, and why **no git worktrees**
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
