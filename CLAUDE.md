@@ -24,3 +24,7 @@ Knowledge base for AI coding agents. **Markdown only — no code to build, no te
 - Update `README.md` and the section `README.md` with a link + one-line hook.
 - Keep examples vendor-neutral and reusable. Prefer the latest Claude models when showing model IDs.
 - No secrets, no private hostnames/IPs, no client names.
+
+## Note
+
+Do not use git worktrees — work directly in this checkout. See `.claude/commands/feature.md` and `.claude/commands/planx.md`.
