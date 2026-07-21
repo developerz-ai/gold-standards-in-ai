@@ -46,10 +46,15 @@ This is principle #2 from the [philosophy](../00-philosophy.md): *the more the a
 ## Building MCP servers — few parameterized tools beat many
 One tool per action = hundreds of tools sitting in context every turn. The cost is brutal:
 
-| Resources (6 verbs) | One-tool-per-verb | `tools/list` every turn |
-|---|---|---|
-| 50 | 300 tools | ~60k tokens |
-| 500 | 3,000 tools | won't fit |
+Linear in your API surface, and it never amortizes — the whole list is re-sent every turn (same token-budget logic as [compressed-config](compressed-config.md)):
+
+| Resources (6 verbs) | One-tool-per-verb | `tools/list` every turn | 3 meta-tools |
+|---|---|---|---|
+| 5 | 30 tools | ~6k tokens | ~0.6k, flat |
+| 50 | 300 tools | ~60k tokens | ~0.6k, flat |
+| 500 | 3,000 tools | won't fit | ~0.6k, flat |
+
+(~200 tokens per tool for name + description + JSON schema. The three meta-tools stay flat no matter how many resources sit behind them.)
 
 ### The 3-tool meta pattern — constant surface at any scale
 | Tool | Purpose |
@@ -72,6 +77,14 @@ Rules:
 - **Auth in the handler, not the dispatcher** — same ability/scoping as the rest of the app.
 - **Hidden resources return ToolNotFound, not Forbidden** — users can't enumerate what's behind the curtain.
 - Keep genuinely non-CRUD tools separate (`send_slack_message`, `reset_password`) and filter them from `tools/list` by role.
+
+### The honest tradeoff — lazy schemas cost a round-trip
+Lazy loading isn't free. First touch of a resource usually burns one turn on `describe_resource` before `manage_resource` can be called — constant per-turn overhead traded for a one-time-per-resource handshake. Shrink it three ways:
+- **Make `list_resources` rich enough to act on.** Inline each resource's actions *and* a one-line param hint — enough to compose the common `list`/`get`/`create` call directly. Reserve `describe_resource` for the long tail: full attribute schemas, enums, validation rules.
+- **Let the model batch.** Accept an array — `describe_resource(resources: ["deals", "contacts"])` — one handshake for multi-resource work.
+- **Cache it.** Schemas are stable between deploys; a host that caches `describe_resource` pays once per session, not once per task.
+
+Net: a handful of resources hit every turn → plain tools can still win, the handshake never amortizes. The meta pattern pays off on large or sparsely-used catalogs — exactly where a flat tool list blows the budget.
 
 ## Make your app AI-debuggable
 Captchas block Playwright/MCP browser flows. Add a query-param escape hatch that skips *captcha verification only* (not auth) when present — the widget still renders so screenshots match real users. Credentials, rate limits, lockouts all still apply. Gate behind `ALLOW_AI_DEBUG_LOGIN` so it's off in prod. Details: [../frontend-craft/captcha.md](../frontend-craft/captcha.md).
