@@ -39,7 +39,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [compressed-config.md](docs/writing-for-agents/compressed-config.md) — 🗜️ write config that costs fewer tokens
 - [behavioral-rules.md](docs/writing-for-agents/behavioral-rules.md) — 🎯 steer *how* the agent codes
 - [planning-and-docs.md](docs/writing-for-agents/planning-and-docs.md) — 📐 planning, docs & the initial idea
-- [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature`, and why **no git worktrees**
+- [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature` — the plan-slice → agent → PR seam, and why **no git worktrees**
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
@@ -67,6 +67,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [ai-agents/README.md](docs/ai-agents/README.md) — the index
 - [agent-sdk.md](docs/ai-agents/agent-sdk.md) — 🧬 building agents with the AI Agent SDK
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
+- [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the 9-point brief
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
 - [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
 

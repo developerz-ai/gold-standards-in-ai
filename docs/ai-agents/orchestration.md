@@ -2,6 +2,8 @@
 
 One agent loop is the atom. Orchestration composes loops into autonomous systems that turn a **goal into merged PRs** — with humans reviewing, not typing. Living example: [`ai-task-master`](https://github.com/developerz-ai/ai-task-master).
 
+**Scope:** this is the *unattended machine you build*. Coordinating subagents yourself, in a session, in one checkout, is a different discipline → [hive-mind.md](hive-mind.md).
+
 ## Planner → Worker → Reviewer
 ```
 goal ─▶ Planner ─▶ task groups (DAG) ─▶ Orchestrator ─▶ Worker ─▶ PR
@@ -25,6 +27,8 @@ const Plan = z.object({ groups: z.array(z.object({
 
 ### Worker — group → branch + PR
 Runs in an isolated **git worktree** (no branch trampling). For big PRs, two phases: (1) plan a file manifest via `submit`, (2) run per-file editors in parallel. Then format → run changed-file tests → push. The orchestrator opens the PR.
+
+> ⚠️ **Worktrees are for THIS machine only** — an unattended orchestrator whose workers each own a branch and a PR, with no human working the tree. Inside an interactive session, **never**: one checkout, many hands, the file set is the lock. See [hive-mind.md](hive-mind.md).
 
 ### Reviewer — threads → fixes
 For each unresolved review thread: decide `fixed` (make the change, push), `replied` (answer), or `wontfix` (justify) — and resolve the thread via the platform API.

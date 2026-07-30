@@ -6,6 +6,7 @@ Patterns for building agents — the systems that *do the work* — with the AI 
 |---|---|
 | [agent-sdk.md](agent-sdk.md) | 🧬 The agent loop, tools, structured output, streaming, retries |
 | [orchestration.md](orchestration.md) | 🎼 Multi-agent: Planner → Worker → Reviewer, autonomous loops, model tiers, z.ai subs |
+| [hive-mind.md](hive-mind.md) | 🐝 Running a team of agents in ONE checkout — when to hive, the file set as the lock, the 9-point brief |
 | [tools-and-mcp.md](tools-and-mcp.md) | 🔧 Tool design + MCP integration + audited capability access |
 | [media-generation.md](media-generation.md) | 🎬 Images, video, audio & speech via OpenRouter |
 

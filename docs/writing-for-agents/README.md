@@ -15,7 +15,9 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 | 5 | [compressed-config.md](compressed-config.md) | 🗜️ Write config files that cost fewer tokens, same signal |
 | 6 | [behavioral-rules.md](behavioral-rules.md) | 🎯 Steer *how* the agent codes (assumptions, simplicity, surgical diffs) |
 | 7 | [planning-and-docs.md](planning-and-docs.md) | 📐 Plan before coding · docs vs CLAUDE.md · the initial idea |
-| 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, why no worktrees |
+| 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, the plan-slice→agent→PR seam, why no worktrees |
+
+Building with a team of agents inside one of those commands? → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 
 ## TL;DR — the quick wins
 80% of the value, under an hour:
