@@ -68,6 +68,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [inner-loop.md](docs/developer-experience/inner-loop.md) — ⏱️ scoped checks vs the full gate — the loop the agent actually runs
 - [linting-ci.md](docs/developer-experience/linting-ci.md) — ✨ Biome · 🔨 Blacksmith CI
 - [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) — 🤖 **AI-first CI/CD** — one gate ≡ CI, parity tests, gates that aren't tests, agent-readable failures
+- [smart-builds.md](docs/developer-experience/smart-builds.md) — 🧠 **smart change detection & caching** — one detector, build-vs-roll content hashes, per-unit images, cache keys
 
 ### 5. 🤖 AI agents
 - [ai-agents/README.md](docs/ai-agents/README.md) — the index

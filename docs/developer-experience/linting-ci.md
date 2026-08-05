@@ -92,7 +92,7 @@ The agent waits on CI before it can merge or deploy, so CI latency taxes every l
 ```
 
 ## Detect changes — only do the work that's needed
-Don't test or build the whole monorepo on every PR. Detect which packages/apps changed (path filters, `turbo --filter`, or `git diff` against the merge base) and run only the affected pipelines.
+Don't test or build the whole monorepo on every PR. Detect which packages/apps changed (path filters, `turbo --filter`, or `git diff` against the merge base) and run only the affected pipelines. The full treatment — one shared detector, build-vs-roll content hashing, per-unit image repos, cache-key design — is [smart-builds.md](smart-builds.md).
 
 ```yaml
 # build only images whose context changed

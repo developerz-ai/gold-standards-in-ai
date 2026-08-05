@@ -56,6 +56,8 @@ jobs:
 
 Cache everything else ([linting-ci](linting-ci.md#cicd-is-the-bottleneck--cache-everything)). Target: **push → green in < 5 min**, because that number multiplies by every PR an agent opens.
 
+Deciding what to **build and restart** is a separate, sharper problem than deciding what to **verify** — two content hashes per unit, not path filters → [smart-builds.md](smart-builds.md).
+
 ## 3. Gates that aren't tests
 
 An AI-first repo enforces things a unit test can't see. Each is a CI job, each fails loudly:

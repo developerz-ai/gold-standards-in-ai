@@ -90,6 +90,20 @@ That is why the plan split is not cosmetic. Split by *separable area of work* an
 
 Exceeding the cap? Split it **even if the user asked for one PR**, and say why.
 
+### PR mode is read from the prompt — the merge queue is not
+Two shapes, chosen before you brief anyone; it changes *how work is grouped*, never the build discipline:
+
+| Mode | Group by | Good for |
+|---|---|---|
+| **many-small** | one slice = one PR | independent fixes, anything a reviewer reads line by line |
+| **fat-sequential** | what **fails together and gets reviewed together** | a sweep whose slices only make sense as one change |
+
+- **Target ~80–100 files per fat PR — a band to steer by, not a gate to stop at.** You cannot know the final count while agents are still writing; don't try to.
+- **"It's all one coherent concern" is not a licence to bundle without limit** — that rationalization is how a 300-file PR nobody reviews happens. Neither "well under the cap" nor "splitting would need rebases" earns a bundle on its own: the cap is a ceiling, not a target, and rebasing is ordinary cost.
+- **If it lands at 150 anyway — ship it**, and note the reduced review coverage in the body. A merged 150-file PR beats an unmerged one being tidied. Finding problems is the work; the work has to land.
+
+**In every mode the merge queue is depth 1.** The thing that must never happen is **two PRs in flight at once** — each merge rebases `main` under the other, and CI results go stale silently. Merge, confirm, fetch, then start the next. A fat PR merged and confirmed is safe; two small PRs racing each other is not.
+
 ## 🕵️ Distrust the paperwork
 
 **A plan is paperwork, and paperwork rots.** `/feature` step 2 exists to catch it: before planning work off a `status.yml`, a plan doc, or an architecture doc, **check it against the code and `git log`.**
