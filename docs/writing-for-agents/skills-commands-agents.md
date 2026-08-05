@@ -93,6 +93,29 @@ Why subagents matter:
 - **Isolation** — each has its own tool restrictions + skill context (and can run in a separate git worktree, no conflicts).
 - **Model control** — cheap/fast model for simple work, top-tier model for hard work.
 
+### One subagent per app — the fleet pattern
+In a [monorepo](../architecture/monorepo.md), the highest-value roster is **one specialist per app/workspace**, named after the directory it owns: `api-dev`, `frontend-dev`, `jobs-dev`, `router-dev`, `docs-dev`… Each file carries what an expert in *that* app must know:
+
+1. **What the app is and is NOT** — "the edge terminates HTTP and streams; if you're writing a business rule here, you're in the wrong workspace."
+2. **How it connects** — who calls in, what it calls out, which contracts are cross-app (change one → grep those consumers).
+3. **Hard rules for the area** — its layering, its error types, its quota/auth gate, its file-size limit.
+4. **Its exact commands**, run from the repo root so root env files load.
+
+Why it works: the delegation is unambiguous (a path maps to exactly one owner), the file sets are naturally disjoint for a [hive](../ai-agents/hive-mind.md), and the specialist prompt is loaded **only when that app is touched** — laziness by construction.
+
+Add `architect` alongside them for "should this be built, and in what shape" — it produces a design with named tradeoffs, not an implementation.
+
+### Rules for subagents that share one checkout
+Agents run in the *same* working tree, so put these in every app agent file (and in the command that spawns them):
+
+- **Scope every command to the files you edited** — never a repo-wide gate, never a working-tree-diffing `:changed` command → [../developer-experience/inner-loop.md](../developer-experience/inner-loop.md#-scoped--safe-when-agents-share-the-checkout).
+- **Concurrency 1.** No `--parallel`, no raised worker counts. Saturating the box is the coordinator's job, once.
+- **No git operations at all.** Leave work uncommitted; the coordinator owns git — and **never `git stash`** (one global stack, shared).
+- **Need a database? Just run the test.** Store isolation is the harness's job; hand-writing a connection string is a harness bug.
+
+### Keep the catalog lazy
+Every skill's `description` sits in context on every turn; the **body** should not. Write the description as a trigger line (keywords + when to activate) and let the body load on pickup. If a skill is needed on most turns, that's the rare case for pinning it inline — decide it with an eval, not a hunch → [../ai-agents/context-budget.md](../ai-agents/context-budget.md).
+
 ## Writing rules for all three
 - Persona/description = one sentence, keyword-rich.
 - One rule per line, imperative. Skip `## Overview`/`## Approach`.

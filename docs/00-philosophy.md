@@ -25,10 +25,10 @@ A coding agent is fast but fallible — it *will* miss things. So quality doesn'
 
 Each layer assumes the one before it is imperfect. That's what makes shipping at agent speed *safe*.
 
-## The five principles
+## The seven principles
 
-### 1. 🏎️ Great DX *is* agent speed
-An agent's effectiveness is proportional to iteration speed. A test that takes 60s instead of 5s doesn't slow you down once — it slows down every loop the agent runs, forever. Optimize the inner loop ruthlessly:
+### 1. 🏎️ Great DX *is* agent speed — and the "developer" is the AI
+Only the AI writes the code, so **DX is the agent's runtime**, not a human comfort. An agent's effectiveness is proportional to iteration speed. A test that takes 60s instead of 5s doesn't slow you down once — it slows down every loop the agent runs, forever. Optimize the inner loop ruthlessly:
 
 | What | Target |
 |---|---|
@@ -38,17 +38,22 @@ An agent's effectiveness is proportional to iteration speed. A test that takes 6
 | Dev server start | < 5s |
 | Full CI (push → green) | < 5 min |
 
-See [developer-experience/](developer-experience/README.md).
+And **easy beats documented**: an agent doesn't complain about a bad workflow, it silently invents a worse one. Anything awkward the second time becomes a command. See [developer-experience/](developer-experience/README.md) · [the inner loop](developer-experience/inner-loop.md).
 
-### 2. 🔓 The more the agent has access to, the better
-Give the agent the keys. An agent that can read prod (read-only), trigger a build, query the DB, open a browser, and check error logs solves problems end-to-end. One that has to ask you to do each step is a glorified autocomplete.
+### 2. 🔓 Freedom and access — the agent must be able to do the work
+Two halves of the same principle: **give it the keys, then don't cut it off mid-thought.**
+
+**Access.** An agent that can read prod (read-only), trigger a build, query the DB, open a browser, and check error logs solves problems end-to-end. One that has to ask you to do each step is a glorified autocomplete.
 
 - Wrap every external system in a `scripts/` command the agent can run. [→ DX scripts](developer-experience/dx-scripts.md)
+- Commit a `.mcp.json` so every agent on the repo gets the same reach with zero setup. [→ .mcp.json](writing-for-agents/mcp-json.md)
 - Connect MCP servers for issues, browsers, errors, DB access. [→ tools & MCP](ai-agents/tools-and-mcp.md)
 - Build a [CodeGraph](developer-experience/codegraph.md) index so it knows the codebase structurally.
 - Run with broad permissions + quality-gate hooks instead of approval-prompting every action. [→ hooks & permissions](writing-for-agents/hooks-and-permissions.md)
 
-Access is gated by *safety in the tools* (read-only DB roles, audited gateways, reviewed PRs), not by withholding capability.
+Access is gated by *safety in the tools* (read-only DB roles, audited gateways, reviewed PRs), not by withholding capability. **A missing capability is a bug in your setup**, not something to tell the agent to work around.
+
+**Freedom.** No step cap, no tool-call cap, no per-turn token or cost cap. Value produced > price of tokens; a limit doesn't make the agent cheaper, it makes it dumber — the human finishes the half-done work anyway. Bound **lack of progress**, never honest work; an agent that can't finish stops itself and names what it's missing. [→ agent work limits](ai-agents/agent-work-limits.md)
 
 ### 3. 🐧 Every dev on a Linux VPS with Claude Code
 No more "works on my machine." Each developer gets a Linux VPS (or dedicated box) with Claude Code installed and the workspace cloned. **One OS, one setup, one set of commands.**
@@ -62,6 +67,18 @@ A monorepo lets one product mix runtimes without friction: SolidJS + Bun for the
 
 ### 5. 📝 Write everything down — for the next session, not for posterity
 Agents are stateless across sessions except for what you write down. A `CLAUDE.md` that documents the exact commands and conventions is worth more than any amount of clever prompting. Compress it (it's read every turn), date load-bearing claims, and delete what rots. [→ writing for agents](writing-for-agents/README.md)
+
+Better than writing it down: **make the machine careful.** A rule in prose is advice; a lint guard that fails CI is a fact the next agent cannot miss. [→ guards & gotchas](writing-for-agents/guards-and-gotchas.md)
+
+### 6. 🎣 Lazy by default — good information, loaded on demand
+Everything read *every turn* is paid forever; everything fetchable *on demand* is free until needed. Keep the always-on layer tiny — `CLAUDE.md` as a router, one-line skill catalogs, a constant-size tool surface — and make depth discoverable by name or search.
+
+**Lazy never means less.** Never a smaller catalog, never a truncated result — only *later*. A capability that's merely unlisted is still reachable; a capability that's hidden reads as impossible and the agent invents a workaround. [→ context budget](ai-agents/context-budget.md)
+
+### 7. 🚀 Be proactive — solve the problem, not the ticket
+An agent that only does exactly what was typed wastes the largest part of its value. Inside the work it's already doing: fix the bug it sees in the file it's editing, ship the guard with the fix, automate the ritual it just did by hand — **in the same PR** — and propose the feature the code is asking for.
+
+The counterweight: **recover the problem before building the solution.** "Nothing breaks by doing nothing" and "this already exists here" are successful outcomes. Proactive means owning the outcome, not widening the diff. [→ behavioral rules](writing-for-agents/behavioral-rules.md)
 
 ## The setup that makes an agent excellent
 
@@ -99,6 +116,8 @@ Low undefined behavior is what makes "fail fast" safe: when something breaks, *w
 - **Custom error types**, not generic exceptions.
 - **Type-safe everything** — TypeScript + Zod, Rust's type system, strict configs.
 - **Surgical diffs.** Every changed line traces to the task. [→ behavioral rules](writing-for-agents/behavioral-rules.md)
+- **One path, replaced completely.** No shims, no dual read/write, no feature flags, no prod A/B. [→ shipping doctrine](workflow/shipping-doctrine.md)
+- **Shape now, capacity later.** Keyset, bounds, idempotency up front; sharding and rollups behind a written trip condition. [→ data & scale](architecture/data-and-scale.md)
 
 ---
 

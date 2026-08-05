@@ -16,6 +16,8 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 | 6 | [behavioral-rules.md](behavioral-rules.md) | 🎯 Steer *how* the agent codes (assumptions, simplicity, surgical diffs) |
 | 7 | [planning-and-docs.md](planning-and-docs.md) | 📐 Plan before coding · docs vs CLAUDE.md · the initial idea |
 | 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, the plan-slice→agent→PR seam, why no worktrees |
+| 9 | [mcp-json.md](mcp-json.md) | 🔌 `.mcp.json` — the repo's MCP servers, committed, secret-free, paired with skills |
+| 10 | [guards-and-gotchas.md](guards-and-gotchas.md) | 🛡️ Make the machine careful — lint guards, doctor checks, preventive rules vs the runbook |
 
 Building with a team of agents inside one of those commands? → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 
@@ -26,6 +28,7 @@ Building with a team of agents inside one of those commands? → [../ai-agents/h
 2. **Broad permissions + a pre-commit lint hook** — zero approval friction, but it physically can't commit unlinted code.
 3. **Response + coding rules** in `CLAUDE.md` — "no preamble, lead with action, disagree when wrong" + surgical-diff rules.
 4. **One lint command** — `bin/lint` auto-fixes everything.
+5. **A committed `.mcp.json`** — every agent on the repo reaches issues, errors, the DB and the browser with zero setup.
 
 ## Anti-patterns
 - `CLAUDE.md` over 600 lines — read every turn, trim ruthlessly.
@@ -33,3 +36,5 @@ Building with a team of agents inside one of those commands? → [../ai-agents/h
 - A skill for every task — only for repeated, complex workflows.
 - No tests — the agent's biggest edge is verifying its own work.
 - 20 approval prompts in a row — your permission setup is wrong.
+- A rule that exists only as prose when a lint guard could enforce it → [guards-and-gotchas](guards-and-gotchas.md).
+- A secret inlined in `.mcp.json` — it's committed; use `${VAR}`.

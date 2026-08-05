@@ -2,6 +2,8 @@
 
 Tools are how an agent acts on the world. MCP is how it reaches systems you don't own the code for. The principle from the [philosophy](../00-philosophy.md): **the more the agent can reach, the more it solves end-to-end.**
 
+**Every tool you define is re-sent on every step.** Design the surface lazily — constant-size discovery, `{}`-callable reads, chunked results behind a handle — with runnable `tool()` examples in [context-budget.md](context-budget.md#-writing-lazy-tools-vercel-ai-sdk). And never let a lazy surface cost the agent a capability → [agent-work-limits.md](agent-work-limits.md).
+
 ## Local tools vs MCP tools
 - **Local tools** — file, git, shell, http — defined in-process with Zod schemas ([agent-sdk](agent-sdk.md#tools--zod-schemas)).
 - **MCP tools** — issue trackers, browsers, error monitors, DB gateways — connected over MCP and merged into the tool set.

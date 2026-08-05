@@ -52,6 +52,31 @@ LLMs are exceptionally good at looping until they meet a *specific goal*. Give s
 
 Strong criteria let the agent loop independently — edit, run, check, repeat — without you adjudicating "done."
 
+## 🚀 Proactive — but about the problem, not the diff
+
+"Surgical" cuts scope; **proactive** owns the outcome. They only look contradictory if you conflate *diff size* with *responsibility*. Both belong in `CLAUDE.md`:
+
+```markdown
+### Be proactive
+- Fix bugs/security issues you see in files you're already editing. Say you did.
+- Ship the mechanical guard with the fix — a defect that can recur gets its lint rule/test in the SAME PR.
+- If it felt bad, automate it in the same PR: the same three commands again, prints added then
+  deleted, setup knowledge in one head, a command that answers with silence instead of an error.
+- Finish the whole task. Report what you VERIFIED, not what you assume happened.
+- Blocked on part of it? Complete every other part and say exactly what you left out and why.
+
+### Know how to say no
+- Requests arrive as solutions. Recover the problem first.
+- Nothing breaks by doing nothing → say so and stop. "This shouldn't be built" is a success.
+- It already exists here → point at it.
+- Premise assumed rather than measured ("it's slow", "it won't scale") → get the number first.
+- One sentence. Offer the smaller thing that works. Don't moralize.
+```
+
+**Work like someone who has been burned before.** Prefer the boring, proven path. Distrust your own certainty — check the actual value, schema, and behavior, not the remembered one. Diagnose systematically (read the error, reproduce, bisect); never guess-and-check. "I don't know, checking" beats a confident wrong answer. No ego: deleting your own work is a good day.
+
+**Be stubborn about consequences, not preferences.** Calibrate to blast radius and reversibility, never to how many times the ask was repeated — full rules in [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md#be-stubborn-about-consequences-not-preferences).
+
 ## Self-checks
 - **Overengineering:** would a senior engineer call this overcomplicated? Yes → simplify.
 - **Surgical:** does every changed line trace to the request? No → revert the strays.

@@ -18,8 +18,9 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Understand the whole philosophy | [docs/00-philosophy.md](docs/00-philosophy.md) |
 | Make a repo great for AI agents | [docs/writing-for-agents/](docs/writing-for-agents/README.md) |
 | Pick the stack & structure | [docs/architecture/](docs/architecture/README.md) · [docs/stack/](docs/stack/README.md) |
-| Get fast feedback loops (DX) | [docs/developer-experience/](docs/developer-experience/README.md) |
-| Build AI agents | [docs/ai-agents/](docs/ai-agents/README.md) |
+| Get fast feedback loops (DX) | [docs/developer-experience/](docs/developer-experience/README.md) · [inner loop](docs/developer-experience/inner-loop.md) |
+| Set up CI/CD for agents | [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) |
+| Build AI agents | [docs/ai-agents/](docs/ai-agents/README.md) · [freedom & access](docs/ai-agents/agent-work-limits.md) |
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
 | Polish the frontend | [docs/frontend-craft/](docs/frontend-craft/README.md) |
 | Move fast on GitHub | [docs/workflow/](docs/workflow/README.md) |
@@ -27,7 +28,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 ## 📚 The full map
 
 ### 0. 🧠 Philosophy
-- [00-philosophy.md](docs/00-philosophy.md) — AI-first development. **Great DX = fast agents.** Give the agent access to everything.
+- [00-philosophy.md](docs/00-philosophy.md) — AI-first development. **DX is the agent's runtime** (only AI writes the code). Freedom + access, lazy by default, proactive by default.
 
 ### 1. ✍️ Writing for agents (the most important section)
 Distilled from years of running Claude Code daily. Make every repo a place an agent thrives.
@@ -40,6 +41,8 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [behavioral-rules.md](docs/writing-for-agents/behavioral-rules.md) — 🎯 steer *how* the agent codes
 - [planning-and-docs.md](docs/writing-for-agents/planning-and-docs.md) — 📐 planning, docs & the initial idea
 - [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature` — the plan-slice → agent → PR seam, and why **no git worktrees**
+- [mcp-json.md](docs/writing-for-agents/mcp-json.md) — 🔌 `.mcp.json` — the repo's MCP servers, committed and secret-free
+- [guards-and-gotchas.md](docs/writing-for-agents/guards-and-gotchas.md) — 🛡️ **make the machine careful** — lint guards, doctor checks, preventive rules vs runbook
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
@@ -47,6 +50,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [tech-stack.md](docs/architecture/tech-stack.md) — 🧰 the default stack & why
 - [solid-srp.md](docs/architecture/solid-srp.md) — 🧱 SOLID / SRP, small files, custom errors
 - [testing.md](docs/architecture/testing.md) — 🧪 unit + integration testing as a first-class citizen
+- [data-and-scale.md](docs/architecture/data-and-scale.md) — 📈 **shape now, capacity later** · bounded sweeps · migrations vs backfills · dev engine ≠ prod engine
 
 ### 3. 🧰 Stack
 - [stack/README.md](docs/stack/README.md) — the index
@@ -61,7 +65,9 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [dx-scripts.md](docs/developer-experience/dx-scripts.md) — 🏃 `bin/setup`, `bin/dev`, `bin/check`
 - [dev-vps.md](docs/developer-experience/dev-vps.md) — 🐧 every dev on a Linux VPS with Claude Code (no OS wars)
 - [codegraph.md](docs/developer-experience/codegraph.md) — 🕸️ CodeGraph: a knowledge graph of your code for agents
+- [inner-loop.md](docs/developer-experience/inner-loop.md) — ⏱️ scoped checks vs the full gate — the loop the agent actually runs
 - [linting-ci.md](docs/developer-experience/linting-ci.md) — ✨ Biome · 🔨 Blacksmith CI
+- [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) — 🤖 **AI-first CI/CD** — one gate ≡ CI, parity tests, gates that aren't tests, agent-readable failures
 
 ### 5. 🤖 AI agents
 - [ai-agents/README.md](docs/ai-agents/README.md) — the index
@@ -69,6 +75,8 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
 - [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the 9-point brief
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
+- [agent-work-limits.md](docs/ai-agents/agent-work-limits.md) — 🔓 **freedom + access** — never cap the work, stall-fence instead, diagnose the terminator
+- [context-budget.md](docs/ai-agents/context-budget.md) — 🧮 standing context, prompt-cache prefix order, lazy surfaces, chunked external results
 - [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
 
 ### 6. ☸️ Infrastructure
@@ -94,6 +102,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [workflow/README.md](docs/workflow/README.md) — the index
 - [project-kickoff.md](docs/workflow/project-kickoff.md) — 🌱 zero → running project, fast
 - [github-issues-milestones.md](docs/workflow/github-issues-milestones.md) — 🎫 issues & milestones at agent speed
+- [shipping-doctrine.md](docs/workflow/shipping-doctrine.md) — 🚢 no legacy, no shims, **no feature flags**, no prod A/B — one path, replaced completely
 
 ## 🤝 How to use this repo
 

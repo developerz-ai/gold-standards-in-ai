@@ -73,7 +73,7 @@ Where shared code lives:
 
 Rules:
 - **Helpers stay SRP** — small, pure where possible, one job, well-named, unit-tested. A "utils" grab-bag of 50 unrelated functions is an anti-pattern; split by concern (`lib/date.ts`, `lib/money.ts`, `lib/http.ts`).
-- **Reusable classes over duplicated state machines** — a base `ApiClient`, a `Result<T>` type, a typed error hierarchy ([above](#custom-error-classes-never-generic)) — define once, extend.
+- **Reusable classes over duplicated state machines** — a base `ApiClient`, a `Result<T>` type, a typed error hierarchy ([above](#custom-error-classes--never-generic)) — define once, extend.
 - **Export an explicit public API** from each package; don't reach into another package's internals.
 - **But don't over-abstract** — see the next section. Extract on the *second* real use, not in anticipation.
 
