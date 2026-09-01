@@ -18,6 +18,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Understand the whole philosophy | [docs/00-philosophy.md](docs/00-philosophy.md) |
 | Make a repo great for AI agents | [docs/writing-for-agents/](docs/writing-for-agents/README.md) |
 | Pick the stack & structure | [docs/architecture/](docs/architecture/README.md) · [docs/stack/](docs/stack/README.md) |
+| Grow a project from pre-MVP to really big | [abstractions & growth](docs/architecture/abstractions-and-growth.md) · [shape now, capacity later](docs/architecture/data-and-scale.md) |
 | Get fast feedback loops (DX) | [docs/developer-experience/](docs/developer-experience/README.md) · [inner loop](docs/developer-experience/inner-loop.md) |
 | Set up CI/CD for agents | [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) |
 | Build AI agents | [docs/ai-agents/](docs/ai-agents/README.md) · [freedom & access](docs/ai-agents/agent-work-limits.md) |
@@ -51,6 +52,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [solid-srp.md](docs/architecture/solid-srp.md) — 🧱 SOLID / SRP, small files, custom errors
 - [testing.md](docs/architecture/testing.md) — 🧪 unit + integration testing as a first-class citizen
 - [data-and-scale.md](docs/architecture/data-and-scale.md) — 📈 **shape now, capacity later** · bounded sweeps · migrations vs backfills · dev engine ≠ prod engine
+- [abstractions-and-growth.md](docs/architecture/abstractions-and-growth.md) — 🪜 **pre-MVP → really big** · declare once, project everywhere · **a guard is the tax paid for not deleting the bypass** · why the rule of three doesn't fire when an AI writes the code
 
 ### 3. 🧰 Stack
 - [stack/README.md](docs/stack/README.md) — the index
