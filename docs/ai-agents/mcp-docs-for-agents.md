@@ -268,6 +268,21 @@ Three frontmatter fields, and the body is whatever the maintainer wants to say.
 
 Frontmatter earns its keep only for what the *listing* needs. Resist adding fields.
 
+### Why not YAML or JSON for the body
+Same recipe, measured:
+
+| Format | Bytes | vs md |
+|---|---|---|
+| `.md` + frontmatter | **821** | — |
+| `.yaml` | 874 | +6% |
+| `.json` | 996 | +21% |
+
+And the byte count understates JSON: escaped quotes (`\"customers\"` — the exact trap that breaks the emitted call, now in your editor too), no comments, no multiline strings. Prose in a JSON field is where tips go to die.
+
+The real argument: **markdown needs no render step, so its bytes *are* the output.** YAML/JSON are input to a renderer that emits roughly the same markdown anyway — you pay the overhead *and* own a transform that can surprise you.
+
+Structured where a machine reads (frontmatter), prose where the agent reads (body). JSON belongs on the wire (`outputSchema`, `resources/read`) — but its `text` field still carries the markdown.
+
 ### Keep it honest
 - **Fence the calls, replay them in CI.** Extract every `` ` ``-fenced `manage({...})` line and run it against seeded fixtures. Rename a param → the test fails in *your* repo, not silently in a customer's agent. Same gate discipline as [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md).
 - **Lint the links.** Every `docs://` URI in a body must resolve to a file. Dangling URIs send agents in circles.
