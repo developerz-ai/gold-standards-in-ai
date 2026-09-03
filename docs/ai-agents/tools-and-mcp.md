@@ -50,6 +50,8 @@ Don't ship one tool per action (hundreds of tools = huge per-turn token cost). E
 
 Push composition into **params** (`filters`, `sort`, `fields`, `include`, `page`) not into more tools. Full rationale, the cost table, and auth/whitelisting rules: [../writing-for-agents/memory-and-mcp.md](../writing-for-agents/memory-and-mcp.md#building-mcp-servers--few-parameterized-tools-beat-many).
 
+A constant surface isn't enough on its own — a weaker client still has to *figure out* which calls to chain. Ship a fourth `docs` tool that serves plain-text recipes: [mcp-docs-for-agents.md](mcp-docs-for-agents.md).
+
 ## Audited capability access (the gateway pattern)
 Giving an agent access ≠ handing it credentials. Put a gateway between the agent and the sensitive system. Real example: a Rust DB-gateway MCP ([`db-mcp-gateway`](https://github.com/developerz-ai/db-mcp-gateway)) where:
 - **Credentials never leave the gateway** — the agent sends a `(server, database, query)` triple + an SSO token, never a connection string.

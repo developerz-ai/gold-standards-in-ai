@@ -86,5 +86,7 @@ Lazy loading isn't free. First touch of a resource usually burns one turn on `de
 
 Net: a handful of resources hit every turn → plain tools can still win, the handshake never amortizes. The meta pattern pays off on large or sparsely-used catalogs — exactly where a flat tool list blows the budget.
 
+That's the *cost* side. The *comprehension* side — how a weak client figures out which calls to chain — is [../ai-agents/mcp-docs-for-agents.md](../ai-agents/mcp-docs-for-agents.md).
+
 ## Make your app AI-debuggable
 Captchas block Playwright/MCP browser flows. Add a query-param escape hatch that skips *captcha verification only* (not auth) when present — the widget still renders so screenshots match real users. Credentials, rate limits, lockouts all still apply. Gate behind `ALLOW_AI_DEBUG_LOGIN` so it's off in prod. Details: [../frontend-craft/captcha.md](../frontend-craft/captcha.md).

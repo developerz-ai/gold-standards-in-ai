@@ -22,6 +22,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Get fast feedback loops (DX) | [docs/developer-experience/](docs/developer-experience/README.md) · [inner loop](docs/developer-experience/inner-loop.md) |
 | Set up CI/CD for agents | [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) |
 | Build AI agents | [docs/ai-agents/](docs/ai-agents/README.md) · [freedom & access](docs/ai-agents/agent-work-limits.md) |
+| Ship an MCP server others' agents can actually use | [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) |
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
 | Polish the frontend | [docs/frontend-craft/](docs/frontend-craft/README.md) |
 | Move fast on GitHub | [docs/workflow/](docs/workflow/README.md) |
@@ -78,6 +79,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
 - [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the 9-point brief
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
+- [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) — 📖 **teach *their* agent to use *your* MCP server** — recipes as advice not scripts, the `docs` tool, editable markdown
 - [agent-work-limits.md](docs/ai-agents/agent-work-limits.md) — 🔓 **freedom + access** — never cap the work, stall-fence instead, diagnose the terminator
 - [context-budget.md](docs/ai-agents/context-budget.md) — 🧮 standing context, prompt-cache prefix order, lazy surfaces, chunked external results
 - [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
