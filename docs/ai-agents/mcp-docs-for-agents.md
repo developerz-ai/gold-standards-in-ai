@@ -113,6 +113,78 @@ Same recipe as JSON costs ~⅓–½ more tokens, and size isn't the real win:
 
 Keep the *shape* (uri, "use when", numbered steps, `→`, skip-if, branch, done-when, tips). Drop the braces. Exception: keep JSON where the client consumes it programmatically (`outputSchema`) — and never prettify the call strings themselves.
 
+## 🔁 Branches, loops and retries — in prose
+
+Real work has conditionals and iteration. Write them as **checks the reader performs on a result it just saw**, never as pseudo-code. `if x then goto 3` invites a weak model to invent control flow; "empty? stop and ask" it just does.
+
+| Control flow | Write it as |
+|---|---|
+| if / else | "`status == "failed"`? → do X. Otherwise continue." — anchored on the field just returned |
+| loop over a list | "For each `payment.id` from step 2: …" |
+| pagination | "`has_more: true`? call again with `page:<n+1>` and merge. **Stop after 5 pages** and tell the user what range you covered." |
+| retry | "Retry once after 5s. Still failing? Stop and report." |
+| don't retry | "'pending' for 5–10 days is normal. Never retry a pending refund." |
+| early exit | "Empty? Wrong email — stop and ask, don't guess." |
+| partial failure | "Skip it, note it, keep going with the rest." |
+| human gate | "Wait for confirmation. This is the last reversible moment." |
+
+**Bound every loop.** A weak model will happily paginate forever. Give it a max *and* what to do when it hits the max.
+
+**Every branch ends in stop or continue.** Never leave the outcome implicit.
+
+### A full worked recipe
+
+```
+docs://recipes/refund-duplicate-charges — find and refund duplicate charges for one customer
+
+Use when a customer says they were charged more than once for the same thing.
+For a single known charge use docs://recipes/refund-a-payment instead.
+Refunds are irreversible — confirm the list with the user before step 5.
+
+1. manage({resource:"customers", action:"list", filters:{email_eq:"<EMAIL>"}})
+   → customer.id
+   Empty? Wrong email. Stop and ask — don't fall back to searching by name,
+   names aren't unique here.
+   More than one match? Stop, show them, let the user pick.
+
+2. manage({resource:"payments", action:"list",
+           filters:{customer_id_eq:"<customer.id>", status_eq:"succeeded"},
+           sort:"-created_at", per_page:100})
+   → payments[]
+   has_more: true? Call again with page:<n+1> and merge the results.
+   Stop after 5 pages (500 payments) and tell the user which date range
+   you actually covered.
+
+3. Group payments[] by (amount_cents, description). A group with 2+ entries
+   inside 24h is a duplicate set. Oldest in the set is the real charge; the
+   rest are duplicates.
+   Nothing found? Say so and stop. Don't widen the window on your own.
+
+4. Show the user the duplicates — dates and amounts — and wait for
+   confirmation. This is the last reversible moment.
+
+5. For each confirmed duplicate payment.id:
+     manage({resource:"refunds", action:"create",
+             params:{payment_id:"<payment.id>", amount_cents:0, reason:"duplicate"}})
+   → refund.id
+   One at a time, not in parallel — refunds are rate-limited to 10/min.
+   REFUND_WINDOW_EXPIRED on one? Skip it, note it, keep going with the rest,
+   then point the user at docs://recipes/issue-a-credit-note for the skipped ones.
+   Any other error? Stop immediately and report. Never retry a refund.
+
+Done when every confirmed duplicate has a refund.id, or you have listed which
+ones were skipped and why.
+
+Tips
+- "pending" lasts 5–10 days. That's normal, not a failure.
+- A payment that already carries a refund won't look failed — check
+  payment.refunded_amount_cents before counting it as a duplicate.
+- Subscription charges repeat legitimately. If description contains
+  "subscription" it's almost never a duplicate — ask before refunding.
+```
+
+What that example is doing, beyond the happy path: a **guard before an irreversible action** (step 4), a **bounded loop** (step 2), an **iteration with per-item error policy** (step 5 — one error class continues, every other stops), a **negative instruction** with the reason attached ("don't fall back to name search — names aren't unique"), and a `Done when` that covers the *partial* outcome as well as the clean one.
+
 ## 🗂️ Shape it like `resources/` — list → read
 
 URI-addressed, delivered through a **tool** so every client gets it.
@@ -319,6 +391,8 @@ Same architecture — a skill *is* progressive disclosure (description in the sy
 - [ ] Same titles in `initialize.instructions` (upgrade, not a dependency)
 - [ ] Every recipe opens with "use when" and names the alternative
 - [ ] Literal calls, `→ gives`, inline enums, one branch per step, `Done when`
+- [ ] Every loop bounded with a max + what to do at the max
+- [ ] Every branch ends in stop or continue; irreversible steps have a human gate
 - [ ] Tips section carries the traps, conventions, costs and irreversibles
 - [ ] Search inlines the top hit; a miss returns nearest + `docs({})`
 - [ ] Every error carries a `docs://` URI
