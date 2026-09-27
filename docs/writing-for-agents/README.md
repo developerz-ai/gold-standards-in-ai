@@ -18,6 +18,7 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 | 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, the plan-slice→agent→PR seam, why no worktrees |
 | 9 | [mcp-json.md](mcp-json.md) | 🔌 `.mcp.json` — the repo's MCP servers, committed, secret-free, paired with skills |
 | 10 | [guards-and-gotchas.md](guards-and-gotchas.md) | 🛡️ Make the machine careful — lint guards, doctor checks, preventive rules vs the runbook |
+| 11 | [output-completeness.md](output-completeness.md) | 🧾 Beat model laziness — no placeholders, no truncation, a guard that rejects them |
 
 Building with a team of agents inside one of those commands? → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 

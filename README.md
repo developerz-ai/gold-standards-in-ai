@@ -25,6 +25,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Ship an MCP server others' agents can actually use | [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) |
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
 | Polish the frontend | [docs/frontend-craft/](docs/frontend-craft/README.md) |
+| Give each app its own good-taste UI (not AI slop) | [design-taste.md](docs/frontend-craft/design-taste.md) · [DESIGN.md](docs/frontend-craft/design-md.md) · [review loop](docs/frontend-craft/design-review-loop.md) |
 | Move fast on GitHub | [docs/workflow/](docs/workflow/README.md) |
 
 ## 📚 The full map
@@ -45,6 +46,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature` — the plan-slice → agent → PR seam, and why **no git worktrees**
 - [mcp-json.md](docs/writing-for-agents/mcp-json.md) — 🔌 `.mcp.json` — the repo's MCP servers, committed and secret-free
 - [guards-and-gotchas.md](docs/writing-for-agents/guards-and-gotchas.md) — 🛡️ **make the machine careful** — lint guards, doctor checks, preventive rules vs runbook
+- [output-completeness.md](docs/writing-for-agents/output-completeness.md) — 🧾 **beat model laziness** — no placeholders, no truncation, a guard that rejects `// ...rest`
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
@@ -102,6 +104,9 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [pwa-offline.md](docs/frontend-craft/pwa-offline.md) — 📲 PWA, responsive, web workers & offline-first
 - [assets-optimization.md](docs/frontend-craft/assets-optimization.md) — 🗜️ optimized images/video/WebP & fonts, optimize before commit
 - [seo.md](docs/frontend-craft/seo.md) — 🔍 SEO: meta, Open Graph, JSON-LD, sitemap, media, Core Web Vitals
+- [design-taste.md](docs/frontend-craft/design-taste.md) — 🧑‍🎨 **anti-AI-slop taste** — a distinct direction per app, banned defaults, type/color/layout/motion rules
+- [design-md.md](docs/frontend-craft/design-md.md) — 🎨 **`DESIGN.md`** — each app's design identity as a markdown file agents read before building UI
+- [design-review-loop.md](docs/frontend-craft/design-review-loop.md) — 🔍 critique → audit → polish → harden, screenshot-driven, fresh-context reviewer
 
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index
