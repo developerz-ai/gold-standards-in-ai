@@ -16,6 +16,10 @@ Provenance tags used below: **[upstream]** = distilled from published research /
 | Premature stop | "Let me know if you want me to continue" | turn ends at 40% |
 | Undershot count | asked for 12 cases, got 7 | nobody counts |
 | Silent truncation | output hits the token cap mid-function | half a file written to disk |
+| Missing close | report written, required questions / verdict line / handoff never emitted | the next step never starts |
+| Filed, not delivered | full report written to a file, reply is a one-line summary + path | nobody reads it |
+| Budget spent on side quests | step cap reached while fetching fonts or counting words, deliverable never written | "almost done" = nothing shipped |
+| Claimed artifact | "DESIGN.md updated" with no file on disk, or prose where tokens were required | reviewers trust the summary |
 
 ## 🧠 Root causes
 
@@ -70,6 +74,11 @@ Rules that make the block work:
 - **Give a legal exit.** Without the `[PAUSED …]` escape, the model's only option near the cap is to compress. [upstream]
 - **Honest blocker > fake completion.** Matches [behavioral-rules](behavioral-rules.md#-proactive--but-about-the-problem-not-the-diff): finish the rest, name what's left out.
 - **Structure the prompt:** rules / context / data / numbered tasks in separate tagged blocks. Numbered tasks are countable; prose asks aren't. [upstream]
+- **Require a visible pre-flight block** for multi-part generation: before code, the model writes a short plan that names each deliverable and states how it will be verified (e.g. "hero headline: container width X, fits 2–3 lines"; "grid: 5 items, 5 cells"). Verifications written up front get checked; unstated ones don't. [upstream, from gpt-taste's `<design_plan>`]
+- **Define the close, not just the body.** Name the exact final element (questions with options, a `disposition:` line, a handoff call) and the only legal alternative (`Questions skipped: <reason>`). A run that ends on the body without its close is incomplete. [ours, from impeccable critique]
+- **Deliver in the reply, then persist.** A report composed straight into a file is not delivered. [ours]
+- **Each section self-contained** in analyses and docs: no "as mentioned above" standing in for content. Multi-file output: every file complete, full path as its header. [upstream]
+- **Approximate size targets.** "~150 words" is fine; an exact word count sends agents into count-and-trim loops that eat the step budget. [ours, observed in skill-behavior traces]
 
 ## 🏗️ Architectural patterns
 
@@ -93,6 +102,15 @@ Prompts lower the rate. Architecture removes the incentive: if no single call ha
 - **Ordered fixes, most material first, capped** (e.g. ≤8). Missing deliverables outrank polish.
 - **Re-check pass scores each prior fix** `resolved` / `partial` / `unresolved` from the artifact — narration of the fix doesn't count.
 - **A "floor" list** of banned shapes (the placeholder list above) is checked even if a hook exists — hookless runs happen.
+- **Reading allowance.** Under a turn cap, the reviewer reads the request and primary outputs first, samples the rest, and starts writing by mid-budget. A review cut off before its sections exist returns nothing; name what went unread instead.
+- **Verdict pass lists ≤ 3 regressions** the fix batch introduced, then stops. No fresh hunt on every round.
+
+### Self-checks: useful, weaker than a second agent
+| Loop | How | Use |
+|---|---|---|
+| Chain of verification | draft → write verification questions about its own claims → answer them independently → revise | factual/analytical output, single agent [upstream] |
+| Self-grading | define "excellent" for the task → grade the draft against it → iterate until met | when no reviewer is available [upstream] |
+| Fresh reviewer | separate context, request-first inventory | anything shipped [ours] — preferred |
 
 ## 🎛️ Parameter tuning
 
@@ -107,7 +125,7 @@ Prompts lower the rate. Architecture removes the incentive: if no single call ha
 
 **Read the terminator before touching a knob.** Log `stop_reason`/`finish_reason` + output token count per call. `max_tokens` → raise the cap or chunk. `end_turn` with placeholders → it's behavior: prompt + gate. [ours] → [agent-work-limits](../ai-agents/agent-work-limits.md#diagnose-the-terminator-before-you-touch-a-ceiling)
 
-## 🛡️ The guard — reject placeholder output mechanically
+## 🛡️ The gates — reject incomplete output mechanically
 
 Prose rules get ignored under pressure; a failing check doesn't. Climb the [guards ladder](guards-and-gotchas.md) — this is rung 4 (lint guard) + a hook. **[ours]**
 
@@ -157,6 +175,20 @@ Placeholders are greppable; *missing* items aren't. For multi-part work:
 - Plan lists deliverables as a checklist (files, endpoints, cases).
 - Verification step diffs the checklist against reality: `ls`, `grep -c`, test names, route table.
 - A deliverable with no evidence = not done. Report says what was **verified**, not assumed.
+- **Artifact gate:** every file the task promises exists on disk and has the required shape (e.g. token-bearing frontmatter, not prose only). Check with `test -s`, a parse, or a schema, not with the agent's summary.
+
+### 4. Budget order — deliverable first
+Step and time caps end runs silently. Order work so a cut-off still leaves something shippable:
+- Write the core deliverable before optional enrichment (font hunting, asset polish, extra screenshots).
+- One batched verification round, not a loop; a second only if the first found something.
+- Log the step count at each milestone; near the cap, stop at a clean boundary with `[PAUSED — X of Y complete. Next: <name>]`.
+
+### 5. Test that the rules actually bind
+Prose rules can be ignored by some models some of the time. For instructions that matter (a skill, a CLAUDE.md block), run behavior tests: [ours, from impeccable's skill-behavior suite]
+- **Assert on the tool-call trace**, not the reply: which files were read, what was written, in what order. The reply's claims are not evidence.
+- **Separate routing checks from full completion.** "Loaded the right playbook" (cheap, many runs) ≠ "shipped the page with review and docs" (expensive, few runs). Report them separately.
+- Seed fixtures + a simulated user for questions; cap steps and time per scenario; a cap hit is a failure, never a pass.
+- Small samples (1–3 runs per model) are regression signals, not reliability estimates. Say so.
 
 ## 🚦 Scale it to the task
 
@@ -166,6 +198,7 @@ Placeholders are greppable; *missing* items aren't. For multi-part work:
 | Single file / function | prompt block in `CLAUDE.md` + lint guard in CI |
 | Multi-file feature | + deliverable count in the plan + hook on commit |
 | Large generation (many files, long docs, migrations) | + outline→per-part chunking or fan-out + continuation handling + finish reviewer |
+| Reusable instructions (skills, shared CLAUDE.md blocks) | + trace-based behavior tests on the models you run |
 
 ## ❌ Anti-patterns
 - Low `max_tokens` "to save cost" — you pay twice: the truncated call and the retry. → [agent-work-limits](../ai-agents/agent-work-limits.md)
@@ -179,4 +212,4 @@ Placeholders are greppable; *missing* items aren't. For multi-part work:
 
 **Related:** [behavioral-rules.md](behavioral-rules.md) — goal-driven execution · [guards-and-gotchas.md](guards-and-gotchas.md) · [hooks-and-permissions.md](hooks-and-permissions.md) · [../ai-agents/agent-work-limits.md](../ai-agents/agent-work-limits.md) · [../ai-agents/context-budget.md](../ai-agents/context-budget.md)
 
-**Sources:** research notes and output-enforcement skill in [taste-skill](https://github.com/Leonxlnx/taste-skill); finish-reviewer idea from the impeccable skill's finish reviewer.
+**Sources:** research notes, output-enforcement and gpt-taste skills in [taste-skill](https://github.com/Leonxlnx/taste-skill); finish reviewer, critique close and skill-behavior tests from [impeccable](https://github.com/pbakaus/impeccable). UI-specific review loop → [design-review-loop.md](../frontend-craft/design-review-loop.md).

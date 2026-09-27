@@ -2,59 +2,100 @@
 
 Left alone, an agent ships the **statistical average UI**: Inter, purple gradient, centered hero, three identical cards, fade-up on everything. Every app then looks like every other AI app. This file has two parts: a **quality floor** every app must clear, and a **method that gives each app its own look**.
 
-**Scope.** This file covers taste and the defaults to refuse. Related docs:
+**Scope.** This file covers taste and the defaults to refuse. Deep topics live next door:
 
 | Need | Go to |
 |---|---|
-| Write/read the project's `DESIGN.md` (tokens, components, do/don't) | [design-md.md](design-md.md) |
-| Critique → audit → polish → harden loop | [design-review-loop.md](design-review-loop.md) |
+| Catalog of directions to pick from | [design-directions.md](design-directions.md) |
+| Write/read the project's `DESIGN.md` + `PRODUCT.md` | [design-md.md](design-md.md) |
+| Critique → audit → harden → polish loop | [design-review-loop.md](design-review-loop.md) |
+| Motion depth, delight, bolder/quieter | [motion-and-delight.md](motion-and-delight.md) |
+| Copy, voice, onboarding, empty states | [ux-copy.md](ux-copy.md) |
+| Responsive, touch, native, UI perf | [adaptive-ui.md](adaptive-ui.md) |
+| Generate a comp image first, then build it; in-browser variants | [reference-image-design.md](reference-image-design.md) |
+| Name, logo, brand kit | [brand-identity.md](brand-identity.md) |
+| Token plumbing, `clamp()`, keyframes · light/dark | [css-scss-craft.md](css-scss-craft.md) · [theming-dark-mode.md](theming-dark-mode.md) |
 | Model truncating or skipping sections | [../writing-for-agents/output-completeness.md](../writing-for-agents/output-completeness.md) |
-| Token plumbing, `clamp()`, keyframes, glass | [css-scss-craft.md](css-scss-craft.md) |
-| Light/dark tokens + toggle | [theming-dark-mode.md](theming-dark-mode.md) |
-| Let the agent see the UI (screenshots) | [README.md → Playwright MCP](README.md#-let-the-agent-see-the-ui--playwright-mcp-headless) |
 
 ## 🧭 Order of operations
 1. **Read the brief.** Page kind, audience, vibe words, references, existing brand assets, quiet constraints (a11y-first, regulated, kids). Constraints beat taste.
-2. **Classify.** Refinement (keep the current look) vs redesign (replace the look, keep the content). Missing `DESIGN.md` ≠ greenfield: if the code already has a coherent look, inherit it.
-3. **Pick the register**: brand vs product (see Register below).
-4. **Pick a direction** (see Make each app different) and set the **dials**.
-5. **State it in one line before code:** `Reading this as: <page kind> for <audience>, <archetype> language, <type pairing>, <palette strategy>, dials V/M/D = 7/5/3.`
-6. Build fully committed → check against the floor below → hand off to the [review loop](design-review-loop.md).
-7. Ambiguous brief → ask **one** question ("closer to calm-minimal or loud-editorial?"), not a questionnaire.
+2. **Decide what is already true** (table below). Missing `DESIGN.md` ≠ greenfield.
+3. **Pick the register** from the surface (see Register).
+4. **Pick a foundation:** official design system or an aesthetic (see Brief → system map).
+5. **Pick a direction** (see Make each app different) and set the **dials**.
+6. **State it in one line before code:** `Reading this as: <page kind> for <audience>, <archetype> language, <type pairing>, <palette strategy>, dials V/M/D = 7/5/3.` Then write the [direction contract](#-direction-contract-before-code).
+7. Build fully committed → check against the floor → hand off to the [review loop](design-review-loop.md).
+8. Ambiguous brief → ask **one** question ("closer to calm-minimal or loud-editorial?"), not a questionnaire. Clear brief → don't ask.
+9. Out of scope (dense data tables, code editors, realtime collab)? **Say so**, name the right tool, apply taste only to the parts it fits.
 
-**The brief wins.** A pinned font, palette or era overrides every default and ban in this file. The bans apply only to choices the brief left open.
+**The brief wins.** A pinned font, palette or era overrides every default and ban in this file. The bans apply only to choices the brief left open. A pinned world pins the world, **not its softest rendition**: its full material range stays in play.
+
+### Decide what is already true
+| Situation | Do |
+|---|---|
+| **Established world** (coherent look in code, even without `DESIGN.md`) | Inherit it. Document it. Don't invent a replacement |
+| **Refinement** | Preserve identity, behavior, copy, everything out of scope. Ask before changing factual copy |
+| **Redesign** | Keep product truth, content, function, constraints. Old look = evidence, not authority. Replace the world; **never split the difference into polish on the discarded look** |
+| **Incomplete brand** | Keep confirmed assets/traits, expand the system with the user |
+| **No visual authority** | Create a new world (below) |
+
+**Invention budget scales with scope.** Section/component/state inside a surface → inherits it, no concept round. Whole new surface in an established world → keep the system, derive 5–7 *structures* from content + task, present 3. New or replacement world → the full derivation below.
 
 ## 🎲 Make each app different
 Goal: **every app gets a distinct, recognizable look.** No shared house style. The floor stays the same for every app. The direction changes per app.
 
 ### Derive, don't default
-1. Write **one sentence of product truth**: what it uniquely does, for whom, in what physical scene (desk at 9am? phone on a train? a dim studio?).
-2. Name the **category rut**: the page this category always ships, plus its predictable opposite. Both are off-limits.
-3. List **5–7 concrete references from the audience's world**: objects, places, publications, rituals, tools, and the graphic traditions they know (transit signage, lab notebooks, record sleeves, trail maps, tax forms, synth panels). Span at least 3 material families. No near-duplicates.
-4. Turn the top 2–3 into directions (archetype + palette + type + one signature interaction). Pick one and **commit to it on every element**: nav, buttons, inputs and links all get restyled in the direction's own style.
-5. **Self-check:** if someone could guess the look from the category alone ("fintech → navy + Inter"), or from the category plus the thing it avoided, rework it.
+1. Write **one sentence of product truth**: the unique mechanism, for whom, in what physical scene (desk at 9am? phone on a train? a dim studio?).
+2. Name the **category rut**: the page this category always ships, plus its predictable opposite. Both are off-limits. A literal reading of the product name/metaphor joins the rut (spend ≤ 1 candidate on it).
+3. List **7 concrete references from the audience's world**, ordered by resonance: objects, places, rituals, and the graphic traditions they read daily (transit signage, lab notebooks, record sleeves, trail maps, tax forms, synth panels, a documentation standard). **Span ≥ 3 material families.** > 3 in one family = you stopped at the obvious artifact. Near-duplicates count once.
+4. Turn the top 2–3 into full directions: world (palette + type + material) + first viewport + signature interaction + honest risk.
+5. **Pick with a seed, not by habit.** Models reliably take option #1 from any list. Rank, then choose deterministically (e.g. product-name length mod N) and write the roll down.
+6. **Fuse, then raise.** Weigh each runner-up against the pick on exactly 2 axes: audience identification, product clarity. A runner-up that loses still **donates one discipline** the pick lacks (a palette's total commitment, a grid's density courage), written as a named line. Donate ambition, never clothes: a lifted motif is a costume.
+7. **Commit on every element**: nav, buttons, inputs, links all rebuilt in the direction's vocabulary. A stock component inside a committed form is a lapse.
+8. **Self-check:** if someone could guess the look from the category alone ("fintech → navy + Inter"), or from category + the thing it avoided, rework.
 
-### Contrasting archetypes (starting points, not skins)
-| Archetype | Palette strategy | Type character | Shape / depth | Motion | Density | Fits |
-|---|---|---|---|---|---|---|
-| **Soft premium** | Light neutral + one muted accent, diffuse tinted shadows | Wide grotesk display, calm sans body | Generous radius (16–24px), layered surfaces | Slow springs, 500–700ms focal entrance | Airy (2–3) | Consumer, health, lifestyle |
-| **Minimal utility** | Near-monochrome, color only for state | One workhorse sans, strong weight steps | Crisp 4–8px radius, 1px dividers, no shadows | Near-static, 150ms feedback | Medium (4–6) | Docs, dev tools, productivity |
-| **Swiss / brutalist print** | Paper + ink + one hazard accent | Heavy neo-grotesk, huge scale jumps, tight leading | 0 radius, visible grid lines, `gap:1px` rules | Hard cuts, no easing theatrics | Bimodal | Portfolios, manifestos, data-heavy editorial |
-| **Terminal / telemetry** | Dark substrate, one signal accent | Mono for data only, sans for prose | 0 radius, framed compartments | Instant state, blinking caret at most | Packed (8–9) | Infra, monitoring, CLI products |
-| **Editorial / magazine** | Committed ground color + ink | Display face with a point of view + readable text face | Asymmetric grid, pull quotes, big images | One authored scroll moment | Airy–medium | Media, long reads, culture |
-| **Playful / maximal** | Full palette (3–4 named roles) or drenched | Chunky or quirky display, rounded sans | Pill controls, stickers, overlap, rotation | Bouncy only here, physics on key actions | Medium | Kids, games, community, events |
-| **Civic / trust-first** | Restrained, high contrast, semantic color | System or proven UI face, large body | Predictable, low radius | Minimal, reduced by default | Medium (4–5) | Gov, health records, finance ops |
-| **Cold luxury** | Silver-grey, chrome, smoke, one saturated pop | Refined sans, wide tracking on small caps only | Sharp or micro-radius, glass as a specific effect | Slow, precise | Airy | Hardware, fashion, high-end |
+### Present choices honestly
+- Show **one committed direction** + ≤ 2 real alternates, same anatomy each (thesis, palette, materials, first viewport, risk). Never a ranked lineup; that invites the safest card.
+- **Standing exit:** always offer "the category standard, played straight". It's the user's door, never your recommendation. If taken: ask for 2–3 peer products, match their craft level, no irony.
+- **Re-roll** only on factual grounds (the direction can't carry the product's truth), never taste. After 2 user re-rolls, ask what quality is missing.
+- **Energy is not the enemy of trust.** "No hype / no gamification" rules out *devices*, not exuberance.
+- **The subject is not a license.** Bookish, warm, family, kids → cream + serif + lamplight is the default wearing the subject's clothes. Book cloth, thread, jackets, endpapers span the saturated spectrum. Treat your first palette for such subjects as already spent.
+- **Truth binds claims, not demonstrations.** Author demo data at full fidelity, label it synthetic, list what to replace. Refusing a bold direction because demo data doesn't exist yet is timidity dressed as honesty.
 
-### Rotate across apps
-- **Record the pick** in the project's [`DESIGN.md`](design-md.md): archetype, fonts, palette strategy, hues, dials.
-- **Before a new app:** read the last few sibling apps' `DESIGN.md` files, then differ on **at least 2 of**: archetype, type pairing, palette family, light/dark, dial values.
-- **Never reuse the same display face or accent hue in two consecutive apps**, even when it "fit" both.
-- **Break the first-choice habit:** rank the candidates, then pick with a deterministic seed (e.g. product-name length mod N). Models reliably take option #1 from any list, and this list is no exception.
-- Familiar is fine **when the user asks for it**. Then match the craft level of 2–3 named peer products, played straight.
+### Archetypes & rotation
+Starting points, not skins: pick from the catalog of 28 directions (light restrained, light expressive, dark, period), mix at most two, re-derive the accent from product meaning → [design-directions.md](design-directions.md).
+- **Record the pick** in [`DESIGN.md`](design-md.md): archetype, fonts, palette strategy, hues, dials, seed.
+- **Before a new app:** read the last 2–3 sibling apps' `DESIGN.md`, then differ from each on **≥ 4 of the 12 sibling axes, incl. ≥ 1 of polarity, display class, accent hue family**. Canonical axes table → [design-directions.md](design-directions.md#-make-siblings-differ). On top: **never reuse the display face or accent hue of the previous app.**
+- Palette families to rotate (as of 2026-09): mono + one saturated pop · forest + bone + amber · black + warm tan · cobalt + one neutral · terracotta + cool slate · olive + brick + paper · ink navy + signal orange · plum + lime · drenched single hue.
 
-### Palette families to rotate (as of 2026-09)
-Pure mono + one saturated pop · Forest green + bone + amber · Black + warm tan (no beige) · Cobalt + one neutral · Terracotta + cool slate · Olive + brick + paper · Ink navy + signal orange · Plum + lime (committed) · Drenched single hue (the surface *is* the color).
+## 📜 Direction contract (before code)
+Write it in the surface brief (e.g. `docs/design/surfaces/<route>.md`), ~150 words. Later agents and the reviewer audit the render against it.
+```markdown
+## Direction contract
+THESIS: <the one idea this surface owns>; refuses <the category-default arrangement>.
+OWN-WORLD: <palette + component language, recognizable with all content removed>.
+STORY: <what the visitor understands, believes, does>.
+FIRST VIEWPORT: <what is where, at what scale; where the primary action sits>.
+FORM: <chosen direction, its rank on your list, the seed/roll>.
+FINISH: unreviewed and undocumented is unfinished; ends with the fresh review, its verdict, DESIGN.md.
+```
+- A block that reads like a mood → the direction isn't decided yet.
+- **Never ship the contract**: not in HTML comments, `data-*`, hidden DOM, JSON-LD, bundles.
+- Memory test for FIRST VIEWPORT: if someone left after one screen, what would they describe an hour later? "A vibe" = not committed.
+
+## 🧱 Brief → design system map
+**Rule: if the brief reads as a real design system, install the official package.** Don't hand-recreate its CSS, don't import its tokens and override 90% of them. **One system per project.**
+
+| Brief reads as | Reach for (as of 2026-09) |
+|---|---|
+| Enterprise / Microsoft-adjacent | Fluent UI |
+| Material-flavored product | Material Web + M3 tokens |
+| Dense B2B analytics | Carbon |
+| Shopify app / Atlassian-style / GitHub-style devtool | Polaris / Atlassian DS / Primer (Brand for marketing) |
+| UK / US public sector | GOV.UK Frontend / USWDS (expected, sometimes required) |
+| Own-the-code components | shadcn/ui or Radix Themes — **never ship the default theme**: restyle radius, color, shadow, type |
+
+Aesthetics (glass, bento, brutalism, editorial, kinetic type, mesh) have no official package: build with web standards and **label approximations honestly** (e.g. "web glass approximation", not "Liquid Glass"; add a `prefers-reduced-transparency` solid fallback).
 
 ## 🎛️ The three dials
 Set them once per surface, then derive layout, motion and density from them.
@@ -65,56 +106,67 @@ Set them once per surface, then derive layout, motion and density from them.
 | **MOTION** | Hover/active only | CSS transitions + a staggered load-in | Scroll-driven sequences, pinned sections, physics |
 | **DENSITY** | Gallery: `py-32+` sections | App: `py-16–24` | Cockpit: tight, 1px rules, no card boxes, tabular numerals |
 
-| Surface | V | M | D |
+| Surface / vibe words | V | M | D |
 |---|---|---|---|
 | Landing (mainstream SaaS) | 7 | 6 | 4 |
-| Agency / creative / portfolio | 8–9 | 7–8 | 3 |
-| Editorial / blog | 6 | 4 | 3 |
+| Agency / creative / "Awwwards", "experimental" | 8–10 | 7–10 | 3 |
+| "Minimal, calm, editorial" / blog | 5–6 | 3–4 | 2–3 |
+| "Premium consumer" | 7–8 | 5–7 | 3–4 |
 | Product app / dashboard | 3–4 | 3 | 6–8 |
-| Civic / regulated | 3 | 2 | 5 |
-| Redesign, preserve look | match | +1 | match |
+| Civic / regulated / a11y-critical | 3 | 2 | 5 |
+| Redesign, preserve · overhaul | match · +2 | +1 · +2 | match |
 
-- VARIANCE ≥ 4 → asymmetric layouts **must collapse to a single column below 768px**.
-- **Motion claimed = motion shown.** Ship MOTION ≥ 5 only if the motion actually works. Otherwise drop to 3 and ship a clean static page. Half-built scroll animation is worse than none.
+- VARIANCE ≥ 4 → asymmetric layouts **must collapse to a single column below 768px**, declared per section.
+- **Motion claimed = motion shown.** Ship MOTION ≥ 5 only if it works. Otherwise drop to 3 and ship a clean static page.
 
 ## 🏷️ Register — brand vs product
 Pick the register from the **surface**, not the company. A dev tool's landing page is brand. A fashion house's docs page is reading.
 
-| Register | Visitor's job | Expression | Rule |
-|---|---|---|---|
-| **Persuade** (brand) | Decide + act | Design *is* the product; bold strategies allowed | Offer intelligible in one line, primary action visible, prove one thing only this product can |
-| **Operate** (product) | Finish a task | Brand lives in precise details | Scanability, consistency, native affordances beat novelty. System/workhorse fonts OK |
-| **Read** | Understand | Quiet, comfortable | Measure, wayfinding, hierarchy first |
-| **Experience** | Be inside the work | Interface recedes | Artifact leads from the first viewport |
+| Register | Visitor's job | Rule |
+|---|---|---|
+| **Persuade** (brand) | Decide + act | Offer intelligible in one line, primary action visible, prove one thing only this product can. Conversion lives *inside* the direction's vocabulary |
+| **Operate** (product) | Finish a task | Earned familiarity. Brand lives in precise details |
+| **Read** | Understand | Measure, wayfinding, hierarchy first |
+| **Experience** | Be inside the work | Artifact leads from the first viewport; interface recedes |
+
+**Operate specifics.** Slop here isn't flatness, it's **strangeness without purpose**: decorated buttons, display fonts on labels, reinvented scrollbars/controls, a modal as first thought.
+- One family is often right. **Fixed rem scale**, not fluid; step ratio 1.125–1.2. Tables may run 120ch.
+- Restrained color is the floor. Accent = primary action, selection, state only. A second neutral layer for sidebars/toolbars. No full-saturation color on inactive states.
+- 150–250ms transitions. **No page-load choreography**: the app loads into a task.
+- Overlays escape their container (`<dialog>`, popover API, `position: fixed`), never clipped by `overflow: hidden`.
+- Permitted here: system fonts, top bar + side nav, tabs, command palette, real density, sameness screen to screen.
 
 ## 🔤 Typography
 | Rule | Value |
 |---|---|
 | Body size floor (web) | `1rem` / 16px |
-| Body measure | 65–75ch (45ch minimum) |
-| Display max | ~6rem. A hero headline is ≤ 2–3 lines; if it wraps to 4, shrink the font, don't cut copy |
+| Body measure | 65–75ch (45ch minimum). Wider measure → more leading |
+| Display max | ~6rem. Hero headline ≤ 2–3 lines: **widen the container, then shrink the font**; never cut copy to fit. A 4-line hero is a font-size error |
+| Hero scale vs asset | Plan together. Headline > 6 words next to a big asset → don't start at the top of the scale |
 | Display tracking | `-0.02em` to `-0.03em`; never below `-0.04em` |
-| Small caps / labels | positive tracking `0.04–0.08em` |
-| Italic display with descenders (`g j p q y`) | `line-height ≥ 1.1` + bottom reserve, or descenders get clipped |
+| Small caps / labels | positive tracking `0.04–0.08em`. Tracked caps for short markers only, never sentences |
+| Italic display with descenders (`g j p q y`) | `line-height ≥ 1.1` + bottom reserve, or descenders clip |
 | Families | 1 is often enough; 2 maximum; a second family must do a job the first can't |
-| Product UI scale | 3–5 sizes, weights 400/500/600, not just 400/700 |
+| Scale | Enumerated ramp: every `font-size` lands on a step. Adding a step is a design decision. Product UI: 3–5 sizes, weights 400/500/600 |
 | Light text on dark | +leading, +a touch of tracking, +one weight step |
 | Numbers in tables/data | `font-variant-numeric: tabular-nums` |
-| Headings | `text-wrap: balance`; paragraphs `text-wrap: pretty` |
+| Wrapping | Headings `text-wrap: balance`; paragraphs `text-wrap: pretty` |
+| Paragraph rhythm | Spacing **or** first-line indent, never both |
 
+- **State the role system before editing:** roles needed, contrast between them, measure, which faces are authoritative. Then stress it: long headings, +30% translation, 200% zoom, missing weight, fallback font.
 - **Choose faces like objects from the subject's world.** Ask: what would this product look like as a physical object?
-- **Reflex faces = you stopped looking** (on brand surfaces, as display): Inter-as-display, Fraunces, Instrument Serif/Sans, Playfair Display, Cormorant, Lora, Crimson, Newsreader, Syne, Space Grotesk, Space Mono, IBM Plex, DM Sans/Serif, Outfit, Plus Jakarta Sans, Roboto, Open Sans, Arial. Use one only with a reason no other face satisfies. "Books want a serif" or "tech wants mono" doesn't count as a reason.
-- **Rule of rotation beats any allow-list.** A recommended face becomes slop the moment every app uses it. Record the pick, and don't repeat it next app.
-- **Serif is not "premium".** "Creative brief → serif display" is the most tested AI tell. Pick a serif only for a real editorial/heritage/publication identity.
+- **Reflex faces = you stopped looking** (brand surfaces, as display): Inter-as-display, Fraunces, Instrument Serif/Sans, Playfair Display, Cormorant, Lora, Crimson, Newsreader, Syne, Space Grotesk, Space Mono, IBM Plex, DM Sans/Serif, Outfit, Plus Jakarta Sans, Roboto, Open Sans, Arial. Use one only with a reason no other face satisfies. "Books want a serif" / "tech wants mono" doesn't count.
+- **Rotation beats any allow-list.** A recommended face becomes slop the moment every app uses it.
+- **Serif is not "premium".** "Creative brief → serif display" is the most tested AI tell. Serif only for a real editorial/heritage/publication identity.
 - **Emphasis = italic or weight of the same family.** Never drop a random serif word into a sans headline.
-- **Monospace only for code, data, measurement.** Using it as a costume for "technical" is a tell.
-- **No system display face** (Impact, Arial Black, the platform sans) as a brand's display voice. Source and self-host the right face ([assets](assets-optimization.md)). Load only the weights you use, use `font-display: swap`, and set metric-matched fallbacks.
-- Sentence case over Title Case. Avoid tracked all-caps subheaders everywhere.
+- **Monospace only for code, data, measurement.** Mono as a "technical" costume is a tell.
+- **No system display face** (Impact, Arial Black, the platform sans) as a brand's display voice. Self-host the right face ([assets](assets-optimization.md)), used weights only, `font-display: swap`, metric-matched fallbacks.
+- Sentence case over Title Case. No tracked all-caps subheaders everywhere.
 
 ## 🎨 Color
-1. **Pick a strategy before picking colors:** Restrained (neutrals + 1 accent; default for Operate/Read) · Committed (one saturated color owns 30–60% of the surface) · Full palette (3–4 named roles) · Drenched (the surface is the color).
+1. **Pick a strategy before picking colors:** Restrained (neutrals + 1 accent; default for Operate/Read) · Committed (one saturated color owns 30–60% of the surface) · Full palette (3–4 named roles) · Drenched (the surface is the color). Name the emotional temperature and dosage too.
 2. **Build roles, not swatches:** canvas, raised surface, text primary/secondary, action, focus, selection, border, success/warning/error/info, data scale.
-3. **Author in OKLCH** for new palettes: lightness and chroma move predictably. Lower the chroma near white and black.
+3. **Author in OKLCH** for new palettes. Lower the chroma near white and black; don't keep high chroma at extreme lightness for math's sake.
 
 ```css
 :root {
@@ -130,97 +182,79 @@ Pick the register from the **surface**, not the company. A dev tool's landing pa
 }
 ```
 
-- **One neutral family, one hue.** Don't mix warm and cool greys. Pure grey is fine if the direction calls for it.
-- **No pure `#000` / `#fff`.** Use off-black and off-white.
-- **Accent consistency lock:** once chosen, one accent everywhere. No surprise teal badge in the footer.
-- **Keep the accent rare.** Spend it on the primary action and state, not on decoration.
+- **One neutral family.** Don't mix warm and cool greys. Tint neutrals only when the hue creates cohesion; pure grey is valid if the world calls for it.
+- **No pure `#000` / `#fff`.** Off-black and off-white.
+- **Accent lock:** one accent everywhere, spent on the primary action and state. No surprise teal badge in the footer. Default saturation < 80%.
+- **Commit at page scale, not in sprinkles.** The strongest color owns a region or role; scattered tiny accents are noise.
+- **Roles can swap by size and theme.** An accent that passes as a large fill may fail as small text on the other theme; give that job to another role instead of dropping contrast.
 - **Text on colored surfaces:** derive secondary text from that hue. Grey text on color looks dead.
-- **Shadows tinted** to the surface hue, with an offset + soft blur. A zero-offset colored glow isn't depth, it's decoration.
-- **Contrast (WCAG AA):** body 4.5:1 · large text 3:1 · controls/icons/focus 3:1. Check hover, disabled, placeholder, text on images, and both themes. Never let color be the only signal.
-- **Light vs dark comes from the use scene** (who, where, what light), not the category. Design dark mode deliberately; don't just invert the light theme ([theming](theming-dark-mode.md)).
-- **One theme per page.** Sections don't flip from dark to cream mid-scroll unless that's a single, deliberate device.
-- **Calibration: the saturated AI looks.** Legitimate only if the brief asks for them:
+- **Explicit colors over chains of translucent overlays.** Alpha stacks make contrast depend on what's underneath.
+- **Shadows tinted** to the surface hue, offset + soft blur, one light source. A zero-offset colored glow isn't depth.
+- **Contrast (WCAG AA):** body 4.5:1 · large text 3:1 · controls/icons/focus 3:1. Check hover, disabled, placeholder, text on images, both themes. Simulate color-vision deficiencies. Never color as the only signal (data: add shape, label, pattern).
+- **Light vs dark comes from the use scene** (who, where, what light), not the category ([theming](theming-dark-mode.md)). **One theme per page**: no mid-scroll flips unless it's one deliberate device.
+- **Calibration: the saturated AI looks.** Legitimate only if the brief asks:
   - Purple→blue gradient + centered hero on a dark mesh.
-  - Warm cream ground + high-contrast serif display + terracotta/oxblood accent (also: beige + brass + espresso for "premium" products).
+  - Warm cream ground + high-contrast serif display + terracotta/oxblood accent (also beige + brass + espresso for "premium consumer").
   - Near-black + one neon accent + glowing edges.
   - Broadsheet hairlines + italic display serif + tiny tracked mono labels.
 
 ## 📐 Layout & space
-- **Squint test:** blur the page. The primary element, secondary element and groups should still read in order.
-- **Proximity before containers.** Group by spacing first. Add borders/cards only when spacing can't do the job.
-- **Rhythm = contrast.** Tight inside groups, generous between them, more space above a heading than below. Don't repeat one gap value until everything weighs the same.
-- **Spacing scale on a 4px base** (4, 8, 12, 16, 24, 32, 48, 64, 96…). No one-off values. Use `gap` for sibling rhythm.
-- **Cards only when elevation means hierarchy.** Otherwise use `border-top`, dividers or whitespace. **Never nest a card inside a card.**
+- **Squint test:** blur the page. Primary, secondary and groups still read in order.
+- **Proximity before containers.** Group by spacing first; borders/cards only when spacing can't.
+- **Rhythm = contrast.** Tight inside groups, generous between, more space above a heading than below. Bottom padding often needs a touch more than top, optically.
+- **Spacing scale on a 4px base** (4, 8, 12, 16, 24, 32, 48, 64, 96…). No one-offs. `gap` for sibling rhythm.
+- **Cards only when elevation means hierarchy.** **Never card-in-card.** 3–5 intentional cards beat 8.
 - **Declare elevation once:** border *or* shadow. A 1px border under a wide soft shadow is a ghost card.
-- **Shape lock:** one radius system (all-sharp · 12–16px soft · pill for small controls only), documented and applied everywhere.
-- **Break the 3-equal-cards row.** Use asymmetric grids, zigzag (max 2 in a row), featured + rest, horizontal scroll, or plain prose.
-- **Bento is a tool, not a default.** Cell count = item count (no blank tiles). Vary the sizes. Give ≥ 2 cells real visual variation (image, tint, pattern). Don't stack six same-shape rows.
-- **Layout families per page:** each family (3-col cards, split, full-bleed quote…) at most once. 8 sections → at least 4 families.
+- **Shape lock:** one radius system (all-sharp · 12–16px soft · pill for small controls only), applied everywhere. Nested corners are concentric: inner radius = outer radius − padding.
+- **Break the 3-equal-cards row.** Asymmetric grid, zigzag (max 2 in a row), featured + rest, horizontal scroll, plain prose.
+- **Bento is a tool, not a default.** Cells = items (no blank tiles; `grid-auto-flow: dense`, then verify spans interlock). Vary sizes. ≥ 2 cells with real visual variation.
+- **Layout families per page:** each family (3-col cards, split, full-bleed quote…) at most once. 8 sections → ≥ 4 families. But variation isn't a goal: repetition that aids recognition stays.
+- **Section content shape (Persuade):** headline ≤ 8 words + sub ≤ 25 words + one asset **or** one CTA. More needs a reason.
+- **Long lists (> 5 items) get a different component**, not a longer `<ul>`: grouped chunks, card-per-item, tabs, scroll-snap pills, featured + "view all". No 20-row tables on a marketing page.
 - **No split header** (big headline left, tiny orphan paragraph floating right). Stack them unless the right column carries a real visual.
-- **Hero:** fits the first viewport. Headline ≤ 2–3 lines, subtext ≤ ~20 words, CTA visible without scrolling, top padding ≤ ~6rem. Max 4 text elements. Logo walls, trust strips and pricing teasers go in the section **below** the hero.
-- **Centered hero only for manifesto/launch copy.** Otherwise use a split, left-aligned text with a right-aligned asset, or asymmetric whitespace (when VARIANCE > 4).
-- **Nav:** one line on desktop, ≤ 80px tall. The active page is marked.
-- **Align across siblings:** CTAs pinned to card bottoms, feature lists starting at the same Y, shared baselines. Nudge optically after you look at the render.
-- **Mechanics:** `min-height: 100dvh`, not `100vh`. Grid over flex percentage math. Max-width container (~1200–1440px). Container queries for reused components. DOM/focus order matches visual order. A documented z-index scale, no `9999`.
+- **Hero:** fits the first viewport. Subtext ≤ ~20 words, CTA visible without scrolling, top padding ≤ ~6rem, **max 4 text elements** (≤ 1 small label, headline, subtext, CTAs). Taglines under CTAs, trust strips, pricing teasers, avatar rows, logo walls → the section **below**.
+- **Centered hero only for manifesto/launch copy.** Otherwise split, left text + right asset, or asymmetric whitespace (VARIANCE > 4).
+- **Nav:** one line on desktop (condense or collapse at 1024px), ≤ 80px tall, active page marked.
+- **Align across siblings:** CTAs pinned to card bottoms, lists start at the same Y, shared baselines. Nudge optically after looking at the render.
+- **Pace the scroll:** vary density, scale, image and quiet inside one grammar. A dense passage earns a quiet one. End on a real close, not a link farm.
+- **Mechanics:** `min-height: 100dvh`, not `100vh`. Grid over flex-percentage math. Max-width container (~1200–1440px). Container queries for reused components. DOM/focus order = visual order. Documented z-index scale, no `9999`. Responsive depth → [adaptive-ui.md](adaptive-ui.md).
 - **Operate surfaces:** predictability *is* the affordance. Keep asymmetry for Persuade/Experience.
 
-## 🎞️ Motion
-**Every animation must answer "what does this communicate?"** Valid answers: feedback, state change, spatial continuity, attention at a meaningful moment. "It looked cool" is not an answer.
-
-| Duration | Use |
-|---|---|
-| 100–150ms | Press/toggle feedback |
-| 150–300ms | Routine state change, hover |
-| 300–500ms | Layout change, overlay, view transition |
-| 500–800ms | The one authored focal entrance |
-
-- **Easing:** exponential ease-out for arrivals, `cubic-bezier(0.16, 1, 0.3, 1)`. Exits faster than entrances. No `linear` on UI. Bounce/elastic only in a playful world, never by reflex.
-- **One authored moment per surface**, product-specific. Not the same fade-and-rise on every section. Stagger only real lists, and cap the total delay.
+## 🎞️ Motion (floor)
+Full rules, durations, easing, choreography, reduced motion → [motion-and-delight.md](motion-and-delight.md).
+- **Every animation answers "what does this communicate?"** Feedback, state change, spatial continuity, attention at a meaningful moment. "Looks cool" isn't an answer.
+- **One authored moment per surface**, product-specific. Not the same fade-up on every section.
 - **Content visible by default.** Animate *from* a visible state so a failed script never hides the page.
-- **Materials:** transform + opacity as the base. Clip-path, mask, bounded blur, shadow and `backdrop-filter` are allowed when they stay smooth. Never animate `width/height/top/left/margin` (use FLIP/transforms). Set `will-change` only during a known animation.
-- **Scroll:** IntersectionObserver, CSS scroll-driven animations (`animation-timeline: view()`), or the existing motion lib. **Never a raw `scroll` listener** or scroll position stored in reactive state.
-- **Limits:** max one marquee per page. Non-essential loops stop offscreen. Grain/noise only on a `position: fixed; pointer-events: none` layer, never on scrolling containers. No custom cursors. Don't animate an image on hover; animate its container.
-- **Reduced motion = fewer + gentler, not none.** Remove spatial movement and keep opacity/color feedback that confirms actions.
+- transform/opacity base; clip-path, mask, bounded blur allowed when smooth. Never animate `width/height/top/left/margin`. **No raw `scroll` listeners**, no scroll position or pointer position in reactive state.
+- ≤ 1 marquee per page. Non-essential loops stop offscreen. Grain only on a fixed `pointer-events: none` layer. No custom cursors. Don't scale an image on hover; give the container the feedback.
+- **Reduced motion = fewer + gentler, not none.**
 
-```css
-.reveal { opacity: 1; }                                   /* visible by default */
-@media (prefers-reduced-motion: no-preference) {
-  .reveal { animation: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-timeline: view(); animation-range: entry 0% cover 30%; }
-}
-@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
-```
+## ✍️ Copy & content (floor)
+Full voice, microcopy, errors, onboarding → [ux-copy.md](ux-copy.md).
+- **Real draft copy in the product's own nouns and verbs.** No lorem, no Acme/John Doe, no fake-precise or fake-round stats. Never invent prices, customers, benchmarks, capabilities; label sample data.
+- **No filler verbs** (Elevate, Seamless, Unleash, Supercharge, Next-gen, Empower, Delve, Unlock). AI-cute copy is worse than plain copy.
+- **No emoji in UI** unless the brand is explicitly chat/social-native.
+- **Buttons = verb + object**, ≤ 3 words, one line. **One label per intent** per page.
+- **Say it once.** No intro repeating the heading, no micro-meta sentence under a heading. One copy register per page.
+- **Dashes:** em/en dash as a UI separator is a strong LLM tell. Periods, commas, colons, hyphenated ranges.
 
-## ✍️ Copy & content
-- **Real draft copy, never lorem ipsum.** Use the product's own nouns and verbs. AI-cute copy is worse than plain copy.
-- **Banned filler:** Elevate, Seamless, Unleash, Supercharge, Next-gen, Revolutionize, Game-changer, Empower, Delve, Tapestry, Unlock, "In today's fast-paced world", "Built for the future of…".
-- **No emoji in UI** (headings, buttons, alt text) unless the brand is explicitly chat/social-native, and even then used sparingly.
-- **No placeholder people/brands:** John Doe, Jane Smith, Acme, Nexus, SmartFlow. Use locale-appropriate names and believable brands.
-- **No fake-precise or fake-round stats** (`99.99%`, `10x`, `48k users`). Numbers come from real data or are visibly labeled as sample data. Never invent prices, customers, benchmarks or capabilities.
-- **Buttons = verb + object**, ≤ 3 words for primary CTAs, one line at desktop. **One label per intent** per page (not "Get in touch" + "Let's talk" + "Contact us").
-- **Errors:** what failed + why (if known) + how to recover. No "Oops!", no blame, no raw codes as the headline. Success messages without exclamation marks.
-- **Destructive actions** name the object + consequence. Prefer undo over confirm. The confirm button repeats the verb, never `OK`/`Yes`.
-- **Forms:** persistent label above the input, placeholder is an example (never the label), error below the field.
-- **Say it once.** No intro repeating the heading, no micro-meta sentence under a heading ("Each of these ships today, not a roadmap promise").
-- **One copy register per page.** Don't mix terminal-speak, editorial prose and marketing punch.
-- **Quotes:** ≤ 3 lines, attributed with name + role. Real typographic quotes.
-- **Dashes:** the em/en dash used as a separator in UI copy is a strong LLM tell. Use periods, commas, colons, hyphenated ranges.
-
-## 🖼️ Icons & imagery
-- **One icon family, one stroke width**, set globally. Using Lucide by default *is* the AI default; choose the icon set deliberately.
-- **No emoji or unicode glyphs as icons.** No hand-drawn icon paths.
-- **No cliché metaphors** (rocket = launch, shield = security, lightbulb = idea).
-- **Real imagery or honest placeholders.** Use generated or real photos. Otherwise leave labeled slots (`<!-- TODO: hero product photo 1600×1200 -->`) and list them for the user. A text-only page is unfinished, not minimalist.
-- **No div-built fake screenshots** (fake dashboards, task lists, terminals made of styled boxes). Use a real screenshot, a live mini-component, or no preview.
+## 🖼️ Icons, imagery & material
+- **One icon family, one stroke width.** Lucide by default *is* the AI default: choose the set deliberately. No emoji/unicode glyphs as icons, no hand-drawn icon paths, no cliché metaphors (rocket = launch, shield = security).
+- **Imagery priority:** image generation if available → real/brand/open-license photos (verify every URL resolves; seeded placeholders beat broken links) → labeled slots (`<!-- TODO: hero product photo 1600×1200 -->`) listed for the user. Search the subject's physical object, not the category. One decisive photo beats five mediocre ones. Image-first workflow → [reference-image-design.md](reference-image-design.md).
+- **A text-only page is unfinished, not minimalist.** Even restrained sites need 2–3 real images.
+- **Author the assets; never substitute chrome.** Gradients, glass, generic icon tiles, sparklines, progress rings or many-vertex `clip-path` where an authored asset belongs = the gap wearing chrome.
+- **Imitation material is the most reliable machine-made tell:** CSS bevels, embossing, fake leather/metal/chalk. Render the material as a real raster, or don't claim it.
+- **No div-built fake screenshots** (dashboards, task lists, terminals made of styled boxes). Real screenshot, live mini-component, or nothing.
 - **No sketchy/doodle SVG illustration**, `feTurbulence` grain scenes, or geometric masks faking organic cutouts. Crisp vector geometry and diagrams are fine.
-- **Backgrounds get texture only from the subject's world.** Decorative grid overlays, stripes and crosshair hairlines need a real map/blueprint/canvas underneath.
-- **Logo walls:** real SVG logos only, no category labels under them, placed below the hero, legible in both themes.
-- **Nothing overlaid on photos** (tags like `PLATE · 02`), no fake photo credits.
+- **Backgrounds get texture only from the subject's world.** Grid overlays, stripes and crosshairs need a real map/blueprint/canvas underneath. No text on high-contrast texture.
+- **When the direction names a technique** (canvas, WebGL, view transitions), build the technique, not a static imitation.
+- **Logo walls:** real SVG logos only, no category labels under them, below the hero, legible in both themes. Invented brand → invented SVG mark, not a plain-text wordmark. Brand system → [brand-identity.md](brand-identity.md).
+- **Nothing overlaid on photos** (tags like `PLATE · 02`), no decorative photo credits.
 
 ## 🧩 States & the parts you didn't draw
-- Every interactive element needs hover, `:active` (≈ `scale(0.98)` / 1px press), focus-visible, disabled, loading, error, and empty states.
-- **Loading:** skeletons shaped like the final layout, not a lone spinner. **Empty:** say which empty case it is (first use / no results / filtered / no permission) and give the next action.
-- **Theme the browser defaults** from the palette. This is the cheapest sign a page was built, not assembled, and the one agents skip most:
+- Every interactive element: hover, `:active` (≈ `scale(0.98)` / 1px press), focus-visible, disabled, loading, error, empty. Button text and form fields pass contrast in every state.
+- **Loading:** skeletons shaped like the final layout. **Empty:** say which empty case (first use / no results / filtered / no permission) + the next action.
+- **Theme the browser defaults** from the palette. Cheapest sign a page was built, not assembled, and the one agents skip most:
 
 ```css
 ::selection { background: color-mix(in oklch, var(--accent) 30%, transparent); color: var(--ink); }
@@ -229,42 +263,47 @@ Pick the register from the **surface**, not the company. A dev tool's landing pa
 a { text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
 ```
 
+## 🔀 Variants of one element
+Tuning an existing element? Lock identity first (one sentence: real hex, loaded fonts, topology, surface, voice), then 3 variants on **3 different axes** (hierarchy · topology · type system · color strategy · density · decomposition). New fonts/hues only on an explicit "redesign". Workflow → [reference-image-design.md](reference-image-design.md). Bolder/quieter levers → [motion-and-delight.md](motion-and-delight.md).
+
 ## 🚫 Banned patterns (unless the brief asks)
 | Area | Slop tell |
 |---|---|
 | Page scaffold | Three identical icon + heading + text cards · hero-metric template (big number, small label, stat row) · card in card · modal for a task that needs no interruption |
-| Labels | Eyebrow/kicker above every heading (ration hard: ≤ 1 per 3 sections, ideally 0) · section numbers `01 / 02` · `Step 1 / Phase 01` labels · `BETA`/`v0.6` in hero · "Scroll to explore" cues |
-| Surface | Gradient text · glassmorphism as decoration · `border-left` color stripe > 1px on cards/alerts · hard offset `4px 4px 0` shadows outside a real neo-brutal world · neon outer glow · pure black bg |
-| Decoration | Status dots before every nav item/row · `·`-separated meta strips · decorative city/time/weather strips · `BRAND. MOTION. SPATIAL.` strip under hero · rotated vertical text · marquee #2 |
-| Lists/data | Hairline above *and* below every row of a long spec list · progress bars with grey tracks as comparison visuals · 20-row tables on a marketing page |
-| Components | Filled + ghost button pair everywhere · sun/moon toggle by reflex · 3-tower pricing that differs only in height · 3-card testimonial carousel with dots · 4-column footer link farm |
+| Labels | Eyebrow/kicker above headings (≤ 1 per 3 sections, ideally 0) · section numbers `01 / 02` · `01 / 4` pagination on tiles · `Step 1 / Phase 01` · `BETA`/`v0.6` in hero · "Brand · No. 01" micro-meta · poetic labels ("Field notes", "Quietly trusted by") · "Scroll to explore" |
+| Surface | Gradient text · glass as decoration · `border-left` stripe > 1px on cards/alerts · hard offset `4px 4px 0` shadow outside a real neo-brutal world · neon outer glow · pure black bg · imitation material |
+| Decoration | Status dots before every row · `·`-separated meta strips · city/time/weather strips · `BRAND. MOTION. SPATIAL.` strip · rotated vertical text · `<br>`-split italic headline by reflex · decorative sparklines/rings |
+| Lists/data | Hairline above *and* below every row · progress bars with grey tracks as comparison · fake live counters ("412 of 800") · version footers on marketing pages |
+| Components | Filled + ghost pair everywhere · sun/moon toggle by reflex · 3-tower pricing differing only in height · 3-card testimonial carousel with dots · 4-column footer link farm |
 | Motion | Same fade-up on every section · bounce by reflex · infinite micro-loops on static info · scroll-jacking without a narrative reason |
 
 ## ✅ Pre-ship taste check (60 seconds)
-- [ ] Direction line stated. The look can't be guessed from the category alone. It differs from sibling apps on ≥ 2 axes.
-- [ ] No reflex face as display. ≤ 2 families. Body ≥ 16px, 65–75ch.
+- [ ] Direction line + contract written. Look can't be guessed from the category. Differs from each sibling on ≥ 4 [sibling axes](design-directions.md#-make-siblings-differ).
+- [ ] No reflex face as display. ≤ 2 families. Body ≥ 16px, 65–75ch. Hero ≤ 3 lines, ≤ 4 text elements.
 - [ ] One neutral family, one locked accent, OKLCH tokens, no `#000`/`#fff`, AA contrast in both themes.
-- [ ] One radius system. No card-in-card. Hero fits the viewport. ≤ 1 eyebrow per 3 sections.
+- [ ] One radius system. No card-in-card. Eyebrow count ≤ ceil(sections ÷ 3). ≥ 4 layout families per 8 sections.
 - [ ] Each animation has a stated purpose. Reduced-motion path exists. No scroll listeners.
-- [ ] Zero filler words, lorem, emoji, fake stats, duplicate CTA intents.
+- [ ] Zero filler words, lorem, emoji, fake stats, duplicate CTA intents, em-dash separators.
+- [ ] Real imagery or labeled slots. No fake screenshots, no imitation material.
 - [ ] All states + themed selection/caret/focus/scrollbar.
-- [ ] Screenshot it ([Playwright MCP](README.md#-let-the-agent-see-the-ui--playwright-mcp-headless)) at mobile + desktop, then run the [review loop](design-review-loop.md).
+- [ ] Screenshot at mobile + desktop ([Playwright MCP](README.md#-let-the-agent-see-the-ui--playwright-mcp-headless)), then run the [review loop](design-review-loop.md).
 
 ## 📋 Paste-ready block (CLAUDE.md / DESIGN.md)
 ```markdown
 ## Design taste
-- Brief wins: pinned fonts/palette/era override everything below.
-- Before UI code, state: "Reading this as: <kind> for <audience>, <archetype>, <fonts>, <palette strategy>, V/M/D=<n/n/n>."
-- Direction: derive from product truth + audience's world, not the category. If the look is guessable from the category, rework.
-- Differ from sibling apps on >=2 of: archetype, type pairing, palette family, light/dark, dials. Record picks in DESIGN.md.
-- Register: Persuade=bold allowed; Operate/Read=predictable, brand in details.
-- Type: body >=16px, 65-75ch; display tracking -0.02..-0.03em (floor -0.04); <=2 families; tabular-nums for data; no reflex faces (Inter/Fraunces/Instrument/Playfair/Space Grotesk/DM/Outfit...) as display without a reason.
-- Emphasis = same-family italic/weight. Mono only for code/data.
-- Color: OKLCH tokens; one tinted neutral family; one locked accent; no #000/#fff; no purple-blue gradient, no gradient text, no neon glow; tinted offset shadows; AA contrast both themes.
-- Layout: 4px spacing scale; tight groups, generous separation; cards only for real elevation; never card-in-card; one radius system; no 3-equal-card row; bento cells = items; hero fits viewport; eyebrows <=1 per 3 sections; no section numbers.
-- Motion: purpose or delete; 150-300ms routine, exits faster; ease-out cubic-bezier(0.16,1,0.3,1); no reflex bounce; one authored moment; content visible by default; transform/opacity/clip-path only; prefers-reduced-motion = fewer + gentler; no scroll listeners; <=1 marquee.
-- Copy: real copy, no lorem/Acme/John Doe; no Elevate/Seamless/Unleash/Next-gen; no emoji in UI; no fake stats; verb+object CTAs <=3 words; one label per intent; errors = what + why + fix.
-- Icons: one set, one stroke; no emoji/glyph icons; no div-built fake screenshots; real images or labeled TODO slots.
+- Brief wins: pinned fonts/palette/era override everything below (the whole world, not its softest rendition).
+- Missing DESIGN.md != greenfield: inherit a coherent look in code. Redesign replaces the world; never polish the discarded look.
+- Before UI code, state: "Reading this as: <kind> for <audience>, <archetype>, <fonts>, <palette strategy>, V/M/D=<n/n/n>." Write the 6-line direction contract (THESIS/OWN-WORLD/STORY/FIRST VIEWPORT/FORM/FINISH) in the surface brief, never in shipped code.
+- Direction: product truth + 7 references from the audience's world (>=3 material families) + seeded pick. Guessable from the category = rework.
+- Differ from each of the last 2-3 sibling apps on >=4 of the 12 axes in design-directions.md (incl. polarity, display class or accent hue family). Never reuse last app's display face or accent hue.
+- Real design system brief -> official package, one per project; shadcn/Radix never in default theme.
+- Register: Persuade=bold allowed; Operate=earned familiarity, fixed rem scale, 150-250ms, no page-load choreography.
+- Type: body >=16px, 65-75ch; tracking -0.02..-0.03em (floor -0.04); <=2 families; enumerated ramp; tabular-nums; no reflex faces as display; emphasis = same-family italic/weight; mono only for code/data.
+- Color: strategy first; OKLCH; one tinted neutral family; one locked accent; no #000/#fff; commit at page scale; tinted offset shadows; AA both themes; no purple gradient, gradient text, neon glow.
+- Layout: 4px scale; tight groups, generous separation; cards only for real elevation, never nested; one radius system; no 3-equal-card row; bento cells = items; hero fits viewport, <=4 text elements; eyebrows <=1 per 3 sections; lists >5 items get another component.
+- Motion: purpose or delete; one authored moment; content visible by default; transform/opacity; no scroll listeners; reduced motion = fewer + gentler.
+- Content: real copy, no lorem/Acme/John Doe/fake stats/filler verbs/emoji; verb+object CTAs, one label per intent.
+- Imagery: generate or source real images (verify URLs) or labeled TODO slots; no div fake screenshots, no imitation material, no chrome where an asset belongs.
 - Theme ::selection, caret, focus-visible, scrollbar, underline offset. Ship hover/active/focus/disabled/loading/empty/error.
 ```
 

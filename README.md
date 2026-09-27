@@ -25,7 +25,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Ship an MCP server others' agents can actually use | [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) |
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
 | Polish the frontend | [docs/frontend-craft/](docs/frontend-craft/README.md) |
-| Give each app its own good-taste UI (not AI slop) | [design-taste.md](docs/frontend-craft/design-taste.md) · [DESIGN.md](docs/frontend-craft/design-md.md) · [review loop](docs/frontend-craft/design-review-loop.md) |
+| Give each app its own good-taste UI (not AI slop) | [design-taste.md](docs/frontend-craft/design-taste.md) · [DESIGN.md](docs/frontend-craft/design-md.md) · [review loop](docs/frontend-craft/design-review-loop.md) · [directions catalog](docs/frontend-craft/design-directions.md) |
 | Move fast on GitHub | [docs/workflow/](docs/workflow/README.md) |
 
 ## 📚 The full map
@@ -107,6 +107,12 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [design-taste.md](docs/frontend-craft/design-taste.md) — 🧑‍🎨 **anti-AI-slop taste** — a distinct direction per app, banned defaults, type/color/layout/motion rules
 - [design-md.md](docs/frontend-craft/design-md.md) — 🎨 **`DESIGN.md`** — each app's design identity as a markdown file agents read before building UI
 - [design-review-loop.md](docs/frontend-craft/design-review-loop.md) — 🔍 critique → audit → polish → harden, screenshot-driven, fresh-context reviewer
+- [design-directions.md](docs/frontend-craft/design-directions.md) — 🎭 **a catalog of distinct directions** — palette, type pairing, depth, motion per recipe; siblings pick different ones
+- [motion-and-delight.md](docs/frontend-craft/motion-and-delight.md) — ✨ motion & delight — what to animate, easing/duration tables, micro-interactions, bolder/quieter dials
+- [ux-copy.md](docs/frontend-craft/ux-copy.md) — ✍️ UX copy, onboarding & clarity — voice per app, microcopy rules, empty states, cutting words
+- [adaptive-ui.md](docs/frontend-craft/adaptive-ui.md) — 📐 adaptive UI — responsive, touch, iOS/Material deltas, UI performance
+- [reference-image-design.md](docs/frontend-craft/reference-image-design.md) — 🖼️ reference-image-first design — generate divergent mockups, then build to match
+- [brand-identity.md](docs/frontend-craft/brand-identity.md) — 🏷️ brand identity per app — strategy, logo/icon/favicon, OG images, brand kit checklist
 
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index

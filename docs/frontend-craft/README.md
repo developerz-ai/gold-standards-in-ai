@@ -15,6 +15,12 @@ Cross-cutting concerns that make a UI feel professional and work for real users 
 | [design-taste.md](design-taste.md) | 🧑‍🎨 Anti-AI-slop taste — a distinct direction per app, banned defaults |
 | [design-md.md](design-md.md) | 🎨 `DESIGN.md` — each app's design identity, read by agents before UI work |
 | [design-review-loop.md](design-review-loop.md) | 🔍 Critique → audit → polish → harden, screenshot-driven |
+| [design-directions.md](design-directions.md) | 🎭 **a catalog of distinct directions** — palette, type pairing, depth, motion per recipe; siblings pick different ones |
+| [motion-and-delight.md](motion-and-delight.md) | ✨ Motion & delight — what to animate, easing/duration tables, micro-interactions, bolder/quieter dials |
+| [ux-copy.md](ux-copy.md) | ✍️ UX copy, onboarding & clarity — voice per app, microcopy rules, empty states, cutting words |
+| [adaptive-ui.md](adaptive-ui.md) | 📐 Adaptive UI — responsive, touch, iOS/Material deltas, UI performance |
+| [reference-image-design.md](reference-image-design.md) | 🖼️ Reference-image-first design — generate divergent mockups, then build to match |
+| [brand-identity.md](brand-identity.md) | 🏷️ Brand identity per app — strategy, logo/icon/favicon, OG images, brand kit checklist |
 
 ## 👀 Let the agent SEE the UI — Playwright MCP (headless)
 A coding agent can't make a web app *look nice* if it's working blind. Give it eyes: wire up [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) (headless) so the agent can open the running app, navigate, screenshot, read the accessibility tree, and iterate on the visual result.
