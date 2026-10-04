@@ -69,10 +69,27 @@ An AI-first repo enforces things a unit test can't see. Each is a CI job, each f
 | **Generated-doc `--check`** | a committed inventory going stale | regenerate + diff |
 | **Dialect-compat guard** | a migration your dev engine accepts and prod's doesn't | static check on migration SQL → [data-and-scale](../architecture/data-and-scale.md) |
 | **Secret scan** | a key in a diff | a PR job; pin third-party actions to a SHA |
+| **Gate ratchet** | an agent loosening a rule, a `tsconfig` flag, or an allowlist to go green | diff vs merge base → [guards-and-gotchas](../writing-for-agents/guards-and-gotchas.md#-dont-weaken-the-gate--a-ratchet-not-a-rule) |
+| **Agent-surface scan** | hidden instructions in `CLAUDE.md` / `.claude/**` / skills / `.mcp.json` | → [guards-and-gotchas](../writing-for-agents/guards-and-gotchas.md#-repo-poisoning-guard--the-agent-read-surface-is-code) |
+| **Workflow security** | a PR turning CI into a credential leak | static check on `.github/workflows/*.yml` — below |
 | **Agent evals** | a "cheap" prompt change breaking tool routing | **not** in the default gate — see below |
 
 ### Evals are a pre-merge gate, never a CI job
 Agent-behavior tests (does the model still pick the right tool? still load the right skill?) call **live models**: they cost money and they're stochastic. Keep them out of `bun test` globs and out of CI; run them deliberately before merging a change to prompts, tools, or skills, and paste the pass rates into the PR. A flaky paid job in the default gate gets muted within a week — and a muted gate is worse than none.
+
+Report the right number. A step that passes 70% of single runs passes **at least once in 3** 97% of the time (pass@3) — but **all 3** only 34% of the time (pass^3 = 0.7³). Tool routing and release-critical paths run every turn, so they're judged on pass^k (k ≥ 3); new capability on pass@k. How we build them → [evals](../ai-agents/evals.md).
+
+### Workflow security — CI is a credential store
+`scripts/lint/workflow-security.ts` parses every workflow and fails on:
+
+| Rule | Why |
+|---|---|
+| `pull_request_target` / `workflow_run` never checks out the PR head (`ref: ${{ github.event.pull_request.head.sha }}`) | that trigger runs with secrets and a write token — PR code would get both |
+| Jobs with `id-token: write` (publish, release) never restore or save a shared dependency/build cache | a PR job can write a poisoned cache the trusted job then restores |
+| `actions/checkout` sets `persist-credentials: false` unless the job pushes | the token otherwise sits in `.git/config` for every later step and dependency |
+| Top-level `permissions:` declared, default `contents: read` | the default token is broader than any job needs |
+| Third-party actions pinned to a full commit SHA | a moved tag runs someone else's code with your secrets |
+| `trustedDependencies` in `package.json` set explicitly and minimal (`[]` if none) | Bun skips dependency lifecycle scripts except this list — and a default list of popular packages when unset; setting it replaces that default. Growth trips the [ratchet](../writing-for-agents/guards-and-gotchas.md#-dont-weaken-the-gate--a-ratchet-not-a-rule) |
 
 ## 4. Never push red — and never merge blind
 
@@ -94,7 +111,7 @@ CI output *is* a prompt. Optimize it:
 
 GitOps handoff: CI builds and pushes images, the cluster pulls them. **CI holds zero cluster credentials** → [kubernetes-gitops](../infrastructure/kubernetes-gitops.md).
 
-- **Migrations self-deploy** (a pre-sync job). Treat that as a design constraint, not a convenience: a migration merges ⇒ it runs, everywhere, once, forever → [data-and-scale](../architecture/data-and-scale.md#-migrations-vs-backfills).
+- **Migrations self-deploy** (a pre-sync job). Treat that as a design constraint, not a convenience: a migration merges ⇒ it runs, everywhere, once, forever → [data-and-scale](../architecture/data-and-scale.md#-migrations-vs-backfills) · lock-safe DDL + drop-after-rollout → [ordering](../architecture/data-and-scale.md#-lock-safe-ddl--deploy-ordering).
 - **Data rewrites run themselves too** if you wire a post-sync backfill job — so write one as if it executes the moment it merges, because it does.
 - **Content-hash the build**: rebuild only units whose inputs changed; roll the rest.
 - **Verify the roll, don't assume it.** Confirm the deployed build id from a live probe (`/version`, a build-sha meta tag, pod image digest) — *never* by grepping the bundle for a string; code-splitting will lie to you.
@@ -106,4 +123,4 @@ Wire the error monitor into the loop: a new issue → an agent reads the trace, 
 
 ---
 
-**Related:** [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)
+**Related:** [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [../ai-agents/evals.md](../ai-agents/evals.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)

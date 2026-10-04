@@ -64,6 +64,7 @@ set -euo pipefail; cd "$(dirname "$0")/.."
 bun run lint
 bun run typecheck
 bun run test
+bun scripts/i18n-check.ts   # catalog parity → ../frontend-craft/i18n.md
 ```
 Wire the same commands into [CI](linting-ci.md) and a [pre-commit hook](../writing-for-agents/hooks-and-permissions.md) so local, hook, and CI agree.
 

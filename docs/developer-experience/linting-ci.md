@@ -14,7 +14,8 @@ Biome replaces ESLint + Prettier for all TS/JS. It's ~10–100× faster, so the 
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": { "noExplicitAny": "error" },
+      "suspicious": { "noExplicitAny": "error", "noEmptyBlockStatements": "error" },
+      "nursery": { "noFloatingPromises": "error" },
       "style": { "useImportType": "error", "noNonNullAssertion": "warn" },
       "correctness": { "noUnusedVariables": "error", "noUnusedImports": "error" }
     }
@@ -26,7 +27,30 @@ Biome replaces ESLint + Prettier for all TS/JS. It's ~10–100× faster, so the 
 ```
 Commands: `biome check .` (lint) · `biome check --write .` (fix). Wire into `bun run lint` / `lint:fix`.
 
+`noEmptyBlockStatements` + `noFloatingPromises` are the silent-failure pair (the latter is type-aware, nursery as of 2026-10) → [guards-and-gotchas](../writing-for-agents/guards-and-gotchas.md#-silent-failure-guards--errors-must-surface).
+
 Other languages: **Rubocop** (Ruby), **`cargo fmt` + `clippy -D warnings`** (Rust), `gofmt` (Go). One `bin/lint` runs them all.
+
+## Dead code — knip as a guard, sweeps in tiers
+Unused exports, files and deps are context an agent reads, trusts and imitates. **knip** finds them; run it in `bun run lint` so new dead code fails CI:
+
+```bash
+bunx knip                                  # files, deps, exports, types, duplicates
+bunx knip --production                     # only what ships — ignores test/dev entry points
+bunx knip --fix --fix-type dependencies    # auto-remove unused deps (SAFE tier only)
+```
+
+Pre-existing hits go in knip's `ignore*` config as an allowlist that shrinks — same rule as [custom guards](../writing-for-agents/guards-and-gotchas.md#custom-lint-guards--institutional-memory-that-executes).
+
+A feature agent flags pre-existing dead code, never deletes it ([behavioral-rules](../writing-for-agents/behavioral-rules.md)). Removal is its own PR:
+
+| Tier | What | Before removing |
+|---|---|---|
+| **SAFE** | unused deps, unused internal exports/types | knip + `bin/check` |
+| **CAREFUL** | files reachable only by string — dynamic `import()`, route/plugin registries, config-named handlers | grep the name as a string, not just as an import |
+| **RISKY** | public API — published package exports, HTTP routes, MCP tools, CLI flags | find external callers (logs, other repos). Internal-only → remove + update callers in one PR. Called by others → it's a public contract: version it, don't sweep it ([shipping-doctrine](../workflow/shipping-doctrine.md)) |
+
+One category per batch (deps → exports → files → duplicates), full gate green after each, one commit per batch — a red gate points at one batch, not ten.
 
 ## Blacksmith CI runners
 Run GitHub Actions on **Blacksmith** runners (`blacksmith-2vcpu-ubuntu-2404`) — faster, consistent, no queue waits.
@@ -134,4 +158,6 @@ reviews:
     - path: "packages/domain/**"
       instructions: "Pure types only. Flag any I/O (fs, network, db, env)."
 ```
+A second, repo-owned reviewer agent with a narrow brief (silent failures, convention drift, security) catches what a generic reviewer doesn't → [reviewer-agents](../writing-for-agents/reviewer-agents.md).
+
 The human still merges. Pin third-party actions to a commit SHA, and run a secret-scan job on PRs.

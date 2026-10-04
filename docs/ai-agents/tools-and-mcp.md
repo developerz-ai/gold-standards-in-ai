@@ -10,10 +10,37 @@ Tools are how an agent acts on the world. MCP is how it reaches systems you don'
 
 ```ts
 const localTools = { file, git, shell };
-let mcpTools = {};
-try { mcpTools = await getMCPTools(mcp); } catch { /* degrade gracefully */ }
+const mcpTools = await getMCPTools(mcp); // throws → the run fails loud, naming the server
 const tools = { ...localTools, ...mcpTools };
 ```
+Never swallow a failed MCP connect: the agent then runs without Sentry/DB/browser, guesses, and reports success. Retry transient errors (below), then fail fast → [../00-philosophy.md](../00-philosophy.md#-fail-fast--fix-fast--deploy-fast). A server the task genuinely doesn't need is not wired into that run — no optional-and-silent tools.
+
+## 📨 What every tool result carries
+The result is the agent's only view of what happened. Shape it so the next step is obvious.
+
+| Field | Content |
+|---|---|
+| `status` | `ok` \| `warning` \| `error` |
+| `summary` | one line: what happened, counts |
+| `next` | the concrete follow-up call(s) — e.g. `fetch_chunk(handle, offset=50)` ([context-budget](context-budget.md#-lazy-on-both-surfaces)) |
+| `artifacts` | ids, paths, handles, URLs it produced |
+
+Errors add three more, so the agent recovers instead of guessing:
+
+| Field | Content |
+|---|---|
+| `cause` | root-cause hint in domain terms (`payment is 142 days old; window is 90`) |
+| `retry` | whether a retry is safe, and with what change (`same call` · `after re-auth` · `never — not idempotent`) |
+| `stop` | when to stop and report instead (`any 4xx other than 409`) |
+
+```json
+{ "status": "error", "summary": "refund rejected",
+  "cause": "payment is 142 days old; refunds are limited to 90 days",
+  "retry": "never — refunds are not idempotent",
+  "stop": "credit note also fails → stop and report",
+  "next": "docs://recipes/issue-a-credit-note" }
+```
+When the server ships recipes, `next` on an error is the `docs://` URI that fixes it → [mcp-docs-for-agents.md](mcp-docs-for-agents.md).
 
 ## Connecting an MCP server (HTTP)
 ```ts

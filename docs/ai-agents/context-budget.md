@@ -142,7 +142,7 @@ Thresholds, budgets, how many catalog lines to render, what to inline vs load on
 
 1. **Every such number carries its derivation in a comment** — what was observed, when, and the multiple applied.
 2. **Size from an observed healthy MAXIMUM × a comfortable multiple**, never from an average.
-3. **Gate the change on evals** — a tool-selection eval and a skill-pickup eval. A collapse or a lazy surface ships only if those are *no worse than baseline*.
+3. **Gate the change on [evals](evals.md)** — a tool-selection eval and a skill-pickup eval. A collapse or a lazy surface ships only if those are *no worse than baseline*.
 4. **Re-measure before changing one.** A drifted number is worse than an untuned one, because it still looks deliberate.
 5. **Ship one path** — never A/B a prompt in production: each arm doubles the untested combinations, and a bug report can't be reproduced without knowing which arm served it → [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md).
 
@@ -152,6 +152,22 @@ Thresholds, budgets, how many catalog lines to render, what to inline vs load on
  *  Backstop = 41 × 1.5 ≈ 60. Re-measure before touching. Not a work budget. */
 export const RUNAWAY_STEP_BACKSTOP = 60;
 ```
+
+## 🗜️ Compact at phase boundaries — the coding session
+
+Same budget, applied to the agent building your repo. Compact (or start fresh) when a phase ends, never in the middle of one:
+
+| Moment | Compact? | Why |
+|---|---|---|
+| Research → plan written | yes | exploration is bulky; the plan is its distilled output |
+| Plan → implementation | yes | plan is on disk; free the window for code |
+| After a failed approach | yes | dead-end reasoning biases the next attempt |
+| Debugging done → next task | yes | traces pollute unrelated work |
+| Mid-implementation / mid-debug | **no** | loses paths, names, partial state you'll re-read at full price |
+
+- **Write state to a file first** — plan + `tried_failed` + `next_step` into the plan's `status.yml` ([workflow-commands.md](../writing-for-agents/workflow-commands.md)). Survives compaction: files on disk, git, `CLAUDE.md`. Lost: everything you read, reasoned or were told in chat. An in-session task list is not a record.
+- **Steer the summary:** `/compact focus on 03-api-routes.md next; see status.yml`.
+- Phase boundaries are judgment, not a token threshold — compacting by percentage lands mid-implementation.
 
 ---
 

@@ -19,6 +19,8 @@ A plan that lives only in an agent's context dies with the session. Written to d
 
 **Plan only.** No implementation, no code execution, no edits outside the plan dir.
 
+**Explore before writing.** Sweep the affected area for: similar features · naming · error handling · logging · types · test patterns · config · deps. Trace entry point → data flow → state changes → contracts honored. Anything the executor would otherwise have to search for goes into the plan now, as `file:line | pattern`.
+
 | Rule | Shape |
 |---|---|
 | **Dated, numbered dir** | `docs/plans/<YYYY>/<MM>/<DD>/<1NN>-<slug>/` — resolve with `date +%Y %m %d`, then `Glob docs/plans/<YYYY>/<MM>/<DD>/1*` → highest `1NN-*` + 1, else `101`. Sorts chronologically, never collides. Slug kebab-case, ≤5 words. |
@@ -46,12 +48,25 @@ current_focus: "03-api-routes.md — rate lookup endpoint"
 slices:
   - { file: 01-data-model.md, status: complete, percent: 100 }
 evidence: ["#324", "abc1234"]
+works:                     # confirmed only — each with its proof
+  - "rate lookup returns cached row — test/rates/lookup.test.ts green"
+tried_failed:              # approach + exact reason; next session does NOT retry these
+  - "per-request upstream fetch — 429 from provider at >10 rps"
+deviations:                # what departed from the plan + why
+  - "02-backend-service.md: rates in rates table, not config — must be editable at runtime"
+next_step: "03-api-routes.md — add GET /rates/:pair in src/routes/rates.ts, mirror src/routes/fx.ts:14"
 last_updated: 2026-07-21
 ```
 - Machine-readable (valid YAML, the enums above) so an orchestrator can query it.
 - **`created_by` ≠ `worked_by`** is what lets one person plan and another execute; `owner` is who answers for it.
 - `evidence` holds commits/PRs — "80% done" becomes checkable.
 - It is the **one** tracker in the dir. The `.md` slices never grow a checkbox.
+- **`tried_failed` is the field that pays.** "Didn't work" is useless; "threw X because Y" stops the next session re-burning an hour. Written the moment an approach dies, not at session end.
+- **`works` needs evidence** (test, probe, PR) — unproven goes to `next_step`, not `works`.
+- **`next_step` is exact** — file, function, pattern to mirror. Resuming should need zero thinking about where to start.
+- **Lives in the plan dir, committed** — never in `~/.claude` or a temp file. Session state outside the repo dies with the machine.
+- **On resume:** read `status.yml` first; warn on any referenced path that no longer exists; warn if `last_updated` is old and re-check against `git log` (see *Distrust the paperwork* below). Then execute `next_step` — no confirmation round-trip.
+- **On close:** one line in the final PR body — predicted vs actual (slices, files changed). Calibrates the next plan.
 
 ## 🚚 `/feature` — idea to deployed
 
@@ -63,6 +78,7 @@ last_updated: 2026-07-21
 4. **Track** — one sub-issue per slice; `Fixes #NNN` auto-closes on merge.
 5. **Build primitive-first** — land one reusable primitive with its first real caller, then adopt everywhere. No abstractions before consumers.
 6. **Verify** — typecheck + lint + test as the green gate; user-facing changes driven in a real browser.
+   Then a **fresh-context cleanup pass** over the diff: delete tests of framework behaviour, checks for impossible cases, debug prints; re-run the gate → [behavioral-rules.md](behavioral-rules.md).
 7. **PR + merge sequentially** — never in parallel; each merge rebases `main` under the others.
 8. **Deploy + watch** — confirm the roll landed with a live probe, not a bundle grep.
 9. **Close** — verify auto-closes fired; close the parent by hand. Re-check the original symptom in prod.

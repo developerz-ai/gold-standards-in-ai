@@ -21,11 +21,12 @@ Cross-cutting concerns that make a UI feel professional and work for real users 
 | [adaptive-ui.md](adaptive-ui.md) | 📐 Adaptive UI — responsive, touch, iOS/Material deltas, UI performance |
 | [reference-image-design.md](reference-image-design.md) | 🖼️ Reference-image-first design — generate divergent mockups, then build to match |
 | [brand-identity.md](brand-identity.md) | 🏷️ Brand identity per app — strategy, logo/icon/favicon, OG images, brand kit checklist |
+| [accessibility.md](accessibility.md) | ♿ WCAG 2.2 AA floor — native elements, focus, live regions, forms, keyboard, web↔SwiftUI↔Compose, axe + manual |
 
 ## 👀 Let the agent SEE the UI — Playwright MCP (headless)
 A coding agent can't make a web app *look nice* if it's working blind. Give it eyes: wire up [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) (headless) so the agent can open the running app, navigate, screenshot, read the accessibility tree, and iterate on the visual result.
 ```bash
-claude mcp add playwright -- npx @playwright/mcp@latest --headless
+claude mcp add playwright -- npx -y @playwright/mcp@0.0.83 --headless   # pin exact → ../writing-for-agents/mcp-json.md
 ```
 - The loop becomes **change → screenshot → compare → refine**, not change → hope.
 - Headless runs fine on a [Linux dev VPS](../developer-experience/dev-vps.md) with no display.

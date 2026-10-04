@@ -14,7 +14,7 @@ One skill per domain, not per task. The `description` is the trigger — pack it
 ```yaml
 ---
 name: deploy
-description: Deploy app — test, build, push, verify. Triggers: deploy, ship, release.
+description: Use when deploying, shipping, or releasing the app — test, build, push, verify.
 allowed-tools: [Bash, Read]
 ---
 
@@ -39,7 +39,21 @@ Structure for bigger skills:
 Tips:
 - `allowed-tools` enforces safety (read-only during review, no writes during debugging).
 - Inside the body: **instruct, don't explain.** Numbered steps, exact commands, failure branches inline (`fail → stop`).
-- A `creating-skills` meta-skill lets the agent author new skills itself.
+- A `creating-skills` meta-skill lets the agent author new skills itself — with the absorb check below built in.
+
+### Absorb before you create
+Skill sprawl = overlapping descriptions competing for the same trigger. Before writing a new skill, `rg` the keywords across `.claude/skills/`, `~/.claude/skills/`, `CLAUDE.md` and memory, then pick one verdict:
+
+| Verdict | When |
+|---|---|
+| **Save** | unique, specific, reusable — a real future trigger exists |
+| **Improve, then save** | valuable but vague: add exact commands, failure branches, tighten scope |
+| **Absorb into `<skill>`** | an existing skill covers the domain → append a section there |
+| **Drop** | one-off fix, trivial, or already covered |
+
+- `description` starts `Use when <observable trigger>` — a file type, command, error, or user phrase the agent can actually see.
+- `name:` = the directory name. Mismatch → the skill is hard to find and easy to duplicate.
+- Same principle repeated in 2+ skills → promote it to a rule (`CLAUDE.md` or [`.claude/rules/`](claude-md.md#-rules-scoped-by-file-type--clauderules)); the skills keep only the *how*.
 
 Common categories: development (your stack's patterns), database-design, performance-optimization, deploy, dns, mail, debug-prod, use-browser (Playwright), migration-management.
 
@@ -90,7 +104,7 @@ Backend specialist. This project.
 
 Why subagents matter:
 - **Parallelism** — `backend-expert` writes code while `infra-expert` handles deploy, simultaneously.
-- **Isolation** — each has its own tool restrictions + skill context (and can run in a separate git worktree, no conflicts).
+- **Isolation** — each has its own context, model, and skills. Not its own checkout: subagents share one working tree and the file set is the lock → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md#-never-git-worktrees).
 - **Model control** — cheap/fast model for simple work, top-tier model for hard work.
 
 ### One subagent per app — the fleet pattern
@@ -103,7 +117,7 @@ In a [monorepo](../architecture/monorepo.md), the highest-value roster is **one 
 
 Why it works: the delegation is unambiguous (a path maps to exactly one owner), the file sets are naturally disjoint for a [hive](../ai-agents/hive-mind.md), and the specialist prompt is loaded **only when that app is touched** — laziness by construction.
 
-Add `architect` alongside them for "should this be built, and in what shape" — it produces a design with named tradeoffs, not an implementation.
+Add `architect` alongside them for "should this be built, and in what shape" — it produces a design with named tradeoffs, not an implementation. Add reviewers too — fresh context, one concern each, findings back to the implementer → [reviewer-agents.md](reviewer-agents.md).
 
 ### Rules for subagents that share one checkout
 Agents run in the *same* working tree, so put these in every app agent file (and in the command that spawns them):

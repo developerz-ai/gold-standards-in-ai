@@ -9,6 +9,8 @@ How we structure code so it's fast to build, easy for an agent to navigate, and 
 | [solid-srp.md](solid-srp.md) | 🧱 SOLID / SRP, small files, custom errors, thin layers |
 | [testing.md](testing.md) | 🧪 Unit + integration testing as a first-class citizen |
 | [data-and-scale.md](data-and-scale.md) | 📈 Shape now / capacity later · bounded sweeps · migrations vs backfills · dev engine ≠ prod engine |
+| [api-contracts.md](api-contracts.md) | 🔌 HTTP contract — one error registry, status codes, keyset pages, Idempotency-Key, retries, versioning |
+| [app-security.md](app-security.md) | 🛡️ App security — authz in the data layer (cross-tenant → 404), sessions/CSRF/CSP, R2 uploads, rate limits, log redaction, `VITE_` env |
 | [abstractions-and-growth.md](abstractions-and-growth.md) | 🪜 Pre-MVP → really big · declare once, project everywhere · why a guard is not an abstraction |
 
 ## The one-paragraph version

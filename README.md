@@ -26,6 +26,8 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
 | Polish the frontend | [docs/frontend-craft/](docs/frontend-craft/README.md) |
 | Give each app its own good-taste UI (not AI slop) | [design-taste.md](docs/frontend-craft/design-taste.md) · [DESIGN.md](docs/frontend-craft/design-md.md) · [review loop](docs/frontend-craft/design-review-loop.md) · [directions catalog](docs/frontend-craft/design-directions.md) |
+| Ship APIs + apps that hold up (errors, security, a11y) | [api-contracts](docs/architecture/api-contracts.md) · [app-security](docs/architecture/app-security.md) · [accessibility](docs/frontend-craft/accessibility.md) |
+| Review & verify agent work | [reviewer-agents](docs/writing-for-agents/reviewer-agents.md) · [evals](docs/ai-agents/evals.md) · [untrusted input](docs/ai-agents/untrusted-input.md) |
 | Move fast on GitHub | [docs/workflow/](docs/workflow/README.md) |
 
 ## 📚 The full map
@@ -47,6 +49,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [mcp-json.md](docs/writing-for-agents/mcp-json.md) — 🔌 `.mcp.json` — the repo's MCP servers, committed and secret-free
 - [guards-and-gotchas.md](docs/writing-for-agents/guards-and-gotchas.md) — 🛡️ **make the machine careful** — lint guards, doctor checks, preventive rules vs runbook
 - [output-completeness.md](docs/writing-for-agents/output-completeness.md) — 🧾 **beat model laziness** — no placeholders, no truncation, a guard that rejects `// ...rest`
+- [reviewer-agents.md](docs/writing-for-agents/reviewer-agents.md) — 🔎 **reviewer agents people trust** — precision gate, false-positive skip list, silent-failure lens, fresh-eyes loop
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
@@ -55,6 +58,8 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [solid-srp.md](docs/architecture/solid-srp.md) — 🧱 SOLID / SRP, small files, custom errors
 - [testing.md](docs/architecture/testing.md) — 🧪 unit + integration testing as a first-class citizen
 - [data-and-scale.md](docs/architecture/data-and-scale.md) — 📈 **shape now, capacity later** · bounded sweeps · migrations vs backfills · dev engine ≠ prod engine
+- [api-contracts.md](docs/architecture/api-contracts.md) — 🔌 HTTP contract — one error registry, status codes, keyset pages, `Idempotency-Key`, retries, versioning
+- [app-security.md](docs/architecture/app-security.md) — 🛡️ app security — authz in the data layer, sessions/CSRF/CSP, uploads, rate limits, log redaction
 - [abstractions-and-growth.md](docs/architecture/abstractions-and-growth.md) — 🪜 **pre-MVP → really big** · declare once, project everywhere · **a guard is the tax paid for not deleting the bypass** · why the rule of three doesn't fire when an AI writes the code
 
 ### 3. 🧰 Stack
@@ -79,11 +84,13 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [ai-agents/README.md](docs/ai-agents/README.md) — the index
 - [agent-sdk.md](docs/ai-agents/agent-sdk.md) — 🧬 building agents with the AI Agent SDK
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
-- [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the 9-point brief
+- [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the WHY + 9-point brief
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
 - [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) — 📖 **teach *their* agent to use *your* MCP server** — recipes as advice not scripts, the `docs` tool, editable markdown
 - [agent-work-limits.md](docs/ai-agents/agent-work-limits.md) — 🔓 **freedom + access** — never cap the work, stall-fence instead, diagnose the terminator
 - [context-budget.md](docs/ai-agents/context-budget.md) — 🧮 standing context, prompt-cache prefix order, lazy surfaces, chunked external results
+- [evals.md](docs/ai-agents/evals.md) — 📏 evals — capability vs regression, **pass@k vs pass^k**, graders, run before merge
+- [untrusted-input.md](docs/ai-agents/untrusted-input.md) — 🧪 **everything an agent reads is data** — lethal trifecta, reader/actor split, repo config as executable surface
 - [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
 
 ### 6. ☸️ Infrastructure
@@ -113,12 +120,14 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [adaptive-ui.md](docs/frontend-craft/adaptive-ui.md) — 📐 adaptive UI — responsive, touch, iOS/Material deltas, UI performance
 - [reference-image-design.md](docs/frontend-craft/reference-image-design.md) — 🖼️ reference-image-first design — generate divergent mockups, then build to match
 - [brand-identity.md](docs/frontend-craft/brand-identity.md) — 🏷️ brand identity per app — strategy, logo/icon/favicon, OG images, brand kit checklist
+- [accessibility.md](docs/frontend-craft/accessibility.md) — ♿ **WCAG 2.2 AA floor** — focus, live regions, forms, keyboard, native mapping, axe + manual
 
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index
 - [project-kickoff.md](docs/workflow/project-kickoff.md) — 🌱 zero → running project, fast
 - [github-issues-milestones.md](docs/workflow/github-issues-milestones.md) — 🎫 issues & milestones at agent speed
 - [shipping-doctrine.md](docs/workflow/shipping-doctrine.md) — 🚢 no legacy, no shims, **no feature flags**, no prod A/B — one path, replaced completely
+- [decision-records.md](docs/workflow/decision-records.md) — 🧭 one record per one-way door — rejected options written down so agents stop re-proposing them
 
 ## 🤝 How to use this repo
 

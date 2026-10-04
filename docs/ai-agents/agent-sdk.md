@@ -22,11 +22,11 @@ const result = await generateText({
 
 Multi-turn agent (loops until a stop condition):
 ```ts
-import { ToolLoopAgent, stepCountIs, hasToolCall } from "ai";
+import { ToolLoopAgent, hasToolCall } from "ai";
 
 const agent = new ToolLoopAgent({
   model, tools, instructions,
-  stopWhen: [stepCountIs(50), hasToolCall("submit")],
+  stopWhen: hasToolCall("submit"), // no step cap — stall detection ends a stuck run
   onStepFinish: async ({ text, toolCalls, usage }) => { /* stream + log */ },
   prepareStep: async ({ messages }) => ({}), // compact context / inject guidance mid-run
 });
@@ -76,12 +76,22 @@ const submit = tool({ inputSchema: Review, execute: async (o) => o });
 ## Streaming, retries, cost control
 - **Stream** via `onStepFinish` — push text deltas and tool calls to the client live; `abortController.abort()` to cancel.
 - **Retry middleware:** retry transient errors (429, 500/502/503/504, timeout) with exponential backoff; **fail fast** on fatal ones (402 / insufficient credits / auth). Never retry a credits-exhausted error.
-- **Stop conditions:** detect a *stall* (no new tool signature or text for N ms) and a *loop* (same tool call repeated K times) — abort instead of burning tokens.
-- **Token budget:** truncate context to the model's window minus a reserve for output + tools.
+- **Stop conditions:** stop on *non-progress* — no new tool signature or text, same tool call with the same args repeating, no state change — never on a step/tool-call count → [stall rule](agent-work-limits.md#the-one-bound-that-stays-lack-of-progress).
+- **Context window:** never truncate. Keep the standing context lazy, chunk big tool results behind a handle, compact history (below) → [context-budget](context-budget.md).
+
+## Parser first, LLM for the uncertain
+Structured, repeating text (logs, invoices, quiz banks, config dumps) → a deterministic parser does the bulk; the LLM sees only what the parser isn't sure of.
+```
+text ─▶ parser/regex ─▶ items + confidence ─┬─ ≥ threshold ─▶ output
+                                            └─ < threshold ─▶ LLM ─▶ output
+```
+- Every item carries a **confidence** (all fields matched, counts tie out, no leftover text).
+- **Threshold set by an eval**, not by feel: labelled sample, measure accuracy per band, move the line → [evals](evals.md).
+- Free-form, non-repeating text → straight to the LLM; a parser there is wasted work.
 
 ## Memory across turns
 - Persist messages to a DB (role, content, tool calls, token usage) for replay.
-- **Compact** when history exceeds a threshold: summarize the oldest messages, keep the most recent N intact.
+- **Compact** when history exceeds a threshold: summarize the oldest messages, keep the most recent N intact. The summary **always keeps the tried/failed list** — approaches attempted, why each failed — or the agent re-tries them after compaction.
 - **Inject guidance mid-run** via `prepareStep` — append a `[Human guidance]` user message before the next step.
 
 ## System prompt structure

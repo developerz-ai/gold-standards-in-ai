@@ -11,8 +11,14 @@ The first artifact is **not code** — it's a tight spec an agent can execute wi
 | Users | Who uses it + their one core job. |
 | Core flows | 3–5 bullet flows, happy path only. |
 | Data model sketch | Entities + key fields + relations (not full DDL). |
-| Tech choices | Default to the standard stack → [../architecture/tech-stack.md](../architecture/tech-stack.md). Only note **deviations**. |
+| Invariants | Rules that must always hold, as checks: `approved receipt is immutable`, `sum(lines) = total`. |
+| States + transitions | Per stateful entity: states and the allowed moves (`draft → submitted → approved\|rejected`). Anything not listed is illegal. |
+| Trust boundaries + data ownership | Who may read/write what; which tenant/user owns each entity; what crosses the boundary from outside (uploads, webhooks, LLM output). |
+| Failure + recovery | Per flow: what fails (payment, upload, third-party), what the user sees, how it's retried or undone. |
+| Success metric | One observable number that says it works: `median submit → approve < 1 day`. Not "users love it". |
+| Tech choices | Default to the standard stack → [../architecture/tech-stack.md](../architecture/tech-stack.md). Only note **deviations** — each one-way-door deviation gets a [decision record](decision-records.md). |
 | Out of scope | What you're explicitly *not* building yet. |
+| Open questions | Unknowns that block a one-way door. Answered → [decision record](decision-records.md). Not blocking → `ASSUMPTION:` and proceed. |
 
 Don't hand-write it. An **`/initial-idea`** slash command turns one paragraph into this spec **plus a milestone list** (the epics / releases). Those milestones become GitHub milestones in [github-issues-milestones.md](github-issues-milestones.md).
 

@@ -406,7 +406,7 @@ Style by *parent* width, not viewport — components become truly portable.
 ```
 
 ## Accessibility
-Non-negotiables. The reduced-motion guard is global and goes near the top of your stylesheet.
+Full floor (focus, live regions, forms, keyboard) → [accessibility.md](accessibility.md). CSS non-negotiables: The reduced-motion guard is global and goes near the top of your stylesheet.
 
 ```css
 /* honor "reduce motion" everywhere at once */

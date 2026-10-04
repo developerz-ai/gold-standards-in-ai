@@ -171,7 +171,7 @@ export function toggleTheme() {
 ```
 
 ## Accessibility
-Respect motion preferences and theme `:focus-visible` / `::selection` from the same tokens:
+Full floor → [accessibility.md](accessibility.md). Respect motion preferences and theme `:focus-visible` / `::selection` from the same tokens:
 ```css
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

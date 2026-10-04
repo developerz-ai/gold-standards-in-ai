@@ -41,7 +41,7 @@ The root file is a **router, not an encyclopedia.** Put the always-needed rules 
 
 ```markdown
 ## Where to look (load on demand)
-- Architecture & ADRs → `docs/architecture/`
+- Architecture → `docs/architecture/` · decisions (why X, not Y) → `docs/decisions/` ([decision-records](../workflow/decision-records.md))
 - API reference        → `docs/api.md`
 - Deploy runbook       → `docs/deploy.md`
 - Auth model           → `packages/auth/CLAUDE.md`
@@ -129,6 +129,42 @@ workspace/
     └── frontend/CLAUDE.md # different stack, same pattern
 ```
 The agent loads both, root → project. Keep each layer to its own scope — no duplication. See [../architecture/monorepo.md](../architecture/monorepo.md).
+
+## 📐 Rules scoped by file type — `.claude/rules/`
+Directory layering scopes by *where* the code lives. Mixed-language repos (Rust core + Swift + Kotlin + TS) also need scoping by *what* the file is — the Swift rules are noise while editing a migration. Put them in `.claude/rules/*.md` with a `paths:` glob; Claude Code loads the file only when the agent Reads/Writes/Edits a match. As of 2026-10 ([docs](https://code.claude.com/docs/en/memory#path-specific-rules)).
+
+```
+.claude/rules/
+├── common.md          # no paths → loads at launch, like CLAUDE.md
+├── rust.md            # paths: ["**/*.rs", "**/Cargo.toml"]
+├── swift.md           # paths: ["apps/ios/**/*.swift"]
+├── kotlin.md          # paths: ["apps/android/**/*.{kt,kts}"]
+└── typescript.md      # paths: ["**/*.{ts,tsx}"]
+```
+
+```markdown
+---
+paths:
+  - "**/*.rs"
+  - "**/Cargo.toml"
+---
+
+# Rust
+- Errors: `thiserror` enums in libs, `anyhow` only in bins. No `unwrap()` outside tests.
+  Overrides common.md "custom error classes" — Rust has no classes; the enum is the type.
+- `cargo clippy -- -D warnings` + `cargo test -p <crate>` for the crate you touched.
+```
+
+| Rule | Why |
+|---|---|
+| `common.md` = language-agnostic principles, no code samples | loads every session; keep it as lean as root `CLAUDE.md` |
+| One file per language/domain, extends common | specific detail loads only when relevant |
+| Override stated explicitly in the language file ("common says X; here Y") | conflicting rules get followed arbitrarily — no implicit precedence |
+| `paths` is the only frontmatter field read; bad YAML → loads unconditionally | check with `/context` that it's lazy |
+| Subdirs fine (`rules/frontend/`), discovered recursively | |
+| Still name the guard (`clippy`, `swiftlint`, `ktlint`, lint script) | prose is the shortcut, the gate is enforcement |
+
+Choose: per-directory `CLAUDE.md` when the boundary is an app/package; `.claude/rules/` with `paths:` when it's a file type spread across the tree.
 
 ## Self-updating
 Add an `/update-claude` slash command so the agent refreshes `CLAUDE.md` when features land. Stale docs are worse than missing ones — [planning-and-docs.md](planning-and-docs.md#docs-decay).
