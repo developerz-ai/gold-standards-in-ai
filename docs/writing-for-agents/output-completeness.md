@@ -92,7 +92,7 @@ Prompts lower the rate. Architecture removes the incentive: if no single call ha
 | **Continuation loop** | detect the cap stop reason (`stop_reason: "max_tokens"` on the Claude API), feed back, ask to resume from the last clean boundary | any single long artifact [ours] |
 | **Fan-out** | independent parts to parallel subagents, each owning a disjoint set of files | many similar units (handlers, migrations, docs) → [hive-mind](../ai-agents/hive-mind.md) |
 | **Evidence first** | require tool output (test run, grep, fetched doc) *before* the narrative | analyses/reviews; stops "sounds right" summaries [upstream] |
-| **Fresh-eyes finish reviewer** | separate agent, no edit rights, checks the deliverable against the original request, returns a verdict word + ordered fixes | anything user-facing or multi-part [ours, from the impeccable finish-reviewer idea] |
+| **Fresh-eyes finish reviewer** | separate agent, no edit rights, checks the deliverable against the original request, returns a verdict word + ordered fixes | anything user-facing or multi-part [ours, from the impeccable finish-reviewer idea]; code-review lenses → [reviewer-agents](reviewer-agents.md) |
 | **Grounding via tools/MCP** | fetch current docs instead of recalling them | models truncate or hedge when unsure of specifics [upstream] |
 
 ### Finish-reviewer rules (the "fresh eyes" pass)

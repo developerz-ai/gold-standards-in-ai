@@ -8,7 +8,7 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 
 | # | File | What it covers |
 |---|---|---|
-| 1 | [claude-md.md](claude-md.md) | 🗂️ `CLAUDE.md` — the project brain, read every session |
+| 1 | [claude-md.md](claude-md.md) | 🗂️ `CLAUDE.md` — the project brain, read every session · path-scoped `.claude/rules/` |
 | 2 | [skills-commands-agents.md](skills-commands-agents.md) | 🧩 Skills (domain expertise), slash commands (workflows), subagents (specialists) |
 | 3 | [hooks-and-permissions.md](hooks-and-permissions.md) | 🔒 Auto-allow safe ops, gate quality with hooks |
 | 4 | [memory-and-mcp.md](memory-and-mcp.md) | 🧠 Cross-session memory · 🔌 MCP servers · the 3-tool MCP pattern |
@@ -19,6 +19,7 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 | 9 | [mcp-json.md](mcp-json.md) | 🔌 `.mcp.json` — the repo's MCP servers, committed, secret-free, paired with skills |
 | 10 | [guards-and-gotchas.md](guards-and-gotchas.md) | 🛡️ Make the machine careful — lint guards, doctor checks, preventive rules vs the runbook |
 | 11 | [output-completeness.md](output-completeness.md) | 🧾 Beat model laziness — no placeholders, no truncation, a guard that rejects them |
+| 12 | [reviewer-agents.md](reviewer-agents.md) | 🔎 Reviewer agents people trust — precision gate, false-positive skip list, silent-failure lens, parallel specialist lenses, fresh-eyes loop |
 
 Building with a team of agents inside one of those commands? → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 

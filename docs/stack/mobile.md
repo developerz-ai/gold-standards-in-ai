@@ -67,7 +67,8 @@ class Api(private val baseUrl: String, http: HttpClient? = null) {
 
 ## Shared conventions across both
 - **Locale passed per request** (`?locale=es`); normalize tags client-side (`pt-BR` → `pt`, fallback `en`). Same locale set the web uses → [../frontend-craft/i18n.md](../frontend-craft/i18n.md).
-- **One backend contract.** Version the API; don't fork logic into the apps.
+- **One backend contract.** Version the API ([additive-only for shipped apps](../architecture/api-contracts.md#️-versioning)); don't fork logic into the apps.
+- **Accessibility:** VoiceOver/TalkBack labels, Dynamic Type / font scale → [accessibility.md](../frontend-craft/accessibility.md#-web--swiftui--compose).
 - **Crash/error reporting** wired before the first view mounts, per-app key.
 - **Tests:** `XCTest` (iOS), JUnit (Android) on the shared modules at minimum.
 - An umbrella web site can tie the apps together for marketing/onboarding ([SSR Solid](frontend-solidjs.md)).

@@ -120,7 +120,7 @@ Name layouts by the relationship they control, not by the page they appear on.
 .reel > * { flex: 0 0 auto; scroll-snap-align: start; }
 ```
 - Use `gap` for spacing between siblings. Use the `min(16rem, 100%)` form inside `minmax` so a column never overflows at 320px.
-- DOM order is focus order. If a layout reorders visually (`order`, `grid-area`), check that tab order still makes sense.
+- DOM order is focus order. If a layout reorders visually (`order`, `grid-area`), check that tab order still makes sense → [accessibility.md](accessibility.md#️-keyboard-paths).
 
 ## 👆 Touch targets and thumb zones
 | Platform | Minimum target | Spacing |

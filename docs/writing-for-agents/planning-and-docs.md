@@ -39,8 +39,16 @@ A good plan is ~30 lines, all signal:
 ```
 Attach a `verify:` to each step. Verifiable criteria let the agent loop to completion without you adjudicating "done" — see [behavioral-rules.md](behavioral-rules.md).
 
+### ✅ Acceptance criteria that an agent can close
+| Rule | Shape |
+|---|---|
+| **No adjective without a check** | "correctly", "fast", "secure", "robust", "intuitive" → replace with an observable: `p95 < 200ms on /rates`, `401 on expired token`. No check possible → label it `human review`. |
+| **Name the side effect that must NOT happen** | `refund issued → ledger row written; no second charge, no email to other tenants`. The prohibited effect is where regressions hide. |
+| **Business rules are assumptions, not discoveries** | Pricing, retention, compliance, SLAs, who the users are — code shows what the system does today, not what the business requires. Not stated in a PRD/contract/policy → record as `ASSUMPTION:` in the plan and proceed. |
+| **Impossible criterion → `[revised]`, never dropped** | Constraint found mid-build → mark the criterion `[revised]`, state the constraint + the new check, log it in `status.yml` `deviations`. Silent drops are how "done" stops meaning done. |
+
 ### Multi-file plans (the `planx` pattern)
-For anything non-trivial, write the plan as **multiple files**, not one `plan.md`: an `overview.md` index plus one `<NN>-<aspect>.md` slice per separable area (data-model, backend, api, frontend, tests), in a dated dir `docs/plans/<YYYY>/<MM>/<DD>/<NN>-<slug>/`, with a machine-readable `status.yml` tracker. This decouples **author from executor** (one agent plans, another implements) and lets slices parallelize across workers. Full spec + templates: [../workflow/project-kickoff.md](../workflow/project-kickoff.md).
+For anything non-trivial, write the plan as **multiple files**, not one `plan.md`: an `overview.md` index plus one `<NN>-<aspect>.md` slice per separable area (data-model, backend, api, frontend, tests), in a dated dir `docs/plans/<YYYY>/<MM>/<DD>/<NN>-<slug>/`, with a machine-readable `status.yml` tracker. This decouples **author from executor** (one agent plans, another implements) and lets slices parallelize across workers. Full spec, `status.yml` schema (incl. `tried_failed`, `next_step`): [workflow-commands.md](workflow-commands.md); kickoff templates: [../workflow/project-kickoff.md](../workflow/project-kickoff.md).
 
 ## The initial idea → spec
 For a brand-new project, capture the idea as a tight spec the agent can execute against. An `/initial-idea` command turns a paragraph into: problem, users, core flows, data model sketch, tech choices (default to the [stack](../architecture/tech-stack.md)), and a milestone list. Then `/plan` each milestone. See [../workflow/project-kickoff.md](../workflow/project-kickoff.md).
@@ -51,7 +59,7 @@ For a brand-new project, capture the idea as a tight spec the agent can execute 
 | Commands the agent runs | Architecture decisions + WHY |
 | Patterns to follow | API documentation |
 | Tech stack versions | Onboarding guides |
-| Testing strategy | Design docs, ADRs |
+| Testing strategy | Design docs, decision records |
 
 `CLAUDE.md` is read every conversation; `docs/` only when relevant. That split keeps `CLAUDE.md` lean.
 
@@ -60,10 +68,14 @@ docs/
 ├── architecture.md
 ├── api.md
 ├── onboarding.md
-└── decisions/            # ADRs
+└── decisions/            # decision records
     ├── 001-use-postgres.md
     └── 002-service-pattern.md
 ```
+Format + when to write one: [../workflow/decision-records.md](../workflow/decision-records.md).
+
+- **One owning doc per fact.** "Where is auth" lives in the map, "why legacy auth was removed" in a decision record. Every other doc links; a copied fact drifts into two answers.
+- **Keep a "deleted on purpose" list** — paths/modules removed intentionally, one line each with the reason or decision link (`src/legacy/session.ts — replaced by JWT, decisions/007`). Without it an agent "restores" the missing piece. Prune entries once recreation is no longer plausible.
 
 ## Concise documentation — the golden rule
 Every markdown file the agent reads costs tokens. Write like you pay per word.

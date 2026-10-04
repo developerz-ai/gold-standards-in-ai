@@ -37,10 +37,53 @@ Rules for a guard:
 - **It fails CI**, or it isn't a guard. Wire every one into `bun run lint`.
 - **Test the guard itself** — a guard that silently matches nothing is worse than none. `<rule>.test.ts` asserts it flags a bad sample *and* passes a good one.
 - **Error text names the value, the seam, and the fix**: `bullmq id "sync:org" contains ':' — use '-' (queues.ts:187). ':' is BullMQ's key separator; the sweep would enqueue 0 jobs.`
-- **Allowlist, don't weaken.** Pre-existing violations go in an explicit `<rule>-allowlist.ts` that shrinks over time — never loosen the rule to fit legacy code.
+- **Allowlist, don't weaken.** Pre-existing violations go in an explicit `<rule>-allowlist.ts` that shrinks over time — never loosen the rule to fit legacy code. Enforced by the [ratchet](#-dont-weaken-the-gate--a-ratchet-not-a-rule).
 - **Born from a real incident.** Guard the defect that happened, not the one you imagine.
 
 The payoff is compounding: an agent that writes the forbidden shape learns *at lint time, in its own loop*, with no human in the room.
+
+## 🔩 Don't weaken the gate — a ratchet, not a rule
+
+An agent stuck on a red check has a cheaper move than fixing the code: loosen the check. "Allowlist, don't weaken" is prose until a guard enforces it. `scripts/lint/gate-ratchet.ts` diffs HEAD against the merge base and **fails when the gate got weaker**:
+
+| Weakening | Detected by |
+|---|---|
+| A rule in `biome.json` removed or lowered (`error` → `warn`/`off`) | parse both versions, compare per-rule severity |
+| `tsconfig*.json` strictness off (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) | parse both, compare flags |
+| An `*-allowlist.ts` grew | entry count, base vs HEAD |
+| More suppressions | count of `biome-ignore`, `@ts-expect-error`, `@ts-ignore`, `#[allow(`, `.skip(` / `.only(` — base vs HEAD |
+| `trustedDependencies` grew | `package.json` array length |
+
+Escape hatch is **evidence, not permission**: the guard passes if the PR body carries `Gate-change: <why the rule is wrong here>`. CI reads it from `github.event.pull_request.body`; the reviewer sees the line in the diff summary. Shrinking any count always passes — the ratchet only turns one way.
+
+## 🔇 Silent-failure guards — errors must surface
+
+The bug an agent writes most and a test catches least: the error that never reaches anyone. Mechanize the shape; leave the judgment ("is this fallback honest?") to the [reviewer agent's silent-failure lens](reviewer-agents.md#-silent-failure-lens-our-top-hunt-target).
+
+| Shape | Guard |
+|---|---|
+| Empty `catch {}` | Biome `suspicious.noEmptyBlockStatements: "error"` — a comment silences it, so the comment must say *why continuing is correct* |
+| `catch` whose body is only `return []` / `null` / `{}` / `false` | custom `scripts/lint/no-swallowed-error.ts` — no rethrow, no log, no domain error → fail |
+| Un-awaited promise | Biome `nursery.noFloatingPromises: "error"` (types domain, nursery as of 2026-10) |
+| Rust `let _ = fallible()` | `clippy::let_underscore_must_use` + `#[must_use]` on your `Result`-returning fns |
+
+A fallback that hides a failure is a lie the next agent debugs for an hour. Return the error, or log it with the value that caused it.
+
+## 🧪 Repo-poisoning guard — the agent-read surface is code
+
+Every file an agent reads is an instruction channel. A PR (or a dependency's vendored skill) can hide instructions a human reviewer never sees. Why → [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md). `scripts/lint/agent-surface.ts` scans `CLAUDE.md`, `**/CLAUDE.md`, `AGENTS.md`, `.claude/**`, `skills/**`, `.mcp.json` and fails on:
+
+| Fail on | Why |
+|---|---|
+| Zero-width / bidi control chars (`U+200B–U+200D`, `U+2060`, `U+FEFF`, `U+202A–U+202E`, `U+2066–U+2069`) | invisible to the reviewer, read by the model |
+| HTML comments (`<!-- … -->`) not on the allowlist | renders as nothing on GitHub, reaches the model verbatim |
+| `ANTHROPIC_BASE_URL` in any committed settings `env` | reroutes API traffic — and the key — to someone else's endpoint |
+| `enableAllProjectMcpServers` in committed settings | a PR that adds a server to `.mcp.json` would auto-start it on every box; approve per box in the gitignored `.claude/settings.local.json` |
+
+```bash
+rg -nP '[\x{200B}-\x{200D}\x{2060}\x{FEFF}\x{202A}-\x{202E}\x{2066}-\x{2069}]' CLAUDE.md AGENTS.md .claude skills .mcp.json
+rg -n '<!--|ANTHROPIC_BASE_URL|enableAllProjectMcpServers' CLAUDE.md AGENTS.md .claude skills .mcp.json
+```
 
 ## `bin/dev doctor` — the environment guard
 
@@ -89,4 +132,4 @@ When a known-wrong shortcut ships on purpose, the debt must be impossible to los
 
 ---
 
-**Related:** [hooks-and-permissions.md](hooks-and-permissions.md) — the iteration rule · [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md) — wiring guards into the gate · [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md) — local gate ≡ CI
+**Related:** [hooks-and-permissions.md](hooks-and-permissions.md) — the iteration rule · [reviewer-agents.md](reviewer-agents.md) — the judgment half of silent failures · [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md) — why the agent-read surface is attack surface · [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md) — wiring guards into the gate · [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md) — local gate ≡ CI

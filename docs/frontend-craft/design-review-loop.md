@@ -18,7 +18,7 @@ build fully ──▶ capture (desktop + mobile, one batch) ──▶ validate c
 |---|---|
 | Build the whole surface **before** the first screenshot | Per-tweak screenshots burn tokens and never converge |
 | Capture **all target viewports in one round**: web `1440` + `390` wide; add the user's real viewport if known | The width that breaks is the one the user sees first |
-| **Max 2 inspection rounds** in the build thread, then hand off | Open-ended self-QA gets worse results at higher cost than a fresh reviewer |
+| **Build thread inspects once or twice, then hands off** to a fresh reviewer | Open-ended self-QA gets worse results at higher cost than a fresh reviewer |
 | Fix **every** finding of a round in one batch, then recapture | Fixing one issue per round never finishes |
 | Stop the moment a round resolves nothing | Thrashing means the approach is wrong, not the details |
 | After round 2, the reviewer's list is the only work list | Don't start your own new hunt for issues |
@@ -138,7 +138,7 @@ Web only; native → [Native deltas](#-native-ios--android-deltas).
 
 | Dimension | Check for | 0 → 4 |
 |---|---|---|
-| **Accessibility** | Contrast <4.5:1 (AAA 7:1 where required), missing labels/roles/states, no focus ring, keyboard traps, div-buttons, skipped heading levels, missing alt, unlabeled inputs, missing required indicators. Reduced motion: flag both "no alternative" **and** a global `0.01ms` kill that deletes useful state feedback | Fails WCAG A → AA fully met |
+| **Accessibility** ([floor](accessibility.md)) | Contrast <4.5:1 (AAA 7:1 where required), missing labels/roles/states, no focus ring, keyboard traps, div-buttons, skipped heading levels, missing alt, unlabeled inputs, missing required indicators. Reduced motion: flag both "no alternative" **and** a global `0.01ms` kill that deletes useful state feedback | Fails WCAG A → AA fully met |
 | **Performance** | Layout thrash (read/write in loops), animating layout properties, unbounded blur/shadow, no lazy images, `will-change` left on, dead deps, needless re-renders; LCP <2.5 s, INP <200 ms, CLS <0.1 | Unoptimized → lean |
 | **Responsive** | Fixed widths, touch targets <44px, horizontal scroll, breaks at 200% zoom/text scaling, mouse-only drag handlers, no `touch-action` on pointer-drag surfaces, missing breakpoints | Desktop-only → fluid, gestures work under touch |
 | **Theming** | Hard-coded colors, broken/low-contrast dark mode, wrong token types, values that don't update on theme switch → [theming-dark-mode.md](theming-dark-mode.md) | No tokens → full system |
@@ -239,7 +239,7 @@ Rule: **the builder never grades its own work.** A reviewer that inherits the bu
 | **Verdict pass** | After fixes + recapture, the **same** reviewer scores each listed fix `resolved / partial / unresolved` from the new screenshots, plus ≤ 3 regressions the batch introduced. No new hunt. Narration of a fix is not evidence |
 | **Scope-honest reporting** | "All 3 fixes resolved" ≠ "no issues remain". Open findings are never announced as a pass |
 | **User evidence wins** | User's screenshot contradicts a `ship` → spawn a **new** full review with their evidence. Never patch inline and self-certify |
-| **Budget** | 2 fix rounds unattended; then show the table and let the human decide |
+| **Stop on non-convergence** | Keep going while each round resolves findings; the same findings come back → stop, show the table → [stall rule](../ai-agents/agent-work-limits.md) |
 | **Documenter after ship** | Fresh pass records the built world in DESIGN.md → [design-md.md](design-md.md#-new-world-final-designmd-comes-from-the-build) |
 
 **Asset provenance.** Every shipped raster records its origin: the exact generation prompt (embedded in file metadata or a sidecar) or the source/license of a sourced image. A raster a fix batch abandons is deleted in the same batch.

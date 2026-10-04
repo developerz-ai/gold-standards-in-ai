@@ -73,6 +73,25 @@ Strong criteria let the agent loop independently — edit, run, check, repeat �
 - One sentence. Offer the smaller thing that works. Don't moralize.
 ```
 
+## 🔎 Search before you build
+"It already exists here" is the first channel, not the only one. Before writing a utility, integration, or tool, look outward in order:
+
+| # | Channel | Check |
+|---|---|---|
+| 1 | This repo | `rg` the modules + tests; `bun scripts/help.ts` |
+| 2 | Package registry | npm / crates.io / SwiftPM / Maven — maintained, permissive license |
+| 3 | Existing MCP servers + skills | `.mcp.json`, `.claude/skills/`, `~/.claude/skills/` |
+| 4 | GitHub | `gh search code` / `gh search repos` for a maintained implementation |
+
+```markdown
+### Search before you build
+- Before net-new code: repo → package registry → MCP servers/skills → GitHub.
+- Decide one, say which in the PR: adopt (use as-is) · extend (thin wrapper) · compose (2–3 small pieces) · build (informed by what you found).
+- A channel you couldn't reach (no `gh` auth, no registry access) → say so. Never claim coverage you didn't check.
+```
+
+Adopting a dependency still passes the shipping bar — one path, no shim kept "in case" → [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md).
+
 **Work like someone who has been burned before.** Prefer the boring, proven path. Distrust your own certainty — check the actual value, schema, and behavior, not the remembered one. Diagnose systematically (read the error, reproduce, bisect); never guess-and-check. "I don't know, checking" beats a confident wrong answer. No ego: deleting your own work is a good day.
 
 **Be stubborn about consequences, not preferences.** Calibrate to blast radius and reversibility, never to how many times the ask was repeated — full rules in [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md#be-stubborn-about-consequences-not-preferences).
@@ -83,6 +102,22 @@ Strong criteria let the agent loop independently — edit, run, check, repeat �
 - **Done:** is there a command that proves it works? No → write the test first.
 
 The overengineered version is rarely *obviously* wrong — it follows patterns, handles edge cases, looks professional. The problem is timing: complexity added before it's needed. Simple now, refactor when the requirement actually arrives.
+
+## 🧹 Cleanup pass beats a longer "don't" list
+**Keep the Simplicity rules above as the standard. Don't grow them into a list of prohibitions for the implementer — add a separate cleanup pass.** Stacking "no needless tests / no extra checks" onto the implementing prompt makes the model timid about *all* testing: it skips the legitimate edge-case tests too. Let the implementer be thorough; then a fresh-context pass cuts the slop.
+
+| Pass | Prompt gist | Context |
+|---|---|---|
+| 1. Implement | "Implement with full TDD. Be thorough with tests." | the task |
+| 2. Clean up | "Review the diff. Remove the slop below. Keep every business-logic test. Re-run checks." | **fresh** — reads the diff, not the reasoning |
+| 3. Gate | `bin/check` (or the scoped inner loop) green | — |
+
+Pass 2 removes:
+- Tests of language/framework behaviour (`typeof x === "string"`, "the ORM saves a row") instead of business rules.
+- Runtime checks the type system already guarantees; handling for impossible states.
+- Debug prints, commented-out code, orphaned helpers from pass 1.
+
+Pass 2 never deletes a failing test to go green, never touches files outside the diff. Pair with a [reviewer agent](reviewer-agents.md) for correctness — cleanup is about slop, review is about bugs. Loop wiring → [../ai-agents/orchestration.md](../ai-agents/orchestration.md).
 
 ## Scale rigor to the task
 | Task size | Rigor |

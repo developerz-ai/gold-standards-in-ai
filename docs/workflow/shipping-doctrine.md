@@ -15,7 +15,7 @@ Agents ship fast. Without a doctrine, "fast" becomes a codebase full of half-rep
 
 Rule of thumb: **if you would be embarrassed to explain the second path to a new agent, don't create it.** The agent has no memory of why it exists; it will read both as intentional.
 
-Public, external contracts are the genuine exception — versioning an API other people call is not a shim. **Name the one-way doors** (a stored data shape, a promise to users, a public contract, an id scheme) and reason about them before shipping. Everything else can be revised later; don't pay for it today.
+Public, external contracts are the genuine exception — versioning an API other people call is not a shim. **Name the one-way doors** (a stored data shape, a promise to users, a public contract, an id scheme) and reason about them before shipping — record each one → [decision-records.md](decision-records.md). Everything else can be revised later; don't pay for it today.
 
 ## 🚫 Never feature flags
 

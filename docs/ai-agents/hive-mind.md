@@ -82,11 +82,15 @@ wave 1: explore  ─▶ reports ─▶ wave 2: fix ─▶ reports ─▶ wave 3:
 
 - **Every slice you NAME, you must DISPATCH.** Briefs tell each agent which teammates are live on which paths — so a named-but-unlaunched slice makes agents dutifully defer work to someone who does not exist, and it vanishes. *This really happened:* three briefs referenced an "agent C" that was never spawned; two finished agents left it a combined six items. Keep the roster and the dispatched set as **one list**, and reconcile them **before** reading reports.
 - **Reserve an UNOWNED bucket, and expect to fill it mid-run.** The real fix often lands in a file no slice covers — a shared transport, a composition root, another workspace entirely. A homeless finding is the one most likely to be quietly dropped. When a report says "the real fix is outside my set", **assign it immediately**; do not file it.
+- **Every agent at every depth: the final message IS the deliverable.** Never end a turn on "waiting for background agents" — a spawned task is not a finished one, and children that finish after the parent's turn ends are orphaned. Delegate → you collect, integrate, then return.
+- **Don't re-delegate work that fits one context.** A subagent that spawns its own subagents for a one-context task adds a report layer and a round trip, and gains nothing. Depth is an outcome, not a plan.
 - **Look for causal chains across reports.** Agents see their own surface; only you see all of them. One run: a missing tool in a background lane removed the very tool an agent used to *discover a response shape*, so it guessed wrong, and every dashboard tile then failed with a different error a *different* agent was independently investigating. Neither could see it. After the reports land, spend one pass asking **"does A explain B?"** — it changes what you fix and what you can drop.
 
 ## 📋 The 9-point agent brief
 
-Omitting any one is how a run goes wrong.
+**Open with the WHY** — what the answer will be used for, which decision it feeds. Without it the agent answers the literal question and its summary drops exactly what you needed.
+
+Then the nine. Omitting any one is how a run goes wrong.
 
 | # | The brief must carry | Failure if omitted |
 |---|---|---|
@@ -108,6 +112,13 @@ Omitting any one is how a run goes wrong.
 | **Stop and report** | Proceeding either way would be unsafe or wasted | Returns with the evidence |
 
 Then *you* take the question to the user and re-task the agent with `SendMessage`, which resumes it with full context.
+
+## 🔍 Interrogate the report before accepting it
+
+The agent holds the details; you hold the purpose. A report is a first draft, not a verdict.
+
+- Read it against the WHY. Gap, unsourced claim, hedge → **`SendMessage` a follow-up** to the same agent; it returns to the source with full context.
+- Loop until the answer is sufficient. Stop on **non-convergence** — the follow-up returns nothing new — not on a round count. Then decide with what you have, or re-cut the slice.
 
 ## 🤜 Expect the hive to contradict you
 

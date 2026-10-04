@@ -15,7 +15,7 @@ Sentry.init({
   tracesSampleRate: 0.1,
 });
 ```
-- **Frontend:** `@sentry/solid` (or browser SDK) — capture unhandled errors + source maps.
+- **Frontend:** `@sentry/solid` (or browser SDK) — capture unhandled errors + source maps (upload, then delete from the deploy; scrub PII → [app-security](../architecture/app-security.md)).
 - **Mobile:** init in the app entrypoint before the first view mounts ([mobile](../stack/mobile.md)).
 - **Tag the release with the git SHA** so an error points straight at the commit that introduced it.
 

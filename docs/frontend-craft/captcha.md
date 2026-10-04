@@ -160,6 +160,7 @@ async function login(req: Request, creds: Credentials, token: string) {
 Why this is the right shape: the widget keeps rendering so your test exercises the exact production UI; only the unsolvable-by-machine step is short-circuited. See [make your app AI-debuggable](../writing-for-agents/memory-and-mcp.md) for the broader pattern, and [Playwright / tool access](../ai-agents/tools-and-mcp.md) for how agents drive the browser.
 
 ## Rules
+- **WCAG 3.3.8 (accessible auth):** image-pick passes AA; text/math puzzles fail; never block paste → [accessibility.md](accessibility.md).
 - **Verify server-side, always.** The client token is a claim, not proof.
 - **Fail closed.** Timeout, network error, malformed response → treat as not verified.
 - **Never trust the client.** A present `h-captcha-response` means nothing until siteverify confirms it.

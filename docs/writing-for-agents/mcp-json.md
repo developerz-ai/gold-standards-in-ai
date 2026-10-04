@@ -23,7 +23,7 @@
     },
     "ui-debugger": {
       "command": "npx",
-      "args": ["-y", "@your-org/ui-debugger-mcp@latest"],
+      "args": ["-y", "@your-org/ui-debugger-mcp@1.4.2"],
       "env": {
         "OPENAI_API_KEY": "${UI_DEBUGGER_API_KEY}",
         "OPENAI_BASE_URL": "${UI_DEBUGGER_BASE_URL:-https://openrouter.ai/api/v1}"
@@ -39,7 +39,8 @@
 - **`${VAR:-default}` for anything environment-dependent.** Staff URL, region, base URL: default to prod/public, let a dev override to localhost. No fork of the file per box.
 - **Every `${VAR}` you introduce goes in `.env.example`** the same commit, exactly like a runtime env var. An agent that can't tell *which* variable is missing burns a turn guessing.
 - **`http` for hosted, `stdio` for local binaries.** `stdio` servers must be installable by one command (`npx -y …`, a `bin/` tool, a released binary) — if setup takes a page of instructions, wrap it in `bin/setup` first.
-- **Pin what mutates prod, float what doesn't.** `@latest` is fine for a debugging helper; pin a version for anything that writes.
+- **Pin every `stdio` package to an exact version.** `npx -y pkg@latest` runs whatever was published last, on every dev box, with every `${VAR}` in its `env` block and your shell's reach — a hijacked maintainer account is code execution on all of them. Exact version (`@1.4.2`, no `^`/`latest`); bump in a PR like any dependency, reading the changelog. Same for `bunx`/`uvx`. `http` servers are the vendor's deploy — nothing to pin, but the token you send them is scoped (→ [../infrastructure/secrets.md](../infrastructure/secrets.md#-agent-identities--its-own-accounts-never-yours)).
+- **`.mcp.json` changes are reviewed like code that runs on every box** — because it is. A new server or a changed `command`/`url` in a PR is a supply-chain change → [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md#-repo-config-is-executable-surface).
 - **Name servers for what they reach**, not the vendor: `db-gateway`, `ui-debugger`, `app-admin`. Tool names surface to the model as `mcp__<server>__<tool>` — the server name is prompt real estate.
 
 ## What earns a slot
@@ -54,6 +55,17 @@ Every connected server costs tokens on **every turn** (its tools are listed in t
 | DB gateway | audited read-only SQL against real data → [../ai-agents/tools-and-mcp.md](../ai-agents/tools-and-mcp.md#audited-capability-access-the-gateway-pattern) |
 | [CodeGraph](../developer-experience/codegraph.md) | structural code lookup instead of grep sweeps |
 | Your own product's admin MCP | operate the thing it builds — dogfooding, and the fastest prod debugging you own |
+
+**Second test — does the work need a server?** MCP earns the slot when the job is **stateful**: a held-open session (live browser/devtools), streaming, an auth handshake (OAuth, SSO session), or a gateway that must hold the credential. Stateless request/response against a tool with a good CLI → **CLI + a skill** instead: zero standing schema cost, and the model already knows the CLI from training.
+
+| Job | Surface |
+|---|---|
+| GitHub PRs, issues, Actions | `gh` CLI + a skill — not the GitHub MCP (~dozens of schemas every turn) |
+| Docs lookup against a REST API | a skill with the `curl` call |
+| Live browser debugging, perf traces | MCP — the held session is the value |
+| DB gateway, SSO-gated admin | MCP — the auth handshake + credential custody is the value |
+
+"Popular" isn't an argument for a slot; "stateful and most agents here need it weekly" is.
 
 Anything used monthly: connect it per-session (`claude mcp add …`) or leave it to the user config. A 47-tool connector nobody calls is a permanent tax.
 

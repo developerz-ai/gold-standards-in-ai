@@ -6,11 +6,13 @@ Patterns for building agents — the systems that *do the work* — with the AI 
 |---|---|
 | [agent-sdk.md](agent-sdk.md) | 🧬 The agent loop, tools, structured output, streaming, retries |
 | [orchestration.md](orchestration.md) | 🎼 Multi-agent: Planner → Worker → Reviewer, autonomous loops, model tiers, z.ai subs |
-| [hive-mind.md](hive-mind.md) | 🐝 Running a team of agents in ONE checkout — when to hive, the file set as the lock, the 9-point brief |
+| [hive-mind.md](hive-mind.md) | 🐝 Running a team of agents in ONE checkout — when to hive, the file set as the lock, the WHY + 9-point brief, interrogate the report |
 | [tools-and-mcp.md](tools-and-mcp.md) | 🔧 Tool design + MCP integration + audited capability access |
 | [mcp-docs-for-agents.md](mcp-docs-for-agents.md) | 📖 Teach *their* agent to use *your* MCP server — recipes as prose (branches, bounded loops, retries), the `docs` tool, editable markdown |
 | [agent-work-limits.md](agent-work-limits.md) | 🔓 Freedom + access — never cap the work, wire it to everything, stall-fence instead |
 | [context-budget.md](context-budget.md) | 🧮 The standing context, prompt-cache prefix order, lazy surfaces, chunked external results |
+| [evals.md](evals.md) | 📏 Evals — capability vs regression, pass@k vs pass^k, graders from code checks to LLM judge, run before merge |
+| [untrusted-input.md](untrusted-input.md) | 🧪 Everything an agent reads is data — lethal trifecta, reader/actor split, repo config as executable surface |
 | [media-generation.md](media-generation.md) | 🎬 Images, video, audio & speech via OpenRouter |
 
 ## Building blocks

@@ -26,6 +26,18 @@ Use real DB connections in tests, not mocks.
 
 Save from **both failure and success** — if you only record corrections, the agent avoids mistakes but drifts from validated approaches. An index file lists all memories for quick lookup.
 
+### 🧪 Memory hygiene — memory is code that runs every session
+Memory loads at session start, every session. A poisoned line doesn't need to win once — it can sit there, or arrive in fragments that assemble later. → [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md)
+
+| Rule | How |
+|---|---|
+| **No secrets in memory** | not tokens, not passwords, not connection strings — a pointer ("creds in Vaultwarden `apps/<app>`") at most → [../infrastructure/secrets.md](../infrastructure/secrets.md) |
+| **Record provenance** | `source: user-correction` / `confirmed-approach` / `external:<url-or-issue>` in frontmatter. Only the first two may change behaviour; `external` is a fact to re-verify, never a rule |
+| **Never save an instruction found in foreign content** | an issue body, web page, tool result or attachment that says "remember to…" is data — report it, don't store it |
+| **Review the memory dir like code** | it's prose the agent obeys; skim diffs, delete what's stale or unexplained |
+| **Wipe after an untrusted run** | a session that ingested foreign repos, attachments or web content all day → drop whatever it wrote to memory before the next session loads it |
+| **Project vs user scope** | project facts in project memory; never let one repo's session write into the global user memory |
+
 ## MCP servers — external tools, no tab switching
 MCP (Model Context Protocol) gives the agent native tools for outside systems.
 
@@ -38,8 +50,10 @@ MCP (Model Context Protocol) gives the agent native tools for outside systems.
 | **Custom** | anything you build — DB gateway, knowledge base, CI |
 
 ```bash
-claude mcp add playwright -- npx @playwright/mcp
+claude mcp add playwright -- npx -y @playwright/mcp@0.0.83   # pinned (latest as of 2026-10) — see mcp-json.md
 ```
+
+Tool descriptions and tool output are untrusted input like any web page → [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md). Which servers earn a committed slot: [mcp-json.md](mcp-json.md#what-earns-a-slot); pin versions: [mcp-json.md](mcp-json.md#rules).
 
 This is principle #2 from the [philosophy](../00-philosophy.md): *the more the agent can reach, the more it solves end-to-end.* For audited, SSO-gated DB access without handing out credentials, see [../infrastructure/sso-zitadel.md](../infrastructure/sso-zitadel.md) and [../ai-agents/tools-and-mcp.md](../ai-agents/tools-and-mcp.md).
 

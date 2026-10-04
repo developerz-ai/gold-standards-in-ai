@@ -67,6 +67,36 @@ They look alike and behave completely differently. Split them, mechanically.
 - **Never hand-edit the migration journal's timestamps.** A future stamp makes the runner skip every later migration — silently, in prod.
 - **A hand-written data migration ships with an integration test that executes the shipped `.sql` file** over fixtures. Nothing else parses that SQL, so a plain typo ships green locally and breaks every DB-backed CI job at once.
 
+## 🔒 Lock-safe DDL & deploy ordering
+
+A migration runs **pre-sync, while old pods still serve**. Two failure modes: a DDL lock queues every query behind it, and the new schema breaks the old code still running.
+
+**Locks** (Postgres):
+
+| Change | ❌ Locks / rewrites | ✅ Do |
+|---|---|---|
+| Any DDL on a hot table | waits forever on a long txn, and every query queues behind the waiting lock | `SET LOCAL lock_timeout = '5s';` first line of the migration — fail fast, re-run the deploy |
+| Index on a big table | `CREATE INDEX` blocks writes for the whole build | `CREATE INDEX CONCURRENTLY IF NOT EXISTS` — **outside** the migrator (below) |
+| New required column | `ADD COLUMN … NOT NULL` with no default on existing rows | nullable → backfill → constraint in a **later** PR |
+| `NOT NULL` / check on existing rows | `SET NOT NULL` scans under an exclusive lock | `ADD CONSTRAINT … CHECK (col IS NOT NULL) NOT VALID` → next PR: `VALIDATE CONSTRAINT` (writes keep flowing) → `SET NOT NULL` skips the scan via the validated check (PG 12+) |
+| Column with a constant default | — | fine: `ADD COLUMN … DEFAULT x` is metadata-only (PG 11+) |
+
+- **Drizzle's migrator runs every pending migration in one transaction** (as of 2026-10). So `CONCURRENTLY` errors there, locks taken early are held until the last pending file finishes, and `NOT VALID` + `VALIDATE` in the same deploy buys nothing. Keep the pending batch small; ship tightening steps in their own PR.
+- **Big-table index builds run like a backfill** — a post-sync job issuing `CREATE INDEX CONCURRENTLY IF NOT EXISTS`. A failed concurrent build leaves an `INVALID` index: the job checks `pg_index.indisvalid`, drops, retries.
+- **Yugabyte**: `CREATE INDEX` is concurrent with online backfill by default — **except inside a transaction block** (every migration tool), where it silently becomes nonconcurrent and is only safe with no concurrent DML. Same fix: big-table indexes go through the post-sync job. As of 2026-10.
+
+**Deploy ordering** — sequence the PRs; never run two code paths at once:
+
+| Change | PR 1 | PR 2 (after PR 1 is fully rolled out) |
+|---|---|---|
+| Add a column/table | migration + code that uses it (tolerates `null` until the backfill's `remaining()` = 0) + backfill | constraint tightening, if any |
+| Drop a column/table | code stops reading **and** writing it | `DROP` migration |
+| Rename a column | **don't** — rename the field in code only: `displayName: text("username")` | — |
+
+- **A `DROP`/`RENAME` in the same PR as the code change breaks the old pods** still serving during the rollout. One path in code at all times; only the schema lags by one deploy.
+- **No dual writes, no "read new, fall back to old"** → [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md). The ordering is the safety; a second code path is a shim.
+- Old pods must tolerate the *new* schema: never `select *` into a strict parser, never positional inserts — an added column must be invisible to them.
+
 ## 🧪 Your dev engine is not your prod engine
 
 If local/CI is stock Postgres and production is a distributed SQL engine (Yugabyte, CockroachDB, Aurora DSQL, Spanner-ish), then **a violation is green on both gates and red in the deploy** — after merge, because migrations self-deploy.

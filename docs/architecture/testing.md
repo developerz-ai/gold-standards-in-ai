@@ -13,6 +13,7 @@ Three jobs tests do for an agent:
 | **Unit** | pure logic, no I/O | validators, formatters, domain logic | < 10s suite, < 3s file |
 | **Integration** | real services (DB, cache) | queries, jobs, API endpoints | minutes OK |
 | **Property** | generated inputs | invariants ("most restrictive grant wins") | as needed |
+| **E2E** | real browser → real stack | the handful of journeys that make money or lose data (sign up, pay, core create/edit) | minutes; parallel per worker |
 
 ## Unit — Bun's native runner
 ```ts
@@ -108,13 +109,53 @@ Give the harness the worker count and let it provision (`TEST_DB_WORKERS=8`) —
 
 **The exception: many agents in one checkout.** Then the box is *already* saturated by N agents, and each one fanning out oversubscribes it — the timeouts that follow read as real test failures. Inside a hive: concurrency 1 per agent, explicit file paths, and the coordinator saturates the machine once at the end → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 
+## 🧭 E2E — committed journeys, not ad-hoc clicking
+
+An agent poking the UI through Playwright MCP *sees* a bug once; a committed spec catches it forever. Every key journey is a Playwright spec in the repo, run by the gate.
+
+| Rule | Do | Never |
+|---|---|---|
+| Locators | `getByRole("button", { name: "Pay" })`, `getByLabel("Email")` — doubles as an a11y check → [../frontend-craft/accessibility.md](../frontend-craft/accessibility.md) | CSS paths, `nth-child`, text that changes with copy |
+| Waiting | wait for the **thing**: `await page.waitForResponse(r => r.url().includes("/api/orders") && r.ok())`, `await expect(locator).toBeVisible()` | `page.waitForTimeout(…)` — same disease as `sleep()` above |
+| Failure output | `trace: "retain-on-failure"` + screenshot, saved as a CI artifact the agent opens (`npx playwright show-trace`) | a red line with no artifact |
+| Visual check | compare to a committed baseline; **no baseline = INCONCLUSIVE**, never PASS | auto-accepting the first screenshot as truth |
+| Flakes | fix the wait or the race; flaky policy → [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md) | `retries: 2` in CI — it hides the race the user will hit |
+
+```ts
+// playwright.config.ts
+export default defineConfig({
+  retries: 0,
+  use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
+});
+```
+
+**Post-deploy smoke** — the same journeys, read-only, against the live URL after every rollout. Fail on: any `console.error`, any `pageerror`, any 4xx/5xx from your own origin.
+```ts
+page.on("console", m => m.type() === "error" && errors.push(m.text()));
+page.on("pageerror", e => errors.push(e.message));
+page.on("response", r => r.url().startsWith(BASE) && r.status() >= 400 && errors.push(`${r.status()} ${r.url()}`));
+// … journey …
+expect(errors).toEqual([]);
+```
+
+**Click-path audit** — for bugs where "the button does nothing". Per touchpoint, trace each store action the handler calls and what it **sets and resets**:
+```
+selectThread(t) → sets {selectedThread} RESETS {composeMode}
+"New email" onClick: setComposeMode(true); selectThread(null)  ← second call undoes the first
+```
+Hunt: a later call resetting an earlier one · two async results racing on one field · an effect that reverts the state just set · a handler whose name promises an API call it never makes · a branch guarded by state that is always false there. The fix lands with an E2E spec for that journey.
+
 ## TDD where it fits
 Convert the task to a failing test first:
 - "Fix the bug" → reproducing test → make it pass.
 - "Add validation" → tests for invalid inputs → make them pass.
 - "Refactor X" → tests green before AND after.
 
+**A reproducing test counts only once it ran RED on the unfixed code** — executed, and failing for the bug's reason (not a typo, a missing import, a broken fixture). Written-but-never-run, or first run after the fix, proves nothing: it may pass on the old code too. Paste the red run in the PR.
+
 This is the engine behind [goal-driven execution](../writing-for-agents/behavioral-rules.md) — the agent loops edit→run→check until green.
+
+Reviewing the tests themselves (untested error paths, assertions that only check "doesn't throw", mocks of the thing under test) → test-quality lens in [../writing-for-agents/reviewer-agents.md](../writing-for-agents/reviewer-agents.md#-specialist-lenses-run-them-in-parallel).
 
 ## Coverage as a gate (optional)
 Where it matters, block merges under a threshold (e.g. line + branch ≥ 90%). Keep it honest — coverage is a floor, not a goal.
@@ -124,5 +165,6 @@ Where it matters, block merges under a threshold (e.g. line + branch ≥ 90%). K
 bun test                       # all unit tests
 bun run test:integration       # integration (after bin/dev)
 bun test path/to/file.test.ts  # one file
+bunx playwright test           # E2E journeys (after bin/dev)
 ```
 If running a single focused test is slow or awkward, fix that — the agent runs it constantly. See [DX](../developer-experience/dx-scripts.md).

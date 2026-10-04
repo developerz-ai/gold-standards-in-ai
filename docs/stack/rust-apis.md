@@ -44,7 +44,8 @@ src/
 ## axum sketch
 ```rust
 let app = Router::new()
-    .route("/healthz", get(|| async { "ok" }))
+    .route("/livez", get(|| async { "ok" }))   // no deps
+    .route("/readyz", get(ready))              // DB + cache; 503 while draining → ../infrastructure/kubernetes-gitops.md
     .route("/v1/query", post(run_query))
     .with_state(state);
 

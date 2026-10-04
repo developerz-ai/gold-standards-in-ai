@@ -39,8 +39,29 @@ Owns a `StateStore` (resumable across crashes), spawns N workers concurrently (o
 ## Autonomous loop patterns
 - **Loop-until-goal:** keep working until acceptance criteria pass.
 - **Loop-until-count:** accumulate to a target (e.g. find 10 bugs).
-- **State machine:** `SETUP → PLANNING → CODING → REVIEW → COMPLETE/FAILED`, with a hard runtime ceiling that escalates instead of spinning forever.
+- **State machine:** `SETUP → PLANNING → CODING → REVIEW → COMPLETE/FAILED`, with a runaway backstop sized from observed healthy max × margin ([agent-work-limits](agent-work-limits.md#unattended-runs-keep-a-backstop--which-is-the-same-rule-not-an-exception)) that escalates instead of spinning forever.
 - **Mailbox:** inject plan updates while it runs (mid-run guidance from [agent-sdk](agent-sdk.md#memory-across-turns)).
+
+## 🎯 The loop's exit — "done" a machine can judge
+
+The loop converges or spins on one thing: its exit condition. Write it before the loop.
+
+| Rule | Why |
+|---|---|
+| **Done = yes/no by one command** ("`bin/check` green AND every group has a merged PR"). Never "make it good" | A vague goal never passes, or passes at random |
+| **"Done" ships with "must not"**: no test deleted/skipped/weakened, coverage not lower, no acceptance file touched | "All tests pass" alone is a license to delete tests |
+| **Prefer an external oracle over self-assertion** — diff vs a known-good sample, tie-out to upstream totals, a golden file | The agent's own asserts can be loosened; an outside number can't |
+| **The builder never edits the acceptance checks.** Planner writes them; Worker writes code | Grading against a moved goalpost always passes |
+| **A separate checker runs acceptance** — a different agent/process, deterministic tools (tests, diff, typecheck), not "looks right" | Grading your own homework inflates → [../writing-for-agents/reviewer-agents.md](../writing-for-agents/reviewer-agents.md) |
+| **Every question answered before launch** — ambiguities resolved in the plan | An unattended loop never stops to ask; it runs the wrong reading to the end |
+| **Stop only after N consecutive "done" signals** (e.g. 3 iterations in a row find nothing left) | One premature "done" ends a run with work left |
+| **Non-progress kills it, not a retry count** — same failure fingerprint, no new state, identical calls → stop and report ([stall rule](agent-work-limits.md#the-one-bound-that-stays-lack-of-progress)) | A cap kills honest slow work and lets fast spinning through |
+
+The human step is **PR review** — the loop opens PRs, it does not sign off its own work. Kill the **whole process group**, never just the parent; a missed heartbeat = stall.
+
+## ✂️ Strip the harness as models improve
+
+Every scaffold encodes "the model can't X alone": sprint decomposition, context resets between phases, a per-step evaluator, a file-manifest pre-pass. On every model change, **re-run the [evals](evals.md) with each scaffold removed** and delete the ones no longer load-bearing. A harness built for last year's model is a tax on this year's.
 
 ## Two-command surface, hidden complexity
 Expose almost nothing:

@@ -160,7 +160,7 @@ Base list lives in [design-taste.md](design-taste.md). The patterns below are wh
 - **No promised cause** the system can't know. Never guess.
 - **Keep user input** on error. Never clear a form.
 - **Inline over modal.** Never `window.alert()`.
-- **Announce** errors to screen readers (`role="alert"` / `aria-live`), and never by color alone.
+- **Announce** errors to screen readers (`role="alert"` / `aria-live`), and never by color alone → [live regions](accessibility.md#-live-regions-for-async-status).
 
 ## 🗑️ Confirmations & destructive actions
 **Prefer undo over confirm** when recovery is safe. Confirm only when the action is irreversible, expensive, or affects others.
