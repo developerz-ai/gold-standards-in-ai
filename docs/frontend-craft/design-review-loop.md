@@ -267,7 +267,7 @@ keep (one line: what must not be diluted). No praise. Do not run a second detect
 ```
 
 ## 🤖 Deterministic anti-pattern detection (lint/CI guard)
-Rule: **mechanical tells get caught by a machine on every edit, not by review.** Two tiers: an **immediate tier** as a post-edit hook (unambiguous only: broken images, overflow, contrast, gradient text, glow, system drift) and a **deep pass** at end of session/CI over every UI file touched, deduplicated against what the hook already reported. Exit `0` = clean, `2` = findings. Wiring → [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md), [hooks-and-permissions.md](../writing-for-agents/hooks-and-permissions.md), [ai-first-cicd.md](../developer-experience/ai-first-cicd.md).
+Rule: **mechanical tells get caught by a machine on every edit, not by review.** Two tiers: a **fast tier** the agent runs on the files it just touched (unambiguous only: broken images, overflow, contrast, gradient text, glow, system drift) and a **deep pass** in `bin/check`/CI over every UI file in the diff. Exit `0` = clean, `2` = findings. Wiring → [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md), [ai-first-cicd.md](../developer-experience/ai-first-cicd.md).
 
 As of 2026-09, the leading open-source detector ships ~60 rules. Distilled:
 

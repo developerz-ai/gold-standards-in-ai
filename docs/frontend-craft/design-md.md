@@ -194,7 +194,7 @@ Documenter (ideally a fresh subagent, after the [review loop](design-review-loop
 | Preview page | `docs/design/preview.html`: swatches + tonal ramps, type ramp, 5–10 primitives with hover/focus, **light and dark**. Regenerate with DESIGN.md; screenshot it in review |
 | Refresh | After a redesign, or when the drift check fails → re-run Scan, compare against the live app, merge |
 
-Cheap drift check (CI or pre-commit):
+Cheap drift check (`bin/check` + CI):
 ```bash
 norm() { grep -oiE '#[0-9a-f]{6}\b' "$1" | tr 'A-F' 'a-f' | sort -u; }
 diff <(norm DESIGN.md) <(norm src/styles/tokens.css) \

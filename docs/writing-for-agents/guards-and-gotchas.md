@@ -132,4 +132,4 @@ When a known-wrong shortcut ships on purpose, the debt must be impossible to los
 
 ---
 
-**Related:** [hooks-and-permissions.md](hooks-and-permissions.md) — the iteration rule · [reviewer-agents.md](reviewer-agents.md) — the judgment half of silent failures · [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md) — why the agent-read surface is attack surface · [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md) — wiring guards into the gate · [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md) — local gate ≡ CI
+**Related:** [permissions.md](permissions.md) — the iteration rule · [reviewer-agents.md](reviewer-agents.md) — the judgment half of silent failures · [../ai-agents/untrusted-input.md](../ai-agents/untrusted-input.md) — why the agent-read surface is attack surface · [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md) — wiring guards into the gate · [../developer-experience/ai-first-cicd.md](../developer-experience/ai-first-cicd.md) — local gate ≡ CI

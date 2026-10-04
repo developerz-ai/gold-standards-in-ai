@@ -50,7 +50,7 @@ The agent that can read prod (read-only), query the DB, drive a browser, read th
 | Real data | DB gateway MCP | read-only role, per-grant scoping, synchronous audit |
 | Production truth | error monitor, log/metric queries | read-only tokens |
 | The UI | headless browser MCP | test/staging creds; an AI-debug escape hatch for captcha |
-| Your product itself | your own admin/first-party MCP | scoped tokens, approval gate on writes |
+| Your product itself | your own admin/first-party MCP | scoped tokens, audited writes |
 | The codebase's structure | [CodeGraph](../developer-experience/codegraph.md) | read-only by nature |
 | Every external system | a `scripts/<domain>/<verb>.ts` wrapper | mutations require `--write` and print first |
 
@@ -58,7 +58,7 @@ Rules that keep "maximum access" and "no leaked credentials" true at the same ti
 
 - **Safety lives in the tool, not in withholding the tool.** Read-only roles, audited gateways, `--write`-gated scripts, reviewed PRs.
 - **Credentials never reach the agent.** It sends a request + an identity token to a gateway; the gateway holds the secret → [tools-and-mcp](tools-and-mcp.md#audited-capability-access-the-gateway-pattern).
-- **Approve classes, not calls.** Broad allow-lists for reads; a human gate only for genuinely irreversible writes → [../writing-for-agents/hooks-and-permissions.md](../writing-for-agents/hooks-and-permissions.md).
+- **No approval prompts.** Full permissions; irreversible prod writes are made safe by the tool (gateway, audit, backups), not by a human click → [../writing-for-agents/permissions.md](../writing-for-agents/permissions.md).
 - **A missing capability is a bug in your setup**, filed against the repo — not a thing to tell the agent to work around.
 - **Hidden capability is worse than missing capability**: a tool the agent can't discover reads as "impossible" and it invents a workaround. Keep everything *reachable by name or search* even when it's not listed → [context-budget](context-budget.md#-lazy-on-both-surfaces).
 

@@ -66,7 +66,7 @@ bun run typecheck
 bun run test
 bun scripts/i18n-check.ts   # catalog parity → ../frontend-craft/i18n.md
 ```
-Wire the same commands into [CI](linting-ci.md) and a [pre-commit hook](../writing-for-agents/hooks-and-permissions.md) so local, hook, and CI agree.
+Wire the same commands into [CI](linting-ci.md) so local and CI agree; `CLAUDE.md` says "run `bin/check` before every commit" → [permissions](../writing-for-agents/permissions.md).
 
 ## Alternative runner: justfile
 For smaller repos a `justfile` works well:
@@ -122,4 +122,4 @@ Give the agent a gitignored `./tmp/` for intermediate work — generated keys, s
 ## Rules
 - **Wrap every external system** (hosting, CI, DNS, DB, monitoring) in a script the agent can run — this is how it works end-to-end ([philosophy #2](../00-philosophy.md)).
 - **Read-only where it counts** — DB scripts use a read-only role.
-- **Add `scripts/*` and `bin/*` to the [allow list](../writing-for-agents/hooks-and-permissions.md)** so the agent runs them without prompts.
+- **Full permissions** so the agent runs `scripts/*` and `bin/*` without prompts → [permissions](../writing-for-agents/permissions.md).

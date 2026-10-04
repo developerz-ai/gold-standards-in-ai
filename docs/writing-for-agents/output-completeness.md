@@ -101,7 +101,7 @@ Prompts lower the rate. Architecture removes the incentive: if no single call ha
 - **Fixed verdict vocabulary:** `ship` / `fix` / `rebuild`. Derived, not felt: any missing requirement → never `ship`.
 - **Ordered fixes, most material first, capped** (e.g. ≤8). Missing deliverables outrank polish.
 - **Re-check pass scores each prior fix** `resolved` / `partial` / `unresolved` from the artifact — narration of the fix doesn't count.
-- **A "floor" list** of banned shapes (the placeholder list above) is checked even if a hook exists — hookless runs happen.
+- **A "floor" list** of banned shapes (the placeholder list above) is checked by the reviewer too — a gate can be skipped locally; CI and the reviewer can't.
 - **Reading allowance.** Under a turn cap, the reviewer reads the request and primary outputs first, samples the rest, and starts writing by mid-budget. A review cut off before its sections exist returns nothing; name what went unread instead.
 - **Verdict pass lists ≤ 3 regressions** the fix batch introduced, then stops. No fresh hunt on every round.
 
@@ -127,7 +127,7 @@ Prompts lower the rate. Architecture removes the incentive: if no single call ha
 
 ## 🛡️ The gates — reject incomplete output mechanically
 
-Prose rules get ignored under pressure; a failing check doesn't. Climb the [guards ladder](guards-and-gotchas.md) — this is rung 4 (lint guard) + a hook. **[ours]**
+Prose rules get ignored under pressure; a failing check doesn't. Climb the [guards ladder](guards-and-gotchas.md) — this is rung 4 (lint guard) in `bin/check` + CI. **[ours]**
 
 ### 1. Lint guard — scans the diff, not the whole repo
 ```bash
@@ -152,23 +152,8 @@ Guard rules (from [guards-and-gotchas](guards-and-gotchas.md#custom-lint-guards-
 - **Error text names the fix:** "write the real code, or name the gap in the PR body."
 - **Also check for stubs:** new function bodies that are only `pass`, `throw new Error("TODO")`, `unimplemented!()`, `return null // TODO` — add per-language patterns as they bite.
 
-### 2. Hook — catch it before the commit exists
-Wire the same script into the agent harness so the agent learns in its own loop:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash(git commit:*)",
-        "hooks": [{ "type": "command", "command": "scripts/lint/no-placeholder-output.sh HEAD" }]
-      }
-    ]
-  }
-}
-```
-
-Stronger variant: a `PostToolUse` hook on file writes/edits that greps just the written content and returns the hit to the agent immediately — the fix happens one step later, not at commit. Hook mechanics → [hooks-and-permissions](hooks-and-permissions.md).
+### 2. In the agent's own loop — `bin/check`
+Put the same script in `bin/check`, and in `CLAUDE.md`: "run `bin/check` before every commit". The agent sees the hit in its own loop; CI catches the run where it didn't. No harness hooks → [permissions](permissions.md).
 
 ### 3. Completeness check — the count gate
 Placeholders are greppable; *missing* items aren't. For multi-part work:
@@ -196,7 +181,7 @@ Prose rules can be ignored by some models some of the time. For instructions tha
 |---|---|
 | One-liner, small edit | nothing extra — tool-based edits rarely elide |
 | Single file / function | prompt block in `CLAUDE.md` + lint guard in CI |
-| Multi-file feature | + deliverable count in the plan + hook on commit |
+| Multi-file feature | + deliverable count in the plan + the guard in `bin/check` |
 | Large generation (many files, long docs, migrations) | + outline→per-part chunking or fan-out + continuation handling + finish reviewer |
 | Reusable instructions (skills, shared CLAUDE.md blocks) | + trace-based behavior tests on the models you run |
 
@@ -210,6 +195,6 @@ Prose rules can be ignored by some models some of the time. For instructions tha
 
 ---
 
-**Related:** [behavioral-rules.md](behavioral-rules.md) — goal-driven execution · [guards-and-gotchas.md](guards-and-gotchas.md) · [hooks-and-permissions.md](hooks-and-permissions.md) · [../ai-agents/agent-work-limits.md](../ai-agents/agent-work-limits.md) · [../ai-agents/context-budget.md](../ai-agents/context-budget.md)
+**Related:** [behavioral-rules.md](behavioral-rules.md) — goal-driven execution · [guards-and-gotchas.md](guards-and-gotchas.md) · [permissions.md](permissions.md) · [../ai-agents/agent-work-limits.md](../ai-agents/agent-work-limits.md) · [../ai-agents/context-budget.md](../ai-agents/context-budget.md)
 
 **Sources:** research notes, output-enforcement and gpt-taste skills in [taste-skill](https://github.com/Leonxlnx/taste-skill); finish reviewer, critique close and skill-behavior tests from [impeccable](https://github.com/pbakaus/impeccable). UI-specific review loop → [design-review-loop.md](../frontend-craft/design-review-loop.md).

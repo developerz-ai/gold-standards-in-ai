@@ -38,7 +38,7 @@ Same shape every time so the agent learns one repo and knows them all:
 | `apps/*` + `packages/*` | Monorepo: user-facing apps, shared domain/infra packages | [../architecture/monorepo.md](../architecture/monorepo.md) |
 | `bin/setup` `bin/dev` `bin/check` | Setup, run, gate — the core trio | [../developer-experience/dx-scripts.md](../developer-experience/dx-scripts.md) |
 | `CLAUDE.md` | The repo's contract for agents | [../writing-for-agents/claude-md.md](../writing-for-agents/claude-md.md) |
-| `.claude/` | Skills, commands, hooks | [../writing-for-agents/skills-commands-agents.md](../writing-for-agents/skills-commands-agents.md) |
+| `.claude/` | Skills, commands, agents, settings | [../writing-for-agents/skills-commands-agents.md](../writing-for-agents/skills-commands-agents.md) |
 | `biome.json` + CI | Format/lint + the green-gate pipeline | [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md) |
 
 After scaffold, `bin/setup && bin/dev` should boot the stack with zero manual steps.

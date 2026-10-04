@@ -54,7 +54,7 @@ The rule: **assets are committed already optimized.** Enforce it with a script, 
 # video  → ffmpeg to mp4 + webm (or reject big raw files)
 bun scripts/assets/optimize.ts assets/
 ```
-- Wire it as a **pre-commit hook** so unoptimized assets physically can't land ([hooks](../writing-for-agents/hooks-and-permissions.md)).
+- Wire it into `bin/check` + CI so unoptimized assets can't merge ([guards](../writing-for-agents/guards-and-gotchas.md)).
 - Or generate derivatives **at build time** (Vite image plugins) and commit only the source — pick one model and document it in `CLAUDE.md`.
 - **Block giant binaries in CI** (warn/fail over a size budget); large originals belong in R2, not git.
 - Keep one **lossless source** per asset; commit the optimized deliverables (or build them).
