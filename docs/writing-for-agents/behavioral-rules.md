@@ -15,10 +15,10 @@ Response rules shape how the agent *talks*. Behavioral rules shape how it *codes
 ## Coding Rules
 
 ### Think before coding
-- State assumptions explicitly. Uncertain → ask, don't guess.
+- State assumptions explicitly. Uncertain → check (code, docs, a quick experiment); still ambiguous → pick the most defensible reading, state it, proceed.
 - Multiple interpretations → present them, don't pick silently.
 - Simpler approach exists → say so.
-- Confused → stop. Name what's unclear. Ask.
+- Confused → stop guessing. Name what's unclear, resolve it from evidence; ask only when the answer is a genuine product decision.
 
 ### Simplicity first
 - Minimum code that solves the stated problem. Nothing speculative.

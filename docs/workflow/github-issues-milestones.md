@@ -84,7 +84,7 @@ So a plan is the source of truth; the issues/milestone are its projection onto t
 **Milestones = releases or epics** (e.g. `v1.0`, `approvals`). Issues = slices.
 
 ## Let the agent run `gh`
-Add to the allow list so the agent operates the tracker without prompts → [../writing-for-agents/hooks-and-permissions.md](../writing-for-agents/hooks-and-permissions.md):
+The agent runs with full permissions, so `gh` just works → [../writing-for-agents/permissions.md](../writing-for-agents/permissions.md). If you run a narrower mode elsewhere, the allow entries are:
 
 ```json
 {

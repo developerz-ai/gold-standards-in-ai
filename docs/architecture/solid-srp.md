@@ -92,4 +92,4 @@ Concrete first. Introduce an interface/trait when the **second implementation** 
 | Custom errors | self-documenting error flows |
 | Documented commands | exact CLI, no guessing |
 
-Enforce it mechanically: a lint gate + a [pre-commit hook](../writing-for-agents/hooks-and-permissions.md), so the agent literally can't commit code that violates the baseline.
+Enforce it mechanically: a lint gate in `bin/check` + CI, so code that violates the baseline can't merge → [guards](../writing-for-agents/guards-and-gotchas.md).

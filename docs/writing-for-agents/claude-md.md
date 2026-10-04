@@ -68,7 +68,7 @@ git add AGENTS.md              # git stores the symlink itself
 Apply the same `ln` trick to anything an agent reads that should be identical across a project — so you edit once and every consumer sees it:
 - **`AGENTS.md` → `CLAUDE.md`** (above).
 - **Per-app files that mirror the root** in a [monorepo](../architecture/monorepo.md): if every app should see the org rules, symlink rather than copy.
-- **Shared skills/commands/hooks:** keep canonical ones in a root `.claude/` and symlink the dir (or individual files) into apps that need them:
+- **Shared skills/commands:** keep canonical ones in a root `.claude/` and symlink the dir (or individual files) into apps that need them:
   ```bash
   ln -s ../../.claude/skills/deploy apps/web/.claude/skills/deploy
   ```

@@ -12,7 +12,7 @@
 - **Same env as production** — dev and deploy targets are both Linux. Fewer "works locally, breaks in prod" surprises.
 - **Claude Code runs where the code runs** — full filesystem, real services, real network. No bridging from a laptop.
 - **Disposable + reproducible** — a box is cattle, not a pet. Rebuild from a script in minutes.
-- **Safe autonomy** — the VPS is the blast radius, so you can run the agent with [broad permissions](../writing-for-agents/hooks-and-permissions.md); you still review every PR.
+- **Safe autonomy** — the VPS is the blast radius, so you can run the agent with [full permissions](../writing-for-agents/permissions.md); you still review every PR.
 - **Reachable from anywhere** — phone, tablet, any laptop → SSH/web into the same powerful box.
 
 ## What a dev box has

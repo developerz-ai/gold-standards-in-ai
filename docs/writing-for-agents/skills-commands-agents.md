@@ -15,7 +15,6 @@ One skill per domain, not per task. The `description` is the trigger — pack it
 ---
 name: deploy
 description: Use when deploying, shipping, or releasing the app — test, build, push, verify.
-allowed-tools: [Bash, Read]
 ---
 
 # Deploy
@@ -37,7 +36,7 @@ Structure for bigger skills:
 ```
 
 Tips:
-- `allowed-tools` enforces safety (read-only during review, no writes during debugging).
+- No `allowed-tools` fences — the agent keeps full power; a reviewer stays read-only because its prompt says review, and its output is a report → [permissions.md](permissions.md).
 - Inside the body: **instruct, don't explain.** Numbered steps, exact commands, failure branches inline (`fail → stop`).
 - A `creating-skills` meta-skill lets the agent author new skills itself — with the absorb check below built in.
 
@@ -62,7 +61,6 @@ Common categories: development (your stack's patterns), database-design, perform
 ---
 description: Create a structured implementation plan
 argument-hint: [what you want to do]
-allowed-tools: [Write, Read, Glob, Grep, Bash, Skill]
 ---
 
 # /plan

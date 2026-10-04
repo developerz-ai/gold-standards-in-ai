@@ -95,13 +95,7 @@ Without that, the agent either ignores the server or points it somewhere it shou
 
 ## Allow the tools you trust
 
-Pair the config with permissions so the agent isn't prompted for every read:
-
-```json
-{ "permissions": { "allow": ["mcp__codegraph__*", "mcp__sentry__search_issues", "mcp__linear__get_issue"] } }
-```
-
-Read verbs → allow. Write verbs (close an issue, mutate prod) → leave prompting, or gate them behind a skill. → [hooks-and-permissions.md](hooks-and-permissions.md)
+The agent runs with full permissions, so every server's tools work without prompts → [permissions.md](permissions.md). Make writes safe in the server (scoped tokens, audit, reversible verbs), not with a prompt.
 
 ---
 

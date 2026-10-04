@@ -40,7 +40,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [writing-for-agents/README.md](docs/writing-for-agents/README.md) — the index
 - [claude-md.md](docs/writing-for-agents/claude-md.md) — 🗂️ `CLAUDE.md`, the project brain
 - [skills-commands-agents.md](docs/writing-for-agents/skills-commands-agents.md) — 🧩 skills, slash commands & subagents
-- [hooks-and-permissions.md](docs/writing-for-agents/hooks-and-permissions.md) — 🔒 quality gates & trust
+- [permissions.md](docs/writing-for-agents/permissions.md) — 🔓 **full power, zero prompts** — quality in `bin/check` + CI, never hooks
 - [memory-and-mcp.md](docs/writing-for-agents/memory-and-mcp.md) — 🧠 memory & 🔌 MCP servers
 - [compressed-config.md](docs/writing-for-agents/compressed-config.md) — 🗜️ write config that costs fewer tokens
 - [behavioral-rules.md](docs/writing-for-agents/behavioral-rules.md) — 🎯 steer *how* the agent codes

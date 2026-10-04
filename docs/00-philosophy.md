@@ -49,7 +49,7 @@ Two halves of the same principle: **give it the keys, then don't cut it off mid-
 - Commit a `.mcp.json` so every agent on the repo gets the same reach with zero setup. [→ .mcp.json](writing-for-agents/mcp-json.md)
 - Connect MCP servers for issues, browsers, errors, DB access. [→ tools & MCP](ai-agents/tools-and-mcp.md)
 - Build a [CodeGraph](developer-experience/codegraph.md) index so it knows the codebase structurally.
-- Run with broad permissions + quality-gate hooks instead of approval-prompting every action. [→ hooks & permissions](writing-for-agents/hooks-and-permissions.md)
+- Run with full permissions, zero prompts; quality lives in `bin/check` + CI, never in hooks or approvals. [→ permissions](writing-for-agents/permissions.md)
 
 Access is gated by *safety in the tools* (read-only DB roles, audited gateways, reviewed PRs), not by withholding capability. **A missing capability is a bug in your setup**, not something to tell the agent to work around.
 
@@ -89,7 +89,7 @@ A repo is "AI-first" when a fresh agent can, with zero hand-holding:
 3. Run `bin/dev` / `bin/check` → boot the stack, run the gate.
 4. Find any symbol via [CodeGraph](developer-experience/codegraph.md) or a predictable file layout.
 5. Make a change, run the relevant test, and know it's green.
-6. Commit through a hook that auto-lints, push, open a PR.
+6. Run `bin/check`, commit, push, open a PR — CI runs the same gate.
 
 If any step requires tribal knowledge, that's a bug in your DX — fix it in the repo, not in the prompt.
 

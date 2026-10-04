@@ -10,7 +10,7 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 |---|---|---|
 | 1 | [claude-md.md](claude-md.md) | 🗂️ `CLAUDE.md` — the project brain, read every session · path-scoped `.claude/rules/` |
 | 2 | [skills-commands-agents.md](skills-commands-agents.md) | 🧩 Skills (domain expertise), slash commands (workflows), subagents (specialists) |
-| 3 | [hooks-and-permissions.md](hooks-and-permissions.md) | 🔒 Auto-allow safe ops, gate quality with hooks |
+| 3 | [permissions.md](permissions.md) | 🔓 Full power, zero prompts — quality in `bin/check` + CI, never hooks |
 | 4 | [memory-and-mcp.md](memory-and-mcp.md) | 🧠 Cross-session memory · 🔌 MCP servers · the 3-tool MCP pattern |
 | 5 | [compressed-config.md](compressed-config.md) | 🗜️ Write config files that cost fewer tokens, same signal |
 | 6 | [behavioral-rules.md](behavioral-rules.md) | 🎯 Steer *how* the agent codes (assumptions, simplicity, surgical diffs) |
@@ -27,7 +27,7 @@ Building with a team of agents inside one of those commands? → [../ai-agents/h
 80% of the value, under an hour:
 
 1. **`CLAUDE.md` with exact commands** — test, lint, build, deploy. The agent stops guessing your CLI.
-2. **Broad permissions + a pre-commit lint hook** — zero approval friction, but it physically can't commit unlinted code.
+2. **Full permissions + `bin/check` in CI** — zero approval friction; unlinted code can't merge.
 3. **Response + coding rules** in `CLAUDE.md` — "no preamble, lead with action, disagree when wrong" + surgical-diff rules.
 4. **One lint command** — `bin/lint` auto-fixes everything.
 5. **A committed `.mcp.json`** — every agent on the repo reaches issues, errors, the DB and the browser with zero setup.
