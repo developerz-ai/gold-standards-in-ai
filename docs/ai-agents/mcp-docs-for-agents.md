@@ -265,13 +265,13 @@ Never let the resource copy be the only copy.
 | `docs` | *how do I…* → recipes + the map |
 | `list_resources` | *what's in here* |
 | `describe_resource` | *what fields/enums does X take* |
-| `manage_resource` | do it |
+| `read_resource` · `write_resource` · `delete_resource` | do it, split by effect ([write safety](mcp-write-safety.md)) |
 
-Four tools, ~800 tokens, flat at any catalog size.
+Six tools, ~1.2k tokens, flat at any catalog size.
 
 - **One `docs` tool, not `docs_search` + `docs_read`.** Two names = two chances to pick wrong; the server knows whether it got `q` or `uri`.
 - **Keep `docs` separate from `describe_resource`.** Different question shapes. A recipe crosses three resources — folding it into `describe_resource` makes it findable only if the model already guessed the right resource, which is the guess it can't make.
-- **Cross-reference in the other descriptions:** end each with `If unsure how to sequence calls, start with docs({q:"..."})`. ~12 tokens, in context every turn, catches the model before it improvises.
+- **Make `docs` findable by what it returns, not by orders.** Its own description says what it serves ("worked sequences of calls for common tasks; `docs({q:'...'})` searches"). Don't append `If unsure… start with docs()` to the other tools. Directory review rejects descriptions that steer the model toward other tools or tell it how to behave.
 - **Keep the description under ~1k chars.** Some hosts truncate long ones with no error — the tail just vanishes. Entry-point call on the *first* line.
 - **Return flat plain text.** No markdown tables, no nested JSON. Clients strip formatting, truncate, or hand over raw text; plain lines survive all of it.
 
@@ -402,7 +402,7 @@ Same architecture — a skill *is* progressive disclosure (description in the sy
 - [ ] CI replays every fenced call; link-lint every `docs://` URI
 
 ## See also
-- [tools-and-mcp.md](tools-and-mcp.md) — tool design, the 3-tool meta pattern, audited capability access
+- [tools-and-mcp.md](tools-and-mcp.md) — tool design, the split meta-tool pattern, audited capability access
 - [../writing-for-agents/memory-and-mcp.md](../writing-for-agents/memory-and-mcp.md) — the token-cost case for few parameterized tools
 - [context-budget.md](context-budget.md) — lazy surfaces, chunked results, prompt-cache prefix order
 - [../writing-for-agents/compressed-config.md](../writing-for-agents/compressed-config.md) — how to write the text you return

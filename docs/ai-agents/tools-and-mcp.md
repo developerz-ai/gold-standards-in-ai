@@ -66,14 +66,18 @@ Retry the connection with backoff; cache the tool list (HTTP streamable transpor
 ### Sentry → close the loop
 With a Sentry MCP server the agent can pull the top production errors, read the stack trace, find the offending code, write a fix + a reproducing test, and open a PR — autonomously. Error monitoring isn't just for dashboards; it's a *work queue* for an agent. Wiring + SDK setup: [../infrastructure/observability.md](../infrastructure/observability.md).
 
-## Designing your own MCP server — the 3-tool pattern
-Don't ship one tool per action (hundreds of tools = huge per-turn token cost). Expose a constant surface:
+## Designing your own MCP server — the split meta-tool pattern
+Don't ship one tool per action (hundreds of tools = huge per-turn token cost). Expose a constant surface, with the dispatcher **split by effect** so each tool's annotations are true of every action it runs. A single read+write dispatcher is rejected by the Connectors Directory.
 
 | Tool | Purpose |
 |---|---|
-| `list_resources` | catalog of resources + their actions |
+| `list_resources` | catalog of resources + their actions + which tool runs each |
 | `describe_resource` | lazy schema for one resource/action |
-| `manage_resource` | dispatcher: `{resource, action, ...params}` |
+| `read_resource` | dispatcher for reads: `{resource, action, params}`, `readOnlyHint: true` |
+| `write_resource` | creates/updates, `destructiveHint: true` |
+| `delete_resource` | archive/cancel/merge/delete/send, `destructiveHint: true`, requires `confirmed_by_user` |
+
+Annotations, `live: false` previews and the `confirmed_by_user` gate: [mcp-write-safety.md](mcp-write-safety.md).
 
 Push composition into **params** (`filters`, `sort`, `fields`, `include`, `page`) not into more tools. Full rationale, the cost table, and auth/whitelisting rules: [../writing-for-agents/memory-and-mcp.md](../writing-for-agents/memory-and-mcp.md#building-mcp-servers--few-parameterized-tools-beat-many).
 

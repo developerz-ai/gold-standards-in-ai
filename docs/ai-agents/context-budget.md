@@ -54,7 +54,7 @@ Providers cache a **matching prefix**. One variable value placed early invalidat
 - Discovery pattern: `discover → describe → dispatch → fetch`. The surface is constant; the catalog is not in context.
 - The property that matters is **"none of the tools is per-connector"**, not the raw tool count.
 - Skills: a one-line catalog entry + `load_skill(name)`. Pin a body inline only when it's needed on *most* turns.
-- Prefer **fewer tools with more parameters** over a tool per verb → [tools-and-mcp](tools-and-mcp.md#designing-your-own-mcp-server--the-3-tool-pattern).
+- Prefer **fewer tools with more parameters** over a tool per verb → [tools-and-mcp](tools-and-mcp.md#designing-your-own-mcp-server--the-split-meta-tool-pattern).
 
 **What comes back from outside** — MCP results, HTTP responses, data-source reads. **You don't control these payloads.** One connector call has been measured returning **28,181 bytes** into a single step, permanently polluting the turn.
 
