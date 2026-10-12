@@ -62,26 +62,30 @@ One tool per action = hundreds of tools sitting in context every turn. The cost 
 
 Linear in your API surface, and it never amortizes — the whole list is re-sent every turn (same token-budget logic as [compressed-config](compressed-config.md)):
 
-| Resources (6 verbs) | One-tool-per-verb | `tools/list` every turn | 3 meta-tools |
+| Resources (6 verbs) | One-tool-per-verb | `tools/list` every turn | 5 meta-tools |
 |---|---|---|---|
-| 5 | 30 tools | ~6k tokens | ~0.6k, flat |
-| 50 | 300 tools | ~60k tokens | ~0.6k, flat |
-| 500 | 3,000 tools | won't fit | ~0.6k, flat |
+| 5 | 30 tools | ~6k tokens | ~1k, flat |
+| 50 | 300 tools | ~60k tokens | ~1k, flat |
+| 500 | 3,000 tools | won't fit | ~1k, flat |
 
-(~200 tokens per tool for name + description + JSON schema. The three meta-tools stay flat no matter how many resources sit behind them.)
+(~200 tokens per tool for name + description + JSON schema. The meta-tools stay flat no matter how many resources sit behind them.)
 
-### The 3-tool meta pattern — constant surface at any scale
+### The meta pattern — constant surface at any scale, dispatcher split by effect
 | Tool | Purpose |
 |---|---|
-| `list_resources` | catalog: `[{name, description, actions}]`. Cheap. |
-| `describe_resource` | schema for one resource/action. Lazy — only what's needed. |
-| `manage_resource` | dispatcher: `{resource, action, ...params}` → registered handler. |
+| `list_resources` | catalog: `[{name, description, actions}]`, each action naming the tool that runs it. Cheap. |
+| `describe_resource` | schema for one resource/action. Lazy, only what's needed. |
+| `read_resource` | dispatcher for actions that change nothing → `readOnlyHint: true` |
+| `write_resource` | dispatcher for create/update → `destructiveHint: true` |
+| `delete_resource` | dispatcher for archive/cancel/merge/delete/send → `destructiveHint: true` + required `confirmed_by_user` |
 
 ```
-manage_resource({ resource: "posts", action: "list",
-                  filters: { status_eq: "published" }, sort: "-created_at" })
+read_resource({ resource: "posts", action: "list",
+                params: { filters: { status_eq: "published" }, sort: "-created_at" } })
 ```
-Add 50 resources tomorrow — `tools/list` doesn't grow. Only schemas the model asks about enter context.
+Add 50 resources tomorrow and `tools/list` doesn't grow. Only schemas the model asks about enter context.
+
+**Never one `manage_resource` for reads and writes.** It can't carry an honest `readOnlyHint`, so hosts can't auto-run its reads or reliably prompt on its deletes. The Connectors Directory rejects it outright. Annotations, previews and confirmation: [../ai-agents/mcp-write-safety.md](../ai-agents/mcp-write-safety.md).
 
 ### Push composition into params, not tools
 Don't ship `list_recent_posts`, `list_published_posts`, `posts_by_tag`. Ship one `list` with composable primitives: `filters` (`_eq`, `_gt`, `_in`, `_cont`), `query`, `sort`, `scope`, `fields` (sparse responses), `page`/`per_page`, `include` (eager-load).
@@ -93,7 +97,7 @@ Rules:
 - Keep genuinely non-CRUD tools separate (`send_slack_message`, `reset_password`) and filter them from `tools/list` by role.
 
 ### The honest tradeoff — lazy schemas cost a round-trip
-Lazy loading isn't free. First touch of a resource usually burns one turn on `describe_resource` before `manage_resource` can be called — constant per-turn overhead traded for a one-time-per-resource handshake. Shrink it three ways:
+Lazy loading isn't free. First touch of a resource usually burns one turn on `describe_resource` before the dispatcher can be called — constant per-turn overhead traded for a one-time-per-resource handshake. Shrink it three ways:
 - **Make `list_resources` rich enough to act on.** Inline each resource's actions *and* a one-line param hint — enough to compose the common `list`/`get`/`create` call directly. Reserve `describe_resource` for the long tail: full attribute schemas, enums, validation rules.
 - **Let the model batch.** Accept an array — `describe_resource(resources: ["deals", "contacts"])` — one handshake for multi-resource work.
 - **Cache it.** Schemas are stable between deploys; a host that caches `describe_resource` pays once per session, not once per task.

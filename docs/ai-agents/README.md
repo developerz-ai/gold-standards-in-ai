@@ -9,6 +9,7 @@ Patterns for building agents — the systems that *do the work* — with the AI 
 | [hive-mind.md](hive-mind.md) | 🐝 Running a team of agents in ONE checkout — when to hive, the file set as the lock, the WHY + 9-point brief, interrogate the report |
 | [tools-and-mcp.md](tools-and-mcp.md) | 🔧 Tool design + MCP integration + audited capability access |
 | [mcp-docs-for-agents.md](mcp-docs-for-agents.md) | 📖 Teach *their* agent to use *your* MCP server — recipes as prose (branches, bounded loops, retries), the `docs` tool, editable markdown |
+| [mcp-write-safety.md](mcp-write-safety.md) | 🛡️ MCP writes that hosts and directories trust — read/write/delete split + annotations, `live:false` previews, required `confirmed_by_user` on destructive commits, audited claims |
 | [agent-work-limits.md](agent-work-limits.md) | 🔓 Freedom + access — never cap the work, wire it to everything, stall-fence instead |
 | [context-budget.md](context-budget.md) | 🧮 The standing context, prompt-cache prefix order, lazy surfaces, chunked external results |
 | [evals.md](evals.md) | 📏 Evals — capability vs regression, pass@k vs pass^k, graders from code checks to LLM judge, run before merge |

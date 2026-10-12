@@ -99,4 +99,4 @@ The agent runs with full permissions, so every server's tools work without promp
 
 ---
 
-*Building your own MCP server?* The surface-size rules — few parameterized tools, lazy schemas, the 3-tool meta pattern — are in [memory-and-mcp.md](memory-and-mcp.md#building-mcp-servers--few-parameterized-tools-beat-many).
+*Building your own MCP server?* The surface-size rules — few parameterized tools, lazy schemas, the split meta-tool pattern — are in [memory-and-mcp.md](memory-and-mcp.md#building-mcp-servers--few-parameterized-tools-beat-many).

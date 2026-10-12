@@ -11,7 +11,7 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 | 1 | [claude-md.md](claude-md.md) | 🗂️ `CLAUDE.md` — the project brain, read every session · path-scoped `.claude/rules/` |
 | 2 | [skills-commands-agents.md](skills-commands-agents.md) | 🧩 Skills (domain expertise), slash commands (workflows), subagents (specialists) |
 | 3 | [permissions.md](permissions.md) | 🔓 Full power, zero prompts — quality in `bin/check` + CI, never hooks |
-| 4 | [memory-and-mcp.md](memory-and-mcp.md) | 🧠 Cross-session memory · 🔌 MCP servers · the 3-tool MCP pattern |
+| 4 | [memory-and-mcp.md](memory-and-mcp.md) | 🧠 Cross-session memory · 🔌 MCP servers · the split meta-tool MCP pattern |
 | 5 | [compressed-config.md](compressed-config.md) | 🗜️ Write config files that cost fewer tokens, same signal |
 | 6 | [behavioral-rules.md](behavioral-rules.md) | 🎯 Steer *how* the agent codes (assumptions, simplicity, surgical diffs) |
 | 7 | [planning-and-docs.md](planning-and-docs.md) | 📐 Plan before coding · docs vs CLAUDE.md · the initial idea |
