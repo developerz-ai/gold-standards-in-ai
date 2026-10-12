@@ -9,6 +9,14 @@ An MCP server that writes needs to make three things legible to the agent and th
 
 Each layer is cheap, and together they're strong. A cooperating model reads all three and follows them. When one is skipped, the audit row shows it.
 
+## 💪 Why `confirmed_by_user` works
+- **Models follow required parameters.** A required boolean in the schema is the strongest steer a server can give without writing a directive into a description. Every call has to answer the question "did the user approve this?", and the model asks.
+- **Consent becomes a protocol step, not a vibe.** Without it, "ask before deleting" lives in a system prompt you don't control. With it, the server holds the line: no `true`, no commit, and the refusal carries everything needed to ask.
+- **It makes the right flow the easy flow.** Preview → show → confirm → commit is two calls. The refusal hands back the exact call to retry.
+- **It's measurable.** `user_confirmed` on every row turns "are agents asking before they destroy data?" into a query: claimed-confirmed commits, refused-for-missing, and per-client rates.
+- **It costs nothing.** One schema property, one check, one column. No new tool, no extra round-trip on reads, and no friction on previews.
+- **It stacks.** It adds to the host's `destructiveHint` prompt and the server's preview/token/allow-list gates, and replaces none of them.
+
 ## ✂️ Split the dispatcher by effect, never by entity
 
 One `manage_resource` that both reads and deletes can't carry an honest `readOnlyHint`, and the Connectors Directory **rejects** it ("separate read and write tools"). Saying which actions are safe in the description doesn't count. Split the tool:
