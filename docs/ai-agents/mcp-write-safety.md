@@ -58,10 +58,12 @@ The flag is **required** in `delete_resource`'s `inputSchema`, so the model sees
 
 ```json
 "confirmed_by_user": { "type": "boolean",
-  "description": "true when the user approved this specific change. A committing call without true writes nothing and returns confirmation_required with the call it refused. A preview (live false or absent) runs either way." }
+  "description": "true when the user approved this change, either directly or by authorizing the task that includes it. A committing call without true writes nothing and returns confirmation_required with the call it refused. A preview (live false or absent) runs either way." }
 ```
 
 The flow the model follows: **preview → show the user → user says yes → commit with `confirmed_by_user: true`.**
+
+**Approval can be per change or for the whole task.** The user says "do the full job" → the model sends `true` on every commit in that job, with no re-asking. The model has no approval → the server refuses, echoes the call, and the model asks. The user decides; the flag carries that decision to the server.
 
 | Rule | Why |
 |---|---|
