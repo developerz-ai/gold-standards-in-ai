@@ -24,3 +24,8 @@ For each unhealthy signal, one ask, unless an open issue already carries its exa
 Titles are stable: nothing that changes run to run (sha, run URL, version) goes in one; that goes in the body,
 with the command and its output. Unreadable evidence is no verdict: re-run it, never file it as a defect.
 A red `main` comes first: nothing releases from it.
+
+## Rows
+
+- `relative-links` — Every relative link resolves; use the existing relative-link loop above.
+- `docs-indexed` — Every doc is indexed; use the existing doc-indexing command in the Signal table above.
