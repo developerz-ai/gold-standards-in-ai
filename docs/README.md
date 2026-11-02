@@ -4,8 +4,8 @@
 
 | Where | What lives there |
 |---|---|
-| [`idea/`](idea/) | Why this repository is shaped the way it is: the product idea, the architecture, the principles a change is weighed against. *(not created yet)* |
-| [`standards/`](standards/) | How work is done here: the rules a change follows, and for each rule the check that enforces it. *(not created yet)* |
+| [🧠 Philosophy](00-philosophy.md) | AI-first development and the principles behind this knowledge base. |
+| [✍️ Writing for agents](writing-for-agents/README.md) | Context, tooling, behavioral rules, and verification for coding agents. | 
 
 The brain itself is the repo root's [`CLAUDE.md`](../CLAUDE.md); the
 commands are `bin/{setup,dev,check,stop}`.
