@@ -24,7 +24,7 @@ Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(s
 ## Gates that matter
 - No CI and no test runner: the gate is prose review, link integrity and the map staying true (`.claude/commands/feature.md`).
 - "Proven" means both final checks pass — every relative link resolves, every doc is indexed in both READMEs. `bash bin/check` prints one line per finding; empty output is the proof.
-- The repo-wide link sweep also matches links inside fenced code blocks — expected noise; judge the hits, do not count them.
+- The link sweep strips fenced code blocks and inline code before it extracts links — every printed hit is a real markdown link; never dismiss one as fenced-code noise.
 - `maintainer.yml` sets `required_checks: []` and `auto_merge_scope: own_and_dependency_bots`: an outside contributor's PR waits for a member.
 - A red `main` comes first; nothing else ships until it is green.
 
