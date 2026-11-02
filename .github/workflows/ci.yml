@@ -1,0 +1,18 @@
+# CI green-gate — established by dz-runner setup mode.
+# Runs the SAME `bin/check` a coding agent runs locally, so a green local run
+# cannot land red here. Adjust the toolchain step below if the default runner
+# image does not carry yours (e.g. actions/setup-node, oven-sh/setup-bun).
+name: check
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: bin/setup
+      - run: bin/check
