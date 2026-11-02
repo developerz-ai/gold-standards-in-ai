@@ -7,16 +7,33 @@
 
 ## Stack
 
-Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oE '\]\([^)#[:space:]]+' | cut -c3- | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`): a change that does not pass it is not proven, whatever its description says.
+Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oP '\]\(\K[^)#[:space:]]+' | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`): a change that does not pass it is not proven, whatever its description says.
 
 ## Review conventions
-
-- TODO(setup): the conventions a reviewer must hold this repo to (from CLAUDE.md / CONTRIBUTING), each as a rule.
+- Hold every doc to the writing rules in `CLAUDE.md`: lead with the rule, fragments over sentences, tables over paragraphs.
+- Reject a file that merges several topics — one topic per file.
+- Require exact paths, commands, env vars and model IDs to stay verbatim; only prose is compressed.
+- Reject any secret, private hostname/IP or client name; placeholders are allowed.
+- Require a date on every load-bearing claim (`As of 2026-06`); prefer deleting a stale doc over patching it.
+- Require the doc to be linked from `README.md` **and** its section `README.md` — an unwired doc does not exist.
+- Keep examples vendor-neutral; require the latest Claude model IDs when a model is named.
+- Reject meta-framing, rhetoric and a trailing summary paragraph.
+- Cite `file:line` for every finding and drop the finding if you cannot — the precision gate in `docs/writing-for-agents/reviewer-agents.md`.
+- Treat zero findings as a valid review; never hold back approval to look rigorous.
 
 ## Gates that matter
-
-- TODO(setup): which checks decide a change here, and what "proven" means for a pull request.
+- No CI and no test runner: the gate is prose review, link integrity and the map staying true (`.claude/commands/feature.md`).
+- "Proven" means both final checks pass — every relative link resolves, every doc is indexed in both READMEs. `bash bin/check` prints one line per finding; empty output is the proof.
+- The repo-wide link sweep also matches links inside fenced code blocks — expected noise; judge the hits, do not count them.
+- `maintainer.yml` sets `required_checks: []` and `auto_merge_scope: own_and_dependency_bots`: an outside contributor's PR waits for a member.
+- A red `main` comes first; nothing else ships until it is green.
 
 ## Never flag
+- Emoji headings and one-line hooks in the READMEs — house navigation style, not decoration to clean up.
+- Tables of exact paths, commands or model IDs — the compression rule keeps them verbatim.
+- `As of <date>` stamps — the mechanism for dated claims, not staleness.
+- The `description` / `argument-hint` / `allowed-tools` frontmatter in `.claude/commands/*.md` — required by the command format.
+- `.claude/` and `.dz/` files — platform-owned layout, edited by the maintainer bot, not by a doc PR.
+- Plan artifacts under `docs/plans/` — transient `/planx` output, not published docs.
+- A sibling link written as `../<section>/<file>.md` instead of restating the sibling's content — cross-linking is the rule.
 
-- TODO(setup): what never to flag — generated or vendored files, style a formatter owns, conventions this repo chose on purpose.
