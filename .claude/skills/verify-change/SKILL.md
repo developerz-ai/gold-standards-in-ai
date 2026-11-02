@@ -16,7 +16,7 @@ passes it locally passes everywhere.
 |------|---------|------------|
 | install | `bin/setup` | echo "gold-standards-in-ai: markdown only, no dependencies to install" |
 | run | `bin/dev` | echo "gold-standards-in-ai: no app to run - read README.md for the map" — on developerz.ai runs, start it with code_bash_background when you need a running stack |
-| prove | `bin/check` | [ -d docs ]\|\|exit 1; o=$(set +e; find . -name '*.md' \| while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] \|\| grep -qsF $b README.md $d/README.md \|\| echo $f;; esac; sed '/^ *\`\`\`/,/^ *\`\`\`/d;s/\`[^\`]*\`//g' "$f" \| grep -oP '\\]\\(\\K[^)#[:space:]]+' \| grep -v ':' \| while read -r l; do [ -e "$d/$l" ] \|\| echo "$f $l"; done; done;true); [ -z "$o" ]\|\|{ echo "$o"; false; } |
+| prove | `bin/check` | [ -d docs ]\|\|exit 1; o=$(set +e; find . -name '*.md' \| while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] \|\| grep -qsF $b README.md $d/README.md \|\| echo $f;; esac; sed '/^ *\`\`\`/,/^ *\`\`\`/d;s/\`[^\`]*\`//g' "$f" \| grep -oE '\\]\\([^)#[:space:]]+' \| cut -c3- \| grep -v ':' \| while read -r l; do [ -e "$d/$l" ] \|\| echo "$f $l"; done; done;true); [ -z "$o" ]\|\|{ echo "$o"; false; } |
 | stop | `bin/stop` | true — on developerz.ai runs, the platform runs this when your session ends — do not stop the stack yourself |
 
 ## Rules
