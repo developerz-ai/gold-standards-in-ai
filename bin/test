@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Regression fixtures for the Markdown validator; no downloaded dependencies.
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+validator="$repo_root/bin/check-docs"
+fixtures=$(mktemp -d "${TMPDIR:-/tmp}/check-docs.XXXXXXXX")
+trap 'rm -rf -- "$fixtures"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+passed=0
+failed=0
+fixture_number=0
+
+new_fixture() {
+    fixture_number=$((fixture_number + 1))
+    root="$fixtures/$fixture_number"
+    mkdir -p "$root/docs"
+    printf '# Fixture\n' > "$root/README.md"
+}
+
+assert_validation() {
+    local name=$1 expected_status=$2 expected_output=$3
+    local output status
+    if output=$(bash "$validator" "$root" 2>&1); then
+        status=0
+    else
+        status=$?
+    fi
+    if [[ $status -eq $expected_status && $output == "$expected_output" ]]; then
+        printf 'PASS %s\n' "$name"
+        passed=$((passed + 1))
+    else
+        printf 'FAIL %s\n' "$name"
+        printf '  expected status: %s; actual: %s\n' "$expected_status" "$status"
+        printf '  expected output: %q\n  actual output: %q\n' "$expected_output" "$output"
+        failed=$((failed + 1))
+    fi
+}
+
+new_fixture
+printf '[Topic](docs/topic.md)\n' >> "$root/README.md"
+printf '[Home](../README.md)\n' > "$root/docs/topic.md"
+assert_validation 'valid indexed docs and relative links' 0 ''
+
+new_fixture
+rmdir "$root/docs"
+assert_validation 'missing docs directory' 1 ''
+
+new_fixture
+printf '# Unindexed\n' > "$root/docs/topic.md"
+assert_validation 'unindexed document diagnostic' 1 './docs/topic.md'
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf 'topic.md\n' > "$root/docs/section/README.md"
+printf '# Topic\n' > "$root/docs/section/topic.md"
+assert_validation 'section index accepts basename' 0 ''
+
+new_fixture
+printf '# Section index\n' > "$root/docs/README.md"
+assert_validation 'README needs no index entry' 0 ''
+
+new_fixture
+printf '[Missing](missing.md)\n' >> "$root/README.md"
+assert_validation 'broken relative link diagnostic' 1 './README.md missing.md'
+
+new_fixture
+printf '[Missing](missing.md#heading)\n' >> "$root/README.md"
+assert_validation 'broken link with fragment' 1 './README.md missing.md'
+
+new_fixture
+cat >> "$root/README.md" <<'MARKDOWN'
+[Web](https://example.invalid/missing)
+[HTTP](http://example.invalid/missing)
+[Mail](mailto:nobody@example.invalid)
+[Custom](custom:missing)
+[Heading](#missing)
+MARKDOWN
+assert_validation 'URLs and fragment-only links ignored' 0 ''
+
+new_fixture
+cat >> "$root/README.md" <<'MARKDOWN'
+Inline `[Missing](inline-missing.md)` example.
+```markdown
+[Missing](fenced-missing.md)
+```
+   ```markdown
+[Missing](indented-fenced-missing.md)
+   ```
+MARKDOWN
+assert_validation 'inline and fenced code examples ignored' 0 ''
+
+new_fixture
+cat >> "$root/README.md" <<'MARKDOWN'
+```
+[Missing](example.md)
+```
+[Missing](real-missing.md)
+MARKDOWN
+assert_validation 'links after code fences still validated' 1 './README.md real-missing.md'
+
+new_fixture
+printf '[Home](README.md#heading)\n' >> "$root/README.md"
+assert_validation 'existing link with fragment' 0 ''
+
+printf '%s passed; %s failed\n' "$passed" "$failed"
+[[ $failed -eq 0 ]]

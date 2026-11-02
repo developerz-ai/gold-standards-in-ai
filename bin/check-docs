@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Validate Markdown indexing and relative links, optionally in a fixture root.
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+cd "${1:-$repo_root}"
+[[ -d docs ]] || exit 1
+
+# Keep the original parser: omit triple-backtick fences and inline code;
+# ignore fragments and targets containing a colon. Index by literal basename.
+diagnostics=$(
+    set +e
+    find . -name '*.md' | while read -r file; do
+        directory=${file%/*}
+        basename=${file##*/}
+        case $file in
+            ./docs/*)
+                [[ $basename == README.md ]] ||
+                    grep -qsF "$basename" README.md "$directory/README.md" ||
+                    echo "$file"
+                ;;
+        esac
+
+        sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$file" |
+            grep -oE '\]\([^)#[:space:]]+' |
+            cut -c3- |
+            grep -v ':' |
+            while read -r link; do
+                [[ -e "$directory/$link" ]] || echo "$file $link"
+            done
+    done
+    true
+)
+
+if [[ -n $diagnostics ]]; then
+    echo "$diagnostics"
+    exit 1
+fi
