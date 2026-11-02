@@ -7,12 +7,15 @@ Daily checkup fired by `schedules: health`: the failures no issue or PR announce
 | every relative link resolves | the loop below | it prints nothing |
 | every doc is indexed | `for f in $(git ls-files 'docs/**/*.md'); do b=$(basename "$f"); [ "$b" = README.md ] \|\| grep -rqF "$b" README.md "$(dirname "$f")/README.md" \|\| echo "$f"; done` | it prints nothing |
 ```bash
-git ls-files '*.md' | while read -r f; do
-  grep -oE '\]\([^)#[:space:]]+' "$f" | sed 's/^](//' | grep -vE '^[a-z]+:' | while read -r l; do
-    [ -e "$(dirname "$f")/$l" ] || echo "$f -> $l"
-  done
+git ls-files '*.md' | grep -v '^\.claude/' | while read -r f; do
+  awk '/^[[:space:]]*```/{c=!c;next} !c' "$f" | sed 's/`[^`]*`//g' \
+    | grep -oE '\]\([^)#[:space:]]+' | sed 's/^](//' | grep -vE '^[a-z]+:' | while read -r l; do
+      [ -e "$(dirname "$f")/$l" ] || echo "$f -> $l"
+    done
 done
 ```
+
+It skips fenced and inline code, where a link is an example rather than a link, and `.claude/`.
 
 ## What to file
 
