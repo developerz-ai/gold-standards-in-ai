@@ -32,16 +32,22 @@ anchors_of() {
     {
         # The text of every ATX heading, fences already stripped.
         sed '/^ *```/,/^ *```/d' "$file" |
-            sed -nE 's/^#{1,6}[[:space:]]+(.*)$/\1/p'
-        # The name of every explicit HTML anchor.
+            sed -nE 's/^#{1,6}[[:space:]]+(.*)$/\1/p' |
+            while IFS= read -r text; do
+                # drop a trailing closing sequence of '#'s and surrounding blanks
+                text=$(printf '%s' "$text" | sed 's/[[:space:]]*#*[[:space:]]*$//')
+                slugify "$text"
+            done |
+            # GitHub collision suffixes: the first occurrence keeps the bare
+            # slug, the next ones become '<slug>-1', '<slug>-2', ... The
+            # suffix counter counts heading slugs only.
+            awk '{ n = seen[$0]++; if (n > 0) print $0 "-" n; else print $0 }'
+        # The name of every explicit HTML anchor, verbatim - GitHub neither
+        # suffixes nor slugifies an anchor's own name.
         sed '/^ *```/,/^ *```/d' "$file" |
             grep -oE '<a[[:space:]]+(name|id)="[^"]+"' |
             sed 's/.*="//;s/"$//' || true
-    } | while IFS= read -r text; do
-        # drop a trailing closing sequence of '#'s and surrounding blanks
-        text=$(printf '%s' "$text" | sed 's/[[:space:]]*#*[[:space:]]*$//')
-        slugify "$text"
-    done
+    }
 }
 
 # Keep the original parser: omit triple-backtick fences and inline code;

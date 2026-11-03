@@ -235,5 +235,43 @@ cat >> "$root/README.md" <<'MARKDOWN'
 MARKDOWN
 assert_validation 'fragment without the HTML anchor is dead' 1 './README.md docs/section/target.md#docs-decay dead anchor'
 
+# Two identical headings: GitHub exposes the first as the bare slug and the
+# second as '<slug>-1' - the checker must offer both, not the bare slug twice.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## Topic
+
+## Topic
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[First](docs/section/target.md#topic)
+[Second](docs/section/target.md#topic-1)
+MARKDOWN
+assert_validation 'duplicate headings get GitHub collision suffixes' 0 ''
+
+# A suffix beyond the collision count still matches no heading.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## Topic
+
+## Topic
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+printf '[Third](docs/section/target.md#topic-2)\n' >> "$root/README.md"
+assert_validation 'suffix beyond the collision count is dead' 1 './README.md docs/section/target.md#topic-2 dead anchor'
+
+# A link may carry a title - validate the target and fragment, never the
+# quoted title.
+new_fixture
+printf '[Home](README.md#fixture "Home")\n' >> "$root/README.md"
+assert_validation 'link title is stripped before validation' 0 ''
+
 printf '%s passed; %s failed\n' "$passed" "$failed"
 [[ $failed -eq 0 ]]
