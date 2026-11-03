@@ -7,7 +7,7 @@
 
 ## Stack
 
-Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oP '\]\(\K[^)#[:space:]]+' | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`): a change that does not pass it is not proven, whatever its description says.
+Markdown only (no runtime). The gate is `bin/check` — `bin/check-docs` (map + relative links) plus `bin/test` (regression fixtures for the validator). `bin/check-docs` in one line: `[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oE '\]\([^)#[:space:]]+' | cut -c3- | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`. A change that does not pass it is not proven, whatever its description says.
 
 ## Review conventions
 - Hold every doc to the writing rules in `CLAUDE.md`: lead with the rule, fragments over sentences, tables over paragraphs.
@@ -22,10 +22,11 @@ Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(s
 - Treat zero findings as a valid review; never hold back approval to look rigorous.
 
 ## Gates that matter
-- No CI and no test runner: the gate is prose review, link integrity and the map staying true (`.claude/commands/feature.md`).
-- "Proven" means both final checks pass — every relative link resolves, every doc is indexed in both READMEs. `bash bin/check` prints one line per finding; empty output is the proof.
+- CI runs the same gate — the job `check` in `.github/workflows/ci.yml` runs `bin/setup` + `bin/check` on push and pull_request; a green local run cannot land red there.
+- Prose, link integrity and the map staying true are the reviewer's own gate (`.claude/commands/feature.md`).
+- "Proven" means both final checks pass — every relative link resolves, every doc is indexed in both READMEs. `bash bin/check-docs` prints one line per finding; empty output is the proof.
 - The link sweep strips fenced code blocks and inline code before it extracts links — every printed hit is a real markdown link; never dismiss one as fenced-code noise.
-- `maintainer.yml` sets `required_checks: []` and `auto_merge_scope: own_and_dependency_bots`: an outside contributor's PR waits for a member.
+- `maintainer.yml` sets `required_checks: ["check / check"]` — workflow `check` + job `check` in `.github/workflows/ci.yml` — and `auto_merge_scope: own_and_dependency_bots`: an outside contributor's PR waits for a member.
 - A red `main` comes first; nothing else ships until it is green.
 
 ## Never flag
