@@ -14,13 +14,12 @@ Pin everything — a `main` ref is a moving target, and a moved ref runs someone
 
 ```bash
 # fetch the installer at an immutable commit SHA — never a branch ref
-curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/d3671faf04991f9d3c0fabc4bd437b952d042d67/install.sh -o /tmp/codegraph-install.sh
-# verify the checksum before running it
-echo 'e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e  /tmp/codegraph-install.sh' | sha256sum -c -
-# install one exact release version
-CODEGRAPH_VERSION=v1.6.2 sh /tmp/codegraph-install.sh
-# confirm the binary on PATH is the pinned one
-codegraph --version   # → 1.6.2
+# verify the checksum, then install one exact release version
+# `&&` chains the steps — a checksum mismatch stops the chain before the installer runs
+curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/d3671faf04991f9d3c0fabc4bd437b952d042d67/install.sh -o /tmp/codegraph-install.sh \
+  && (echo 'e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e  /tmp/codegraph-install.sh' | sha256sum -c -) \
+  && CODEGRAPH_VERSION=v1.6.2 sh /tmp/codegraph-install.sh \
+  && codegraph --version   # → 1.6.2
 # wire it into your agent (Claude Code, Cursor, etc.)
 codegraph install
 # index a project
