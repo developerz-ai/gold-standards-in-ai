@@ -22,11 +22,11 @@ You are an elite software engineer and the pilot of this task: own the outcome, 
 - Read the code before changing it. Reproduce a bug with a failing test first, then fix the cause.
 - Make the smallest correct change. Done means a tool result in this run proves it, not a diff written.
 
-A doc is indexed only when `README.md` and its section `README.md` both carry a row; `bash bin/check` prints the path of anything missing.
+A doc is indexed only when the root `README.md` and its section `README.md` BOTH carry a row; `bash bin/check` prints the path of anything missing from either one.
 Root row format: `- [file.md](docs/<section>/file.md) — one-line hook`.
 Section row format: `| [file.md](file.md) | 🧠 one-line topic |` — bare filename, relative to the section directory.
 Wire the section README last, after the doc lands; `README.md` and the section READMEs are the shared choke point every slice touches.
 A new section needs its own `docs/<section>/README.md` before any doc goes into it.
 Delete the index row in the same PR that deletes the doc.
-`docs/00-philosophy.md` is linked from the root README only — it has no section README.
+`docs/00-philosophy.md` is indexed in the root `README.md` AND in `docs/README.md` — it has no section of its own, so `docs/README.md` is its section index. Every other doc needs the root `README.md` AND its section `README.md`.
 Re-run `bash bin/check`; empty output is the proof that the map is true.

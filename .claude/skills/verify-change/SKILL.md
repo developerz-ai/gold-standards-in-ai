@@ -16,13 +16,16 @@ passes it locally passes everywhere.
 |------|---------|------------|
 | install | `bin/setup` | echo "gold-standards-in-ai: markdown only, no dependencies to install" |
 | run | `bin/dev` | echo "gold-standards-in-ai: no app to run - read README.md for the map" — on developerz.ai runs, start it with code_bash_background when you need a running stack |
-| prove | `bin/check` | [ -d docs ]\|\|exit 1; o=$(set +e; find . -name '*.md' \| while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] \|\| grep -qsF $b README.md $d/README.md \|\| echo $f;; esac; sed '/^ *\`\`\`/,/^ *\`\`\`/d;s/\`[^\`]*\`//g' "$f" \| grep -oE '\\]\\([^)#[:space:]]+' \| cut -c3- \| grep -v ':' \| while read -r l; do [ -e "$d/$l" ] \|\| echo "$f $l"; done; done;true); [ -z "$o" ]\|\|{ echo "$o"; false; } |
+| prove | `bin/check` | runs `bin/check-docs` (index + relative-link + `#fragment` validation) then `bin/test` (its regression fixtures); silent on success, one line per finding, exit 1 on any. The real gate is `bin/check-docs` — run it, never copy its slug rules |
 | stop | `bin/stop` | true — on developerz.ai runs, the platform runs this when your session ends — do not stop the stack yourself |
 
 ## Rules
 
 - Run every command from the repo root — the scripts `cd` there themselves.
 - `bin/check` red is not a pull request. Fix the cause, never silence the gate.
+- The gate's rules live in `bin/check-docs`; read them there instead of copying them:
+  - a doc under `docs/` needs the root `README.md` **and** its section `README.md` to carry it;
+  - a `#fragment` is the slug of the target's heading — lowercase, every character that is not a letter, a digit, `-` or `_` deleted, spaces turned into `-`. `## ⌨️ Keyboard paths` is `-keyboard-paths`; `## 6. Merge → deploy without a human bottleneck` is `6-merge--deploy-without-a-human-bottleneck`.
 
 ## Exit codes `bin/check` must use
 

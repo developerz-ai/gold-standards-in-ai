@@ -137,7 +137,7 @@ Generic lightning bolt · rocket · lightbulb · padlock-for-security · sparkle
 | Neutrals | 4-6 + ramp | canvas, surfaces, ink, muted, hairline; tinted toward the primary hue or warm/cool by mood |
 | Semantic | 3-4 | success, warning, danger, info — respect domain conventions |
 
-- Hue from **meaning + direction**, never category default. Rotate hue family vs siblings → [design-taste.md](design-taste.md#palette-families-to-rotate-as-of-2026-09).
+- Hue from **meaning + direction**, never category default. Rotate hue family vs siblings → [design-taste.md](design-taste.md#archetypes--rotation).
 - **Brand color ≠ text color.** A saturated brand hue often fails 4.5:1 as text. Ship a `primary-text` step that passes.
 - Never pure `#000`/`#fff` for ink/canvas unless polarity-as-signature (declare it).
 - No generic purple-blue glow, no rainbow, no neon unless the mode is explicitly cultural.
@@ -200,7 +200,7 @@ e.g. "Misty ridgelines and trail markers · duotone brand-900→brand-100 · wid
 
 - Generated imagery: same style string on every prompt + a reference image → consistency. Route via [media-generation](../ai-agents/media-generation.md).
 - Illustration: one line weight, one corner style, palette-only fills. Mascot only if it fits personality — then it's a system (poses, sizes, where it appears).
-- Texture only from the subject's world ([design-taste.md](design-taste.md#-icons--imagery)).
+- Texture only from the subject's world ([design-taste.md](design-taste.md#-icons-imagery--material)).
 
 ## ✳️ Iconography style
 **Rule: one family, one stroke width, one grid — matching the mark's geometry.**

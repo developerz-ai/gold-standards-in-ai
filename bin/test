@@ -41,6 +41,7 @@ assert_validation() {
 
 new_fixture
 printf '[Topic](docs/topic.md)\n' >> "$root/README.md"
+printf 'topic.md\n' > "$root/docs/README.md"
 printf '[Home](../README.md)\n' > "$root/docs/topic.md"
 assert_validation 'valid indexed docs and relative links' 0 ''
 
@@ -56,6 +57,7 @@ new_fixture
 mkdir -p "$root/docs/section"
 printf 'topic.md\n' > "$root/docs/section/README.md"
 printf '# Topic\n' > "$root/docs/section/topic.md"
+printf '[Topic](docs/section/topic.md)\n' >> "$root/README.md"
 assert_validation 'section index accepts basename' 0 ''
 
 new_fixture
@@ -76,7 +78,7 @@ cat >> "$root/README.md" <<'MARKDOWN'
 [HTTP](http://example.invalid/missing)
 [Mail](mailto:nobody@example.invalid)
 [Custom](custom:missing)
-[Heading](#missing)
+[Heading](#fixture)
 MARKDOWN
 assert_validation 'URLs and fragment-only links ignored' 0 ''
 
@@ -102,8 +104,136 @@ MARKDOWN
 assert_validation 'links after code fences still validated' 1 './README.md real-missing.md'
 
 new_fixture
-printf '[Home](README.md#heading)\n' >> "$root/README.md"
+printf '[Home](README.md#fixture)\n' >> "$root/README.md"
 assert_validation 'existing link with fragment' 0 ''
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Topic\n' > "$root/docs/section/topic.md"
+printf 'topic.md\n' > "$root/docs/section/README.md"
+assert_validation 'doc in section index only is reported' 1 './docs/section/topic.md'
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Topic\n' > "$root/docs/section/topic.md"
+printf '[Topic](docs/section/topic.md)\n' >> "$root/README.md"
+assert_validation 'doc in root index only is reported' 1 './docs/section/topic.md'
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Topic\n' > "$root/docs/section/topic.md"
+printf 'topic.md\n' > "$root/docs/section/README.md"
+printf '[Topic](docs/section/topic.md)\n' >> "$root/README.md"
+assert_validation 'doc in both indexes passes' 0 ''
+
+new_fixture
+printf '# Target\n\n## Real heading\n' > "$root/docs/target.md"
+printf '[Home](../README.md)\n' >> "$root/docs/target.md"
+printf 'target.md\n' > "$root/docs/README.md"
+printf '[Target](docs/target.md#missing-heading)\n' >> "$root/README.md"
+assert_validation 'dead anchor reported' 1 './README.md docs/target.md#missing-heading dead anchor'
+
+new_fixture
+printf '[Self](#missing-heading)\n' >> "$root/README.md"
+assert_validation 'dead anchor in the current file reported' 1 './README.md #missing-heading dead anchor'
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Target\n\n## Real heading\n' > "$root/docs/section/target.md"
+printf 'target.md\n' > "$root/docs/section/README.md"
+printf '[Target](docs/section/target.md#real-heading)\n' >> "$root/README.md"
+assert_validation 'valid cross-file fragment passes' 0 ''
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Target\n\n## Real heading\n' > "$root/docs/section/target.md"
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+```markdown
+[Dead](docs/section/target.md#missing-heading)
+```
+MARKDOWN
+assert_validation 'fragment inside a fenced example ignored' 0 ''
+
+new_fixture
+mkdir -p "$root/docs/section"
+printf '# Target\n\n## Real heading\n' > "$root/docs/section/target.md"
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+Inline `[Dead](docs/section/target.md#missing-heading)` example.
+MARKDOWN
+assert_validation 'fragment inside an inline example ignored' 0 ''
+
+# A heading slug drops punctuation, symbols and emoji: only letters, digits,
+# '-', '_' and spaces survive, and a space becomes '-'. Both the emoji heading
+# and the em-dash heading below slug to a name the link must match.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## ⌨️ Keyboard paths
+
+## Docs decay — write for the next session
+
+## Archetypes & rotation
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[Keyboard](docs/section/target.md#-keyboard-paths)
+[Decay](docs/section/target.md#docs-decay--write-for-the-next-session)
+[Archetypes](docs/section/target.md#archetypes--rotation)
+MARKDOWN
+assert_validation 'punctuation and emoji dropped from heading slugs' 0 ''
+
+# The same slugs, minus the deletion of punctuation and emoji, are dead
+# anchors - the slug is not the raw heading text.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## ⌨️ Keyboard paths
+
+## Docs decay — write for the next session
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[Keyboard](docs/section/target.md#keyboard-paths)
+[Decay](docs/section/target.md#docs-decay-write-for-the-next-session)
+MARKDOWN
+assert_validation 'slug is not the raw heading text' 1 './README.md docs/section/target.md#keyboard-paths dead anchor
+./README.md docs/section/target.md#docs-decay-write-for-the-next-session dead anchor'
+
+# An explicit HTML anchor is an anchor in its own right, beside the heading
+# slug it sits on.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## <a name="docs-decay"></a>Docs decay — write for the next session
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[Decay](docs/section/target.md#docs-decay)
+MARKDOWN
+assert_validation 'explicit HTML anchor resolves' 0 ''
+
+# Without the explicit HTML anchor the same fragment is dead: the HTML anchor
+# branch is what makes the link above resolve.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## Docs decay — write for the next session
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[Decay](docs/section/target.md#docs-decay)
+MARKDOWN
+assert_validation 'fragment without the HTML anchor is dead' 1 './README.md docs/section/target.md#docs-decay dead anchor'
 
 printf '%s passed; %s failed\n' "$passed" "$failed"
 [[ $failed -eq 0 ]]
