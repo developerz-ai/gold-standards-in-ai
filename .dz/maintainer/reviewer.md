@@ -7,7 +7,7 @@
 
 ## Stack
 
-Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oE '\]\([^)#[:space:]]+' | cut -c3- | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`): a change that does not pass it is not proven, whatever its description says.
+Markdown only (no runtime). The gate is `bin/check`, which runs `bin/check-docs` and `bin/test`. It exits 0 when the change passes, 75 when a gate precondition is unmet and the gate could not grade, and any other nonzero when validation or regression fails. A change that does not pass it is not proven, whatever its description says.
 
 ## Review conventions
 

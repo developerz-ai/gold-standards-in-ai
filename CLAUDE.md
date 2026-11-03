@@ -30,8 +30,8 @@ Run from the repo root; each script resolves the repo root itself.
 |---|---|---|
 | `bin/setup` | `mise install` when mise is present; echoes `gold-standards-in-ai: markdown only, no dependencies to install` | once, after clone |
 | `bin/dev` | echoes `gold-standards-in-ai: no app to run - read README.md for the map` | every session |
-| `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success | before every commit |
-| `bin/check-docs` | map + relative-link validation; one line per finding, exit 1 on any | while editing docs |
+| `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success; exit 0 pass, exit 75 an unmet precondition, any other nonzero red | before every commit |
+| `bin/check-docs` | map + relative-link validation; one line per finding; exit 1 on a finding, exit 75 when it cannot grade — a missing `docs/` tree | while editing docs |
 | `bin/test` | regression fixtures for the validator; no downloaded dependencies | when `bin/check-docs` changes |
 | `bin/stop` | no-op — nothing to stop, never removes data | session end (the platform runs it) |
 
