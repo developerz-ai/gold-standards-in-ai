@@ -37,7 +37,7 @@ Full doctrine — the one this repo documents: [`docs/ai-agents/hive-mind.md`](.
 
 ### Who runs which checks
 
-No linter, no test runner. The gate is **prose review, link integrity, the map staying true** — and it splits like any gate.
+The gate is **`bin/check`** (`bin/check-docs` — map + relative-link validation — plus its regression fixtures in `bin/test`), which CI runs in the `check / check` job. Alongside it: prose review, the map staying true. It splits like any gate.
 
 | | Agent (per doc it owns) | Coordinator (once, at the end) |
 |---|---|---|
@@ -46,24 +46,15 @@ No linter, no test runner. The gate is **prose review, link integrity, the map s
 | the map | reports the row its doc needs | edits `README.md` + section `README.md` and runs the map check |
 | secrets | greps its own doc | the repo-wide grep |
 
-**An agent checks only its own files; repo-wide green is yours, once, at the end.** Never N agents sweeping all of `docs/**` — the reports overlap and each costs you a read. The two final-gate checks (they also match inside fenced blocks, so example paths are expected noise — judge the hits, don't count them):
+**An agent checks only its own files; repo-wide green is yours, once, at the end.** Never N agents sweeping all of `docs/**` — the reports overlap and each costs you a read. Do not re-implement the gate — one command, and it is the same one CI runs:
 
 ```bash
-# 1. every relative link resolves
-grep -rnoE '\]\([^)h][^)]*\)' --include='*.md' . | sed -E 's/\]\(/|/; s/\)$//' |
-while IFS='|' read -r src link; do
-  f="${link%%#*}"; d=$(dirname "${src%%:*}")
-  [ -e "$d/$f" ] || echo "DEAD  ${src%%:*} -> $link"
-done
-
-# 2. every doc is on the map, in both places
-for f in $(git ls-files 'docs/*/*.md' | grep -v '/README.md$'); do
-  grep -q "$f" README.md                                   || echo "UNMAPPED (root)    $f"
-  grep -q "$(basename "$f")" "$(dirname "$f")/README.md"   || echo "UNMAPPED (section) $f"
-done
+bin/check          # the gate: bin/check-docs + bin/test
 ```
 
-A real hit from either is a merge blocker.
+`bin/check-docs` is the repo-wide sweep: every relative link resolves, every doc on the map in both READMEs. It prints one line per finding as `<file> <link>` and exits 1; empty output is the proof. It strips fenced blocks and inline code, so a printed link is a real one. Run `bin/check-docs` while editing, `bin/check` before you commit — CI runs the same `bin/check` as `check / check`, and a red or missing result there does not qualify the merge.
+
+A real finding is a merge blocker.
 
 ### Two things only the coordinator can do
 
@@ -114,7 +105,7 @@ A real hit from either is a merge blocker.
 
 8. **Wire it in.** Add a link + a one-line hook to `README.md` **and** the section `README.md` — you do this yourself, last, after every agent has finished. A new section needs its own `README.md`.
 
-9. **Gate.** Run both checks from §Who runs which checks, plus: house rules held · no secrets, private hostnames/IPs or client names · no undated load-bearing claim · no duplication of a sibling doc.
+9. **Gate.** Run `bin/check` — the same command CI runs — plus: house rules held · no secrets, private hostnames/IPs or client names · no undated load-bearing claim · no duplication of a sibling doc.
 
 10. **Commit & merge.** Let every agent finish first — never commit while one is still writing. **Sweep the leftovers before you stage**: scratch notes, a draft at the repo root, an agent's own summary file. Agents create them and rarely clean up; they must not ship.
 
@@ -126,7 +117,7 @@ A real hit from either is a merge blocker.
     gh pr create                              # Summary + the doc-map rows changed
     ```
 
-    Naming paths on `git add` is all the selectivity needed. **Never `git stash`** — one global stack shared with every concurrent agent. **Main moves under you**: after `git fetch`, intersect files-changed-on-main with files-changed-locally; a real overlap (almost always `README.md`) is **three-way merged**, never taken wholesale — a naive overwrite drops main's rows silently, with no conflict marker. No CI here, so `gh pr merge --squash` once review is done. One PR in flight at a time; `git fetch` before the next slice.
+    Naming paths on `git add` is all the selectivity needed. **Never `git stash`** — one global stack shared with every concurrent agent. **Main moves under you**: after `git fetch`, intersect files-changed-on-main with files-changed-locally; a real overlap (almost always `README.md`) is **three-way merged**, never taken wholesale — a naive overwrite drops main's rows silently, with no conflict marker. CI gates the merge: `gh pr merge --squash` only after the `check / check` result is green — a red or missing result does not qualify, and no result yet is not a pass. One PR in flight at a time; `git fetch` before the next slice.
 
 11. **Leave the trail straight.** A doc your change invalidated gets updated in the same PR; a doc it made redundant gets **deleted** in the same PR — a wrong doc costs more than a missing one.
 

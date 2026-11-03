@@ -2,7 +2,8 @@
 # developerz.ai maintainer policy: developerz-ai/gold-standards-in-ai
 #
 # AI-maintained docs: the agent triages, answers, closes what has stalled and keeps links and claims
-# accurate. Markdown only, so there is no CI to name and nothing to release.
+# accurate. Markdown only, so there is nothing to release — but CI runs `bin/check`, and its
+# `check / check` result is the merge gate.
 version: 1
 
 tone:
@@ -31,10 +32,12 @@ pr:
   wait_for_other_bots: [coderabbit]
   # Named so the agent knows which red check is the author's to fix. Re-check against the
   # repo's ruleset and `.github/workflows/` when either changes; this list is not the ruleset.
-  required_checks: []
+  # `check / check` = workflow `check` + job `check` in `.github/workflows/ci.yml`; CI runs `bin/check`.
+  # A red OR missing `check / check` result does not qualify a PR for auto-merge.
+  required_checks: ["check / check"]
   auto_merge: true
-  # Not `any`, unlike the code repos: there is no CI here to gate a merge, and coding agents read
-  # these docs as instructions, so an outside contributor's PR waits for a member.
+  # Not `any`, unlike the code repos: an outside contributor's PR waits for a member. CI gates the
+  # merge on `check / check`; coding agents read these docs as instructions, so the scope stays narrow.
   auto_merge_scope: own_and_dependency_bots
   require_review: true
   close_awaiting_author_after_days: 21
