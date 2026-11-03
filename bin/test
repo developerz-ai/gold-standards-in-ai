@@ -267,6 +267,44 @@ printf 'target.md\n' > "$root/docs/section/README.md"
 printf '[Third](docs/section/target.md#topic-2)\n' >> "$root/README.md"
 assert_validation 'suffix beyond the collision count is dead' 1 './README.md docs/section/target.md#topic-2 dead anchor'
 
+# A heading that already carries a suffix is taken: 'Topic', 'Topic-1', then
+# 'Topic' must yield topic, topic-1, topic-2 - the third heading advances its
+# suffix past the existing suffixed heading, as GitHub does.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## Topic
+
+## Topic-1
+
+## Topic
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+cat >> "$root/README.md" <<'MARKDOWN'
+[First](docs/section/target.md#topic)
+[Second](docs/section/target.md#topic-1)
+[Third](docs/section/target.md#topic-2)
+MARKDOWN
+assert_validation 'duplicate heading advances past an existing suffixed heading' 0 ''
+
+# Advancing stops at the first free name: 'topic-3' matches no heading here.
+new_fixture
+mkdir -p "$root/docs/section"
+cat > "$root/docs/section/target.md" <<'MARKDOWN'
+# Target
+
+## Topic
+
+## Topic-1
+
+## Topic
+MARKDOWN
+printf 'target.md\n' > "$root/docs/section/README.md"
+printf '[Fourth](docs/section/target.md#topic-3)\n' >> "$root/README.md"
+assert_validation 'suffix past the advanced collision is dead' 1 './README.md docs/section/target.md#topic-3 dead anchor'
+
 # A link may carry a title - validate the target and fragment, never the
 # quoted title.
 new_fixture
