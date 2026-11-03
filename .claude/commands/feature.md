@@ -37,7 +37,7 @@ Full doctrine — the one this repo documents: [`docs/ai-agents/hive-mind.md`](.
 
 ### Who runs which checks
 
-The gate is **`bin/check`** (`bin/check-docs` — map + relative-link validation — plus its regression fixtures in `bin/test`), which CI runs in the `check / check` job. Alongside it: prose review, the map staying true. It splits like any gate.
+The gate is **`bin/check`** (`bin/check-docs` — map + relative-link validation — plus its regression fixtures in `bin/test`), which CI runs in the `check` job — the raw check-run name, not the UI's `check / check` label. Alongside it: prose review, the map staying true. It splits like any gate.
 
 | | Agent (per doc it owns) | Coordinator (once, at the end) |
 |---|---|---|
@@ -52,7 +52,7 @@ The gate is **`bin/check`** (`bin/check-docs` — map + relative-link validation
 bin/check          # the gate: bin/check-docs + bin/test
 ```
 
-`bin/check-docs` is the repo-wide sweep: every relative link resolves, every doc on the map in both READMEs. It prints one line per finding as `<file> <link>` and exits 1; empty output is the proof. It strips fenced blocks and inline code, so a printed link is a real one. Run `bin/check-docs` while editing, `bin/check` before you commit — CI runs the same `bin/check` as `check / check`, and a red or missing result there does not qualify the merge.
+`bin/check-docs` is the repo-wide sweep: every relative link resolves, every doc on the map in both READMEs. It prints one line per finding as `<file> <link>` and exits 1; empty output is the proof. It strips fenced blocks and inline code, so a printed link is a real one. Run `bin/check-docs` while editing, `bin/check` before you commit — CI runs the same `bin/check` as the `check` job, and a red or missing result there does not qualify the merge.
 
 A real finding is a merge blocker.
 
@@ -117,7 +117,7 @@ A real finding is a merge blocker.
     gh pr create                              # Summary + the doc-map rows changed
     ```
 
-    Naming paths on `git add` is all the selectivity needed. **Never `git stash`** — one global stack shared with every concurrent agent. **Main moves under you**: after `git fetch`, intersect files-changed-on-main with files-changed-locally; a real overlap (almost always `README.md`) is **three-way merged**, never taken wholesale — a naive overwrite drops main's rows silently, with no conflict marker. CI gates the merge: `gh pr merge --squash` only after the `check / check` result is green — a red or missing result does not qualify, and no result yet is not a pass. One PR in flight at a time; `git fetch` before the next slice.
+    Naming paths on `git add` is all the selectivity needed. **Never `git stash`** — one global stack shared with every concurrent agent. **Main moves under you**: after `git fetch`, intersect files-changed-on-main with files-changed-locally; a real overlap (almost always `README.md`) is **three-way merged**, never taken wholesale — a naive overwrite drops main's rows silently, with no conflict marker. CI gates the merge: `gh pr merge --squash` only after the `check` result is green — a red or missing result does not qualify, and no result yet is not a pass. One PR in flight at a time; `git fetch` before the next slice.
 
 11. **Leave the trail straight.** A doc your change invalidated gets updated in the same PR; a doc it made redundant gets **deleted** in the same PR — a wrong doc costs more than a missing one.
 
