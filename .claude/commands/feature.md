@@ -52,9 +52,9 @@ The gate is **`bin/check`** (`bin/check-docs` — map + relative-link validation
 bin/check          # the gate: bin/check-docs + bin/test
 ```
 
-`bin/check-docs` is the repo-wide sweep: every relative link resolves, every doc on the map in both READMEs. It prints one line per finding as `<file> <link>` and exits 1; empty output is the proof. It strips fenced blocks and inline code, so a printed link is a real one. Run `bin/check-docs` while editing, `bin/check` before you commit — CI runs the same `bin/check` as the `check` job, and a red or missing result there does not qualify the merge.
+`bin/check-docs` is the repo-wide sweep: every relative link resolves, every doc on the map in both READMEs. It prints one line per finding as `<file> <link>` and exits 1; empty output is the proof. It strips fenced blocks and inline code, so a printed link is a real one. A top-level doc is swept too — `docs/00-philosophy.md` is indexed in the root `README.md` and in `docs/README.md`; the section index of a top-level doc is `docs/README.md`. Run `bin/check-docs` while editing, `bin/check` before you commit — CI runs the same `bin/check` as the `check` job, and a red or missing result there does not qualify the merge.
 
-A real finding is a merge blocker.
+Each hit is a merge blocker on its own.
 
 ### Two things only the coordinator can do
 
