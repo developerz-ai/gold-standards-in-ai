@@ -57,13 +57,17 @@ while IFS='|' read -r src link; do
 done
 
 # 2. every doc is on the map, in both places
-for f in $(git ls-files 'docs/*/*.md' | grep -v '/README.md$'); do
+# 'docs/*.md' catches top-level docs (docs/00-philosophy.md); 'docs/*/*.md' catches section docs.
+# Two pathspecs, because a git pathspec '*' never matches '/': 'docs/*/*.md' alone skips every top-level doc.
+for f in $(git ls-files 'docs/*.md' 'docs/*/*.md' | grep -v '/README.md$'); do
   grep -q "$f" README.md                                   || echo "UNMAPPED (root)    $f"
   grep -q "$(basename "$f")" "$(dirname "$f")/README.md"   || echo "UNMAPPED (section) $f"
 done
 ```
 
-A real hit from either is a merge blocker.
+Two pathspecs, so a top-level doc is swept too — `docs/00-philosophy.md` is indexed in the root `README.md` and in `docs/README.md` (the section index of a top-level doc is `docs/README.md`).
+
+Each hit is a merge blocker on its own: a doc missing from the root `README.md` and a doc missing from its section `README.md` are two separate findings, printed on separate lines. Never collapse them into one grep — a doc indexed in only one of the two reads as mapped and is never reported.
 
 ### Two things only the coordinator can do
 
