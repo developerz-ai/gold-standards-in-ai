@@ -57,8 +57,9 @@ while IFS='|' read -r src link; do
 done
 
 # 2. every doc is on the map, in both places
-# 'docs/*.md' catches top-level docs (docs/00-philosophy.md); 'docs/*/*.md' catches section docs.
-# Two pathspecs, because a git pathspec '*' never matches '/': 'docs/*/*.md' alone skips every top-level doc.
+# 'docs/*.md' catches top-level docs (docs/00-philosophy.md) and section docs alike — a git pathspec '*' matches '/'.
+# 'docs/*/*.md' names the section docs explicitly; alone it skips every top-level doc, because it needs another slash
+# after 'docs/'.
 for f in $(git ls-files 'docs/*.md' 'docs/*/*.md' | grep -v '/README.md$'); do
   grep -q "$f" README.md                                   || echo "UNMAPPED (root)    $f"
   grep -q "$(basename "$f")" "$(dirname "$f")/README.md"   || echo "UNMAPPED (section) $f"

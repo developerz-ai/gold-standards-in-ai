@@ -5,7 +5,7 @@ Daily checkup fired by `schedules: health`: the failures no issue or PR announce
 | Signal | Command | Healthy |
 |---|---|---|
 | every relative link resolves | the loop below | it prints nothing (tracked files only — narrower than the gate) |
-| every doc is indexed | `for f in $(git ls-files 'docs/**/*.md'); do b=$(basename "$f"); [ "$b" = README.md ] \|\| { grep -qF "$f" README.md \|\| echo "$f (root README)"; grep -qF "$b" "$(dirname "$f")/README.md" \|\| echo "$f (section README)"; }; done` | it prints nothing; the probe requires both required indexes and is stricter than `bin/check-docs` on index coverage |
+| every doc is indexed | `for f in $(git ls-files 'docs/*.md'); do b=$(basename "$f"); [ "$b" = README.md ] \|\| { grep -qF "$f" README.md \|\| echo "$f (root README)"; grep -qF "$b" "$(dirname "$f")/README.md" \|\| echo "$f (section README)"; }; done` | it prints nothing; the probe requires both required indexes and is stricter than `bin/check-docs` on index coverage |
 | red default-branch CI | `gh run list --branch main --workflow check --limit 5 --json headSha,conclusion,status,url` | the newest completed run is `success` at the sha `main` names now |
 | stuck Dependabot PR | `gh pr list --state open --author app/dependabot --json number,title,createdAt,url` | no open PR is older than 7 days, one `.github/dependabot.yml` schedule interval |
 ```bash
@@ -24,6 +24,9 @@ untracked Markdown and `.claude/` Markdown, and skips any link target containing
 target starting with a lowercase scheme. The doc-indexing probe requires both required indexes and is stricter than
 `bin/check-docs` on index coverage: a probe finding is a real one-index gap the gate misses. `bash bin/check` remains
 the map verdict.
+
+The doc-indexing probe's pathspec is `docs/*.md`: a git pathspec `*` matches `/`, so it reaches top-level docs and
+nested ones alike. `docs/**/*.md` would skip every top-level doc — it needs another slash after `docs/`.
 
 ## What to file
 
