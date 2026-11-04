@@ -42,7 +42,7 @@ Run from the repo root; each script resolves the repo root itself.
 | `README.md` | the map — every doc is linked from it |
 | `AGENTS.md` | pointer to this file — one brain, never two |
 | `docs/README.md` | docs index |
-| `docs/00-philosophy.md` | the core thesis; indexed in the root `README.md` and `docs/README.md`, no section README |
+| `docs/00-philosophy.md` | the core thesis; indexed in the root `README.md` and in `docs/README.md` — its section index, both required indexes |
 | `docs/<section>/README.md` | index for each section |
 | `docs/<section>/<topic>.md` | one topic per file |
 | `docs/<section>/` | 8 sections — `ai-agents`, `architecture`, `developer-experience`, `frontend-craft`, `infrastructure`, `stack`, `workflow`, `writing-for-agents` |

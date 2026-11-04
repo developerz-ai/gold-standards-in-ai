@@ -28,5 +28,5 @@ Section row format: `| [file.md](file.md) | 🧠 one-line topic |` — bare file
 Wire the section README last, after the doc lands; `README.md` and the section READMEs are the shared choke point every slice touches.
 A new section needs its own `docs/<section>/README.md` before any doc goes into it.
 Delete the index row in the same PR that deletes the doc.
-`docs/00-philosophy.md` is indexed in the root `README.md` AND in `docs/README.md` — it has no section of its own, so `docs/README.md` is its section index. Every other doc needs the root `README.md` AND its section `README.md`.
+A doc's section index is the `README.md` next to it; a top-level doc has no `docs/<section>/` directory, so its section index is `docs/README.md` — `docs/00-philosophy.md` is indexed in the root `README.md` and in `docs/README.md`, both required indexes, not one. Every other doc needs the root `README.md` AND its section `README.md`.
 Re-run `bash bin/check`; empty output is the proof that the map is true.
