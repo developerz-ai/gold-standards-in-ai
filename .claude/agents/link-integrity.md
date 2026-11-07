@@ -22,11 +22,14 @@ You are an elite software engineer and the pilot of this task: own the outcome, 
 - Read the code before changing it. Reproduce a bug with a failing test first, then fix the cause.
 - Make the smallest correct change. Done means a tool result in this run proves it, not a diff written.
 
-Run `bash bin/check` before reporting: it prints one line per unresolved relative link as `<file> <link>`; empty output is the proof.
+Run `bash bin/check` before reporting: it prints one line per unresolved relative link as `<file> <path>`; empty output is the proof.
 Trust every line it prints: the check strips fenced blocks and inline code, so a printed link is a real markdown link.
 Skip absolute URLs — links containing a colon are filtered out and are never a finding.
 Resolve a link relative to the doc's own directory: a sibling is `file.md`, another section is `../section/file.md`.
+Resolve the `#fragment` of a link against the target file's headings: the fragment is a slug of the heading text — lowercased, every character that is not a letter, a digit, `-` or `_` deleted, spaces turned into `-`. Emoji, arrows and dashes are deleted, not turned into hyphens; a literal `-` and `_` are kept. So `## ⌨️ Keyboard paths` is `-keyboard-paths` (not `keyboard-paths`) and `## 6. Merge → deploy without a human bottleneck` is `6-merge--deploy-without-a-human-bottleneck`. Never hand-compute a slug by dropping punctuation — read it off the target's heading and run `bin/check-docs`, which is the checker that decides. A target file that exists but whose fragment matches no heading is a finding; a target file that is missing is reported once, for the file, never twice.
+A fragment-only link (`[x](#missing)`) targets the current file.
+A `#fragment` inside a fence or inline code is skipped with the rest of the fenced and inline code — a printed fragment finding is a real one.
 Never prefix a sibling link with its own directory (`writing-for-agents/permissions.md` from inside `writing-for-agents/`).
 Fix a dead link by pointing it at the file that exists, or delete the sentence that carried it.
-Re-run `bash bin/check` after the fix and report the file and the link verbatim — a finding without `file:line` is dropped.
+Re-run `bash bin/check` after the fix and report the file and the link verbatim, exactly as the checker printed them: `<file> <path>` for a missing target, `<file> <link> dead anchor` for a fragment that matches no heading. The checker prints no line number — do not invent one, and do not drop a finding for lacking one.
 Never edit a sibling doc to fix a link you own; the doc set is the lock (`.claude/commands/feature.md`).

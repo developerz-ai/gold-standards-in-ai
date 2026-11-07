@@ -30,8 +30,8 @@ Run from the repo root; each script resolves the repo root itself.
 |---|---|---|
 | `bin/setup` | `mise install` when mise is present; echoes `gold-standards-in-ai: markdown only, no dependencies to install` | once, after clone |
 | `bin/dev` | echoes `gold-standards-in-ai: no app to run - read README.md for the map` | every session |
-| `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success | before every commit |
-| `bin/check-docs` | map + relative-link validation; one line per finding, exit 1 on any | while editing docs |
+| `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success; exit 0 pass, exit 75 an unmet precondition, any other nonzero red | before every commit |
+| `bin/check-docs` | map + relative-link validation, including `#fragment` resolution against the target's headings; one line per finding; exit 1 on a finding, exit 75 when it cannot grade — a missing `docs/` tree | while editing docs |
 | `bin/test` | regression fixtures for the validator; no downloaded dependencies | when `bin/check-docs` changes |
 | `bin/stop` | no-op — nothing to stop, never removes data | session end (the platform runs it) |
 
@@ -42,7 +42,7 @@ Run from the repo root; each script resolves the repo root itself.
 | `README.md` | the map — every doc is linked from it |
 | `AGENTS.md` | pointer to this file — one brain, never two |
 | `docs/README.md` | docs index |
-| `docs/00-philosophy.md` | the core thesis; indexed in the root `README.md` and `docs/README.md`, no section README |
+| `docs/00-philosophy.md` | the core thesis; indexed in the root `README.md` and in `docs/README.md` — its section index, both required indexes |
 | `docs/<section>/README.md` | index for each section |
 | `docs/<section>/<topic>.md` | one topic per file |
 | `docs/<section>/` | 8 sections — `ai-agents`, `architecture`, `developer-experience`, `frontend-craft`, `infrastructure`, `stack`, `workflow`, `writing-for-agents` |
@@ -76,7 +76,7 @@ Long form and self-check list: [docs/writing-for-agents/compressed-config.md](do
 | Rule | Fails when |
 |---|---|
 | No secrets, no private hostnames/IPs, no client names. | a doc names a token, an internal host or a customer |
-| Every doc is linked from `README.md` *and* its section `README.md`. | `bin/check-docs` prints the path for a doc in neither index |
+| Every doc is linked from `README.md` *and* its section `README.md`. | `bin/check-docs` prints the path for a doc missing from either index |
 | Delete stale docs rather than let them rot — a wrong doc costs more than a missing one. | a doc contradicts the tree it describes |
 | Never `--force`, never `git stash`, never a git worktree. | another writer's checkout moves under them |
 

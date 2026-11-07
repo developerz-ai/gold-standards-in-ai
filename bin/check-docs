@@ -1,13 +1,88 @@
 #!/usr/bin/env bash
 # Validate Markdown indexing and relative links, optionally in a fixture root.
+#
+# Exit codes:
+#   0   the tree is valid
+#   75  a precondition this validator needs is unmet - it refused to grade
+#   1   the tree ran and is invalid (unindexed doc, broken relative link)
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
-cd "${1:-$repo_root}"
-[[ -d docs ]] || exit 1
+root=${1:-$repo_root}
+
+if [[ ! -d $root ]]; then
+    printf 'check-docs: no such tree: %s\n' "$root" >&2
+    exit 75
+fi
+cd "$root"
+
+# The docs tree is what gets graded. Missing = the gate could not run, never a
+# red change, so this exits 75 and not 1.
+if [[ ! -d docs ]]; then
+    printf 'check-docs: docs directory missing - gate refused to grade\n' >&2
+    exit 75
+fi
+
+# GitHub-style heading slug: lowercase, punctuation/symbols/emoji deleted,
+# spaces turned into '-'. Literal '-' and '_' are kept.
+slugify() {
+    local text=$1 out='' ch
+    local i
+    for (( i = 0; i < ${#text}; i++ )); do
+        ch=${text:i:1}
+        case $ch in
+            ' ') out+='-' ;;
+            '-' | '_') out+=$ch ;;
+            *[![:alnum:]-_]*) ;;
+            *) out+=$ch ;;
+        esac
+    done
+    printf '%s\n' "${out,,}"
+}
+
+# Print every anchor a Markdown file offers: the slug of each heading plus
+# the name of any explicit HTML anchor (<a name="..."> / <a id="...">).
+# Fenced code blocks are stripped first - a '#' line inside a fence is not a heading.
+anchors_of() {
+    local file=$1
+    [[ -f $file ]] || return 0
+    {
+        # The text of every ATX heading, fences already stripped.
+        sed '/^ *```/,/^ *```/d' "$file" |
+            sed -nE 's/^#{1,6}[[:space:]]+(.*)$/\1/p' |
+            while IFS= read -r text; do
+                # drop a trailing closing sequence of '#'s and surrounding blanks
+                text=$(printf '%s' "$text" | sed 's/[[:space:]]*#*[[:space:]]*$//')
+                slugify "$text"
+            done |
+            # GitHub collision suffixes: the first occurrence keeps the bare
+            # slug; a later one takes '<slug>-1', '<slug>-2', ... advancing
+            # until a name no earlier heading emitted - a heading whose own
+            # slug is already suffixed counts as taken, so Topic, Topic-1,
+            # Topic yields topic, topic-1, topic-2.
+            awk '
+                {
+                    if ($0 in emitted) {
+                        suffix = 1
+                        while (($0 "-" suffix) in emitted) suffix++
+                        slug = $0 "-" suffix
+                    } else {
+                        slug = $0
+                    }
+                    emitted[slug] = 1
+                    print slug
+                }'
+        # The name of every explicit HTML anchor, verbatim - GitHub neither
+        # suffixes nor slugifies an anchor's own name.
+        sed '/^ *```/,/^ *```/d' "$file" |
+            grep -oE '<a[[:space:]]+(name|id)="[^"]+"' |
+            sed 's/.*="//;s/"$//' || true
+    }
+}
 
 # Keep the original parser: omit triple-backtick fences and inline code;
-# ignore fragments and targets containing a colon. Index by literal basename.
+# ignore targets containing a colon. Index by literal basename. A link whose
+# target exists but whose '#fragment' matches no heading is a dead anchor.
 diagnostics=$(
     set +e
     find . -name '*.md' | while read -r file; do
@@ -15,18 +90,46 @@ diagnostics=$(
         basename=${file##*/}
         case $file in
             ./docs/*)
-                [[ $basename == README.md ]] ||
-                    grep -qsF "$basename" README.md "$directory/README.md" ||
-                    echo "$file"
+                if [[ $basename != README.md ]]; then
+                    # A doc is indexed only when the root README *and* its
+                    # section README both carry it.
+                    indexed=1
+                    grep -qsF -- "$basename" README.md || indexed=0
+                    grep -qsF -- "$basename" "$directory/README.md" || indexed=0
+                    [[ $indexed -eq 1 ]] || echo "$file"
+                fi
                 ;;
         esac
 
         sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$file" |
-            grep -oE '\]\([^)#[:space:]]+' |
-            cut -c3- |
-            grep -v ':' |
+            grep -oE '\]\([^)]*\)' |
+            sed 's/^](//;s/)$//' |
             while read -r link; do
-                [[ -e "$directory/$link" ]] || echo "$file $link"
+                # A link may carry a title - keep the target only.
+                link=${link%%[[:space:]]*}
+                [[ -n $link ]] || continue
+                path=${link%%#*}
+                fragment=''
+                [[ $link == *'#'* ]] && fragment=${link#*#}
+                # A target containing a colon is an absolute URL or a custom
+                # scheme - never a finding.
+                [[ $path == *:* ]] && continue
+                if [[ -z $path ]]; then
+                    target=$file
+                else
+                    target=$directory/$path
+                fi
+                if [[ ! -e $target ]]; then
+                    # The target file is missing - report it once, for the file.
+                    echo "$file $path"
+                    continue
+                fi
+                [[ -n $fragment ]] || continue
+                # The target exists; the fragment must match a heading in it.
+                # grep reads the whole stream: an early exit would SIGPIPE the
+                # producer and pipefail would call that a dead anchor.
+                anchors_of "$target" | grep -xF -- "$fragment" >/dev/null ||
+                    echo "$file $link dead anchor"
             done
     done
     true

@@ -16,15 +16,18 @@ passes it locally passes everywhere.
 |------|---------|------------|
 | install | `bin/setup` | echo "gold-standards-in-ai: markdown only, no dependencies to install" |
 | run | `bin/dev` | echo "gold-standards-in-ai: no app to run - read README.md for the map" — on developerz.ai runs, start it with code_bash_background when you need a running stack |
-| prove | `bin/check` | [ -d docs ]\|\|exit 1; o=$(set +e; find . -name '*.md' \| while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] \|\| grep -qsF $b README.md $d/README.md \|\| echo $f;; esac; sed '/^ *\`\`\`/,/^ *\`\`\`/d;s/\`[^\`]*\`//g' "$f" \| grep -oE '\\]\\([^)#[:space:]]+' \| cut -c3- \| grep -v ':' \| while read -r l; do [ -e "$d/$l" ] \|\| echo "$f $l"; done; done;true); [ -z "$o" ]\|\|{ echo "$o"; false; } |
+| prove | `bin/check` | runs `bin/check-docs` (index + relative-link + `#fragment` validation) then `bin/test` (its regression fixtures); silent on success. Exits 0 when the change passes, 75 when a gate precondition is unmet, any other nonzero for a validation or regression failure. The real gate is `bin/check-docs` — run it, never copy its slug rules |
 | stop | `bin/stop` | true — on developerz.ai runs, the platform runs this when your session ends — do not stop the stack yourself |
 
 ## Rules
 
 - Run every command from the repo root — the scripts `cd` there themselves.
 - `bin/check` red is not a pull request. Fix the cause, never silence the gate.
+- The gate's rules live in `bin/check-docs`; read them there instead of copying them:
+  - a doc under `docs/` needs the root `README.md` **and** its section `README.md` to carry it;
+  - a `#fragment` is the slug of the target's heading — lowercase, every character that is not a letter, a digit, `-` or `_` deleted, spaces turned into `-`. `## ⌨️ Keyboard paths` is `-keyboard-paths`; `## 6. Merge → deploy without a human bottleneck` is `6-merge--deploy-without-a-human-bottleneck`.
 
-## Exit codes `bin/check` must use
+## Exit codes `bin/check` uses
 
 A coding box runs this gate before it commits, and it has to tell a FAILING change
 from a gate it could not run — otherwise correct work is thrown away as if it were
@@ -33,8 +36,8 @@ red. Exit 1 cannot carry that difference, so one code is reserved:
 | Exit | Means | What the platform does |
 |------|-------|------------------------|
 | 0 | the change passes | commit it |
-| 75 | a resource the gate NEEDS is unreachable (a database, a service, a credential) — it refused to grade | refuse the commit, and blame the environment, never the change |
-| any other non-zero | the gate ran and the change is red | refuse the commit, and blame the change |
+| 75 | a gate precondition is unmet — the gate could not grade | refuse the commit, and blame the environment, never the change |
+| any other non-zero | validation or regression failed — the gate ran and the change is red | refuse the commit, and blame the change |
 
 - Guard preconditions FIRST and `exit 75` when one is unmet. `exit 1` there tells the
   platform your change is broken when it is your environment that is.
