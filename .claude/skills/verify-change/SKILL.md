@@ -16,13 +16,16 @@ passes it locally passes everywhere.
 |------|---------|------------|
 | install | `bin/setup` | echo "gold-standards-in-ai: markdown only, no dependencies to install" |
 | run | `bin/dev` | echo "gold-standards-in-ai: no app to run - read README.md for the map" — on developerz.ai runs, start it with code_bash_background when you need a running stack |
-| prove | `bin/check` | runs `bin/check-docs` and `bin/test`; exits 75 when a gate precondition is unmet, any other nonzero for a validation or regression failure, and 0 when the change passes |
+| prove | `bin/check` | runs `bin/check-docs` (index + relative-link + `#fragment` validation) then `bin/test` (its regression fixtures); silent on success. Exits 0 when the change passes, 75 when a gate precondition is unmet, any other nonzero for a validation or regression failure. The real gate is `bin/check-docs` — run it, never copy its slug rules |
 | stop | `bin/stop` | true — on developerz.ai runs, the platform runs this when your session ends — do not stop the stack yourself |
 
 ## Rules
 
 - Run every command from the repo root — the scripts `cd` there themselves.
 - `bin/check` red is not a pull request. Fix the cause, never silence the gate.
+- The gate's rules live in `bin/check-docs`; read them there instead of copying them:
+  - a doc under `docs/` needs the root `README.md` **and** its section `README.md` to carry it;
+  - a `#fragment` is the slug of the target's heading — lowercase, every character that is not a letter, a digit, `-` or `_` deleted, spaces turned into `-`. `## ⌨️ Keyboard paths` is `-keyboard-paths`; `## 6. Merge → deploy without a human bottleneck` is `6-merge--deploy-without-a-human-bottleneck`.
 
 ## Exit codes `bin/check` uses
 
