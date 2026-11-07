@@ -1,10 +1,27 @@
 #!/usr/bin/env bash
 # Validate Markdown indexing and relative links, optionally in a fixture root.
+#
+# Exit codes:
+#   0   the tree is valid
+#   75  a precondition this validator needs is unmet - it refused to grade
+#   1   the tree ran and is invalid (unindexed doc, broken relative link)
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
-cd "${1:-$repo_root}"
-[[ -d docs ]] || exit 1
+root=${1:-$repo_root}
+
+if [[ ! -d $root ]]; then
+    printf 'check-docs: no such tree: %s\n' "$root" >&2
+    exit 75
+fi
+cd "$root"
+
+# The docs tree is what gets graded. Missing = the gate could not run, never a
+# red change, so this exits 75 and not 1.
+if [[ ! -d docs ]]; then
+    printf 'check-docs: docs directory missing - gate refused to grade\n' >&2
+    exit 75
+fi
 
 # GitHub-style heading slug: lowercase, punctuation/symbols/emoji deleted,
 # spaces turned into '-'. Literal '-' and '_' are kept.

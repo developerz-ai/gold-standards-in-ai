@@ -7,7 +7,7 @@
 
 ## Stack
 
-Markdown only (no runtime). The gate is `bin/check` — it runs `bin/check-docs` (index + relative-link + `#fragment` validation) and then `bin/test` (its regression fixtures), and is silent on success: a change that does not pass it is not proven, whatever its description says.
+Markdown only (no runtime). The gate is `bin/check` — it runs `bin/check-docs` (index + relative-link + `#fragment` validation) and then `bin/test` (its regression fixtures), and is silent on success. It exits 0 when the change passes, 75 when a gate precondition is unmet and the gate could not grade, and any other nonzero when validation or regression fails. A change that does not pass it is not proven, whatever its description says.
 
 Read the gate, never a copy of it. `bin/check-docs` is the single source of truth for the rules it enforces:
 

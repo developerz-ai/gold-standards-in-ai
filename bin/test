@@ -4,6 +4,11 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
 validator="$repo_root/bin/check-docs"
+gate="$repo_root/bin/check"
+precondition_output='check-docs: docs directory missing - gate refused to grade'
+# Depth of nested suites. bin/check runs bin/test, so a full bin/check from
+# inside this suite would recurse into it; the marker bounds the nesting.
+gate_depth=${GATE_TEST_DEPTH:-0}
 fixtures=$(mktemp -d "${TMPDIR:-/tmp}/check-docs.XXXXXXXX")
 trap 'rm -rf -- "$fixtures"' EXIT
 trap 'exit 130' INT
@@ -20,6 +25,20 @@ new_fixture() {
     printf '# Fixture\n' > "$root/README.md"
 }
 
+# Compares one run's status and output with what the contract requires.
+assert_result() {
+    local name=$1 expected_status=$2 expected_output=$3 status=$4 output=$5
+    if [[ $status -eq $expected_status && $output == "$expected_output" ]]; then
+        printf 'PASS %s\n' "$name"
+        passed=$((passed + 1))
+    else
+        printf 'FAIL %s\n' "$name"
+        printf '  expected status: %s; actual: %s\n' "$expected_status" "$status"
+        printf '  expected output: %q\n  actual output: %q\n' "$expected_output" "$output"
+        failed=$((failed + 1))
+    fi
+}
+
 assert_validation() {
     local name=$1 expected_status=$2 expected_output=$3
     local output status
@@ -28,13 +47,49 @@ assert_validation() {
     else
         status=$?
     fi
-    if [[ $status -eq $expected_status && $output == "$expected_output" ]]; then
+    last_status=$status
+    assert_result "$name" "$expected_status" "$expected_output" "$status" "$output"
+}
+
+# Drives the public entrypoint, so the status must survive the whole chain.
+# --docs-only: bin/check runs bin/test, and a full bin/check from inside a
+# fixture would recurse into this suite.
+assert_gate() {
+    local name=$1 expected_status=$2 expected_output=$3
+    local output status
+    if output=$(bash "$gate" --docs-only "$root" 2>&1); then
+        status=0
+    else
+        status=$?
+    fi
+    last_status=$status
+    assert_result "$name" "$expected_status" "$expected_output" "$status" "$output"
+}
+
+# The full public path: bin/check grades the tree, then runs the regression
+# suite. That suite runs this file again, so the depth marker keeps the
+# nesting at one level and the inner run skips the full-gate fixtures.
+assert_gate_full() {
+    local name=$1 expected_status=$2 expected_output=$3
+    local output status
+    if output=$(GATE_TEST_DEPTH=$((gate_depth + 1)) bash "$gate" "$root" 2>&1); then
+        status=0
+    else
+        status=$?
+    fi
+    last_status=$status
+    assert_result "$name" "$expected_status" "$expected_output" "$status" "$output"
+}
+
+# A precondition status and a validation status must never collide.
+assert_distinct() {
+    local name=$1 first=$2 second=$3
+    if [[ $first -ne 0 && $second -ne 0 && $first -ne $second ]]; then
         printf 'PASS %s\n' "$name"
         passed=$((passed + 1))
     else
         printf 'FAIL %s\n' "$name"
-        printf '  expected status: %s; actual: %s\n' "$expected_status" "$status"
-        printf '  expected output: %q\n  actual output: %q\n' "$expected_output" "$output"
+        printf '  statuses must be distinct and non-zero: %s and %s\n' "$first" "$second"
         failed=$((failed + 1))
     fi
 }
@@ -47,11 +102,60 @@ assert_validation 'valid indexed docs and relative links' 0 ''
 
 new_fixture
 rmdir "$root/docs"
-assert_validation 'missing docs directory' 1 ''
+assert_validation 'missing docs directory' 75 "$precondition_output"
+precondition_status=$last_status
 
 new_fixture
 printf '# Unindexed\n' > "$root/docs/topic.md"
 assert_validation 'unindexed document diagnostic' 1 './docs/topic.md'
+validation_status=$last_status
+
+assert_distinct 'precondition status differs from validation status' \
+    "$precondition_status" "$validation_status"
+
+new_fixture
+rmdir "$root/docs"
+assert_gate 'gate refuses to grade a missing docs tree' 75 "$precondition_output"
+gate_precondition_status=$last_status
+
+new_fixture
+printf '[Topic](docs/topic.md)\n' >> "$root/README.md"
+printf 'topic.md\n' > "$root/docs/README.md"
+printf '[Home](../README.md)\n' > "$root/docs/topic.md"
+assert_gate 'gate accepts a valid tree' 0 ''
+
+assert_distinct 'gate precondition status differs from validation status' \
+    "$gate_precondition_status" "$validation_status"
+
+# The full public path - bin/check grades the tree and then runs the
+# regression suite - at the outermost level only; a nested suite would
+# recurse into itself.
+if [[ $gate_depth -eq 0 ]]; then
+    new_fixture
+    rmdir "$root/docs"
+    assert_gate_full 'full gate refuses to grade a missing docs tree' 75 \
+        "$precondition_output"
+    full_gate_precondition_status=$last_status
+
+    new_fixture
+    printf '# Unindexed\n' > "$root/docs/topic.md"
+    assert_gate_full 'full gate reports an unindexed document' 1 './docs/topic.md'
+    full_gate_validation_status=$last_status
+
+    new_fixture
+    printf '[Missing](missing.md)\n' >> "$root/README.md"
+    assert_gate_full 'full gate reports a broken relative link' 1 \
+        './README.md missing.md'
+
+    new_fixture
+    printf '[Topic](docs/topic.md)\n' >> "$root/README.md"
+    printf 'topic.md\n' > "$root/docs/README.md"
+    printf '[Home](../README.md)\n' > "$root/docs/topic.md"
+    assert_gate_full 'full gate accepts a valid tree and runs the suite' 0 ''
+
+    assert_distinct 'full gate precondition status differs from validation status' \
+        "$full_gate_precondition_status" "$full_gate_validation_status"
+fi
 
 new_fixture
 mkdir -p "$root/docs/section"
