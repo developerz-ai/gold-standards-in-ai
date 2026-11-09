@@ -73,7 +73,7 @@ Several narrow, read-only reviewers find more than one broad one, because each g
 | **Comments** | Check each comment against the code | `inaccurate` · `stale` · `incomplete` · `low-value` (restates the code) |
 
 - Pick lenses by diff: types changed → type-design; tests changed or missing → test-quality; error paths touched → silent-failure. The correctness lens always runs.
-- Lenses run on a cheaper/faster model. The final verdict runs on the strongest one (`claude-opus-5-5`).
+- Lenses run on a cheaper/faster model. The final verdict runs on the top tier of the current models overview (as of 2026-11-09: `claude-fable-5-1`; `claude-opus-5-5` is the tier below).
 - Any finding that will recur → climb the [guards ladder](guards-and-gotchas.md#the-ladder--pick-the-cheapest-rung-that-actually-binds) in the same PR. A reviewer catching the same shape twice is a missing lint rule.
 
 ## 🔁 The review loop: fresh eyes every round
