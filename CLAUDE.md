@@ -19,8 +19,8 @@
 | Content | Markdown only — no runtime, no dependencies |
 | Scripts | bash under `bin/` |
 | Gate | `bin/check` — the same gate CI runs |
-| CI | `.github/workflows/ci.yml` — `bin/setup` + `bin/check` on push and pull_request |
-| Pre-commit | `.githooks/pre-commit` → `bin/check`; activate once per clone: `git config core.hooksPath .githooks` |
+| CI | `.github/workflows/ci.yml` — `bash bin/setup` + `bash bin/check` on push and pull_request |
+| Pre-commit | `.githooks/pre-commit` → `exec bash bin/check`; activate once per clone: `git config core.hooksPath .githooks` |
 
 ## Commands
 
@@ -30,10 +30,12 @@ Run from the repo root; each script resolves the repo root itself.
 |---|---|---|
 | `bin/setup` | `mise install` when mise is present; echoes `gold-standards-in-ai: markdown only, no dependencies to install` | once, after clone |
 | `bin/dev` | echoes `gold-standards-in-ai: no app to run - read README.md for the map` | every session |
-| `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success; exit 0 pass, exit 75 an unmet precondition, any other nonzero red | before every commit |
+| `bash bin/check` | the gate — tracked mode of the `bin/` scripts, then `bin/check-docs` + `bin/test`; silent on success; exit 0 pass, exit 75 an unmet precondition, any other nonzero red | before every commit |
 | `bin/check-docs` | map + relative-link validation, including `#fragment` resolution against the target's headings; one line per finding; exit 1 on a finding, exit 75 when it cannot grade — a missing `docs/` tree | while editing docs |
 | `bin/test` | regression fixtures for the validator; no downloaded dependencies | when `bin/check-docs` changes |
 | `bin/stop` | no-op — nothing to stop, never removes data | session end (the platform runs it) |
+
+Run the gate through bash — it grades the executable bit of the `bin/` scripts, so it must start even when one of them lost it.
 
 ## Structure
 

@@ -9,14 +9,15 @@ description: Prove a change in developerz-ai/gold-standards-in-ai before committ
 
 ## The one gate
 
-`bin/check` is the gate. CI runs it and the pre-commit hook runs it, so a change that
+`bin/check` is the gate — run it as `bash bin/check`, the command CI and the pre-commit
+hook use, so it starts even when a `bin/` script lost its executable bit. A change that
 passes it locally passes everywhere.
 
 | Step | Command | What it is |
 |------|---------|------------|
 | install | `bin/setup` | echo "gold-standards-in-ai: markdown only, no dependencies to install" |
 | run | `bin/dev` | echo "gold-standards-in-ai: no app to run - read README.md for the map" — on developerz.ai runs, start it with code_bash_background when you need a running stack |
-| prove | `bin/check` | runs `bin/check-docs` (index + relative-link + `#fragment` validation) then `bin/test` (its regression fixtures); silent on success. Exits 0 when the change passes, 75 when a gate precondition is unmet, any other nonzero for a validation or regression failure. The real gate is `bin/check-docs` — run it, never copy its slug rules |
+| prove | `bash bin/check` | grades the tracked mode of the `bin/` scripts (a script tracked without the executable bit is a finding naming the path), then runs `bin/check-docs` (index + relative-link + `#fragment` validation) then `bin/test` (its regression fixtures); silent on success. Exits 0 when the change passes, 75 when a gate precondition is unmet, any other nonzero for a validation, a mode finding or regression failure. For the gate's Markdown rules, read `bin/check-docs` — never copy its slug rules |
 | stop | `bin/stop` | true — on developerz.ai runs, the platform runs this when your session ends — do not stop the stack yourself |
 
 ## Rules
@@ -37,7 +38,7 @@ red. Exit 1 cannot carry that difference, so one code is reserved:
 |------|-------|------------------------|
 | 0 | the change passes | commit it |
 | 75 | a gate precondition is unmet — the gate could not grade | refuse the commit, and blame the environment, never the change |
-| any other non-zero | validation or regression failed — the gate ran and the change is red | refuse the commit, and blame the change |
+| any other non-zero | validation, a mode finding or regression failed — the gate ran and the change is red | refuse the commit, and blame the change |
 
 - Guard preconditions FIRST and `exit 75` when one is unmet. `exit 1` there tells the
   platform your change is broken when it is your environment that is.

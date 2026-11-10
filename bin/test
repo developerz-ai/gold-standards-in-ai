@@ -155,6 +155,46 @@ if [[ $gate_depth -eq 0 ]]; then
 
     assert_distinct 'full gate precondition status differs from validation status' \
         "$full_gate_precondition_status" "$full_gate_validation_status"
+
+    # A tracked script under bin/ keeps its executable bit - in the index and
+    # on disk. A lost bit turns the gate into 'Permission denied' before it can
+    # report anything. The fixture repos set the index mode explicitly, so the
+    # result never depends on core.fileMode or on the disk mode.
+    new_fixture
+    mkdir -p "$root/bin"
+    printf '#!/usr/bin/env bash\n' > "$root/bin/setup"
+    chmod +x "$root/bin/setup"
+    git -C "$root" -c init.defaultBranch=main init -q
+    git -C "$root" add -- bin/setup
+    git -C "$root" update-index --chmod=-x -- bin/setup
+    assert_gate_full 'gate reports a tracked script without the executable bit' 1 \
+        'bin/setup not executable (tracked 100644)'
+
+    new_fixture
+    mkdir -p "$root/bin"
+    printf '#!/usr/bin/env bash\n' > "$root/bin/setup"
+    chmod +x "$root/bin/setup"
+    git -C "$root" -c init.defaultBranch=main init -q
+    git -C "$root" add -- bin/setup
+    git -C "$root" update-index --chmod=+x -- bin/setup
+    chmod -x "$root/bin/setup"
+    assert_gate_full 'gate reports a tracked script that is not executable on disk' 1 \
+        'bin/setup not executable (working tree)'
+
+    # The clean tree also tracks what the gate must not grade: a file under
+    # bin/ that is not a script, and a symlink. The symlink points at the
+    # script, so only the mode guards keep both entries out of the findings.
+    new_fixture
+    mkdir -p "$root/bin"
+    printf '#!/usr/bin/env bash\n' > "$root/bin/setup"
+    chmod +x "$root/bin/setup"
+    printf '# Notes\n' > "$root/bin/NOTES.md"
+    ln -s setup "$root/bin/link"
+    git -C "$root" -c init.defaultBranch=main init -q
+    git -C "$root" add -- bin/setup bin/NOTES.md bin/link
+    git -C "$root" update-index --chmod=+x -- bin/setup
+    git -C "$root" update-index --chmod=-x -- bin/NOTES.md
+    assert_gate_full 'gate accepts a tracked script with the executable bit' 0 ''
 fi
 
 new_fixture

@@ -14,5 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: bin/setup
-      - run: bin/check
+      # Through bash: a lost executable bit on a bin/ script reaches the gate as its finding, not "Permission denied".
+      - run: bash bin/setup
+      - run: bash bin/check

@@ -12,7 +12,7 @@ Daily checkup fired by `schedules: health`: the failures no issue or PR announce
 One validator: `bin/check-docs` — the gate and this checkup run the same code, so a finding here is a finding there.
 The checkup walks untracked Markdown and `.claude/` Markdown too, skips fenced and inline code — a link there is an
 example, not a link — and never reports a target containing a colon; a printed finding is a real one.
-`bash bin/check` (`bin/check-docs` + `bin/test`) remains the map verdict.
+`bash bin/check` now also runs the tracked-mode check on the `bin/` scripts, alongside `bin/check-docs` and `bin/test`; it remains the map verdict.
 
 ## What to file
 

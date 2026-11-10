@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# One gate: Markdown validation and its regression tests. Silent on success.
+# One gate: Markdown validation, tracked script modes and their regression
+# tests. Silent on success.
 #
 # Usage: bin/check [--docs-only] [root]
 #   root         tree to grade (default: the repo root)
@@ -41,6 +42,53 @@ if [[ ! -d $root ]]; then
     exit 75
 fi
 root=$(cd "$root" && pwd)
+
+# A tracked script under bin/ keeps its executable bit: in the index and on
+# disk. A lost bit turns 'bin/check' into 'Permission denied' before the gate
+# can say anything, so the gate grades it instead. A tree that is not a git
+# repository tracks nothing - there is nothing to grade and the check skips
+# silently. The check never refuses to grade, so it never exits 75.
+mode_findings=0
+check_tracked_modes() {
+    local tree=$1
+    local listing mode _object _stage path first_line
+    if ! listing=$(git -C "$tree" ls-files --stage -- bin/ 2>/dev/null); then
+        return 0
+    fi
+    while read -r mode _object _stage path; do
+        if [[ -z $path ]]; then
+            continue
+        fi
+        # A symlink carries no script of its own.
+        if [[ $mode == 120000 ]]; then
+            continue
+        fi
+        if [[ ! -f "$tree/$path" ]]; then
+            continue
+        fi
+        first_line=''
+        IFS= read -r first_line 2>/dev/null < "$tree/$path" || true
+        if [[ $first_line != '#!'* ]]; then
+            continue
+        fi
+        if [[ $mode != 100755 ]]; then
+            printf '%s not executable (tracked %s)\n' "$path" "$mode"
+            mode_findings=1
+        elif [[ ! -x "$tree/$path" ]]; then
+            printf '%s not executable (working tree)\n' "$path"
+            mode_findings=1
+        fi
+    done <<< "$listing"
+}
+
+# The mode check grades the tree the gate was given, before the validator.
+# It runs in the full path only: --docs-only grades the Markdown tree alone.
+if [[ $run_tests -eq 1 ]]; then
+    check_tracked_modes "$root"
+    if [[ $mode_findings -ne 0 ]]; then
+        exit 1
+    fi
+fi
 
 # The validator's status passes through unchanged: 75 (refused to grade), 1 (a
 # validation diagnostic) or 0. Never collapse 75 into another code.
