@@ -74,12 +74,14 @@ Several processes can run identical bytes (one runtime, an env var picks the ent
 | Test browsers | the browser download dir | the framework version |
 | System deps | a **pre-built base image** | rebuild weekly, not per run |
 
+Current upstream majors (As of 2026-11): [`actions/cache@v6`](https://github.com/actions/cache/releases) and [`docker/build-push-action@v7`](https://github.com/docker/build-push-action/releases).
+
 ```yaml
-- uses: actions/cache@v4
+- uses: actions/cache@v6
   with:
     path: ~/.cache/ms-playwright
     key: pw-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-- uses: docker/build-push-action@v5
+- uses: docker/build-push-action@v7
   with:
     cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image }}:buildcache
     cache-to:   type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image }}:buildcache,mode=max
