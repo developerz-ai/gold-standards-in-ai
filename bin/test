@@ -200,6 +200,13 @@ assert_validation 'inline and fenced code examples ignored' 0 ''
 
 new_fixture
 cat >> "$root/README.md" <<'MARKDOWN'
+```markdown
+[Missing](fenced-missing.md)
+MARKDOWN
+assert_validation 'unterminated code fence suppresses following links' 0 ''
+
+new_fixture
+cat >> "$root/README.md" <<'MARKDOWN'
 ```
 [Missing](example.md)
 ```
