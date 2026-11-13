@@ -1,14 +1,64 @@
 #!/usr/bin/env bash
 # One gate: Markdown validation and its regression tests. Silent on success.
+#
+# Usage: bin/check [--docs-only] [root]
+#   root         tree to grade (default: the repo root)
+#   --docs-only  grade the tree with the validator only, skip the test suite
+#
+# Exit codes:
+#   0                    the change passes
+#   75                   a precondition the gate needs is unmet - it refused to grade
+#   any other non-zero   the gate ran and the change is red
 set -euo pipefail
-cd "$(dirname "$0")/.."
 
-bash bin/check-docs
-if test_output=$(bash bin/test 2>&1); then
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+
+run_tests=1
+root=$repo_root
+trees=0
+for arg in "$@"; do
+    case $arg in
+        --docs-only)
+            run_tests=0
+            ;;
+        -*)
+            printf 'check: unknown option: %s\n' "$arg" >&2
+            exit 2
+            ;;
+        *)
+            trees=$((trees + 1))
+            if [[ $trees -gt 1 ]]; then
+                printf 'check: one tree at a time\n' >&2
+                exit 2
+            fi
+            root=$arg
+            ;;
+    esac
+done
+
+if [[ ! -d $root ]]; then
+    printf 'check: no such tree: %s\n' "$root" >&2
+    exit 75
+fi
+root=$(cd "$root" && pwd)
+
+# The validator's status passes through unchanged: 75 (refused to grade), 1 (a
+# validation diagnostic) or 0. Never collapse 75 into another code.
+validator_status=0
+bash "$repo_root/bin/check-docs" "$root" || validator_status=$?
+if [[ $validator_status -ne 0 ]]; then
+    exit "$validator_status"
+fi
+
+if [[ $run_tests -eq 0 ]]; then
+    exit 0
+fi
+
+# A regression failure keeps its own status.
+if test_output=$(bash "$repo_root/bin/test" 2>&1); then
     :
 else
     status=$?
     printf '%s\n' "$test_output"
     exit "$status"
 fi
-

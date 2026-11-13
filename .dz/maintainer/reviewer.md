@@ -7,7 +7,15 @@
 
 ## Stack
 
-Markdown only (no runtime). The gate is `bin/check` (`[ -d docs ]||exit 1; o=$(set +e; find . -name '*.md' | while read -r f; do d=${f%/*}; b=${f##*/}; case $f in ./docs/*) [ $b = README.md ] || grep -qsF $b README.md $d/README.md || echo $f;; esac; sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' "$f" | grep -oE '\]\([^)#[:space:]]+' | cut -c3- | grep -v ':' | while read -r l; do [ -e "$d/$l" ] || echo "$f $l"; done; done;true); [ -z "$o" ]||{ echo "$o"; false; }`): a change that does not pass it is not proven, whatever its description says.
+Markdown only (no runtime). The gate is `bin/check` — it runs `bin/check-docs` (index + relative-link + `#fragment` validation) and then `bin/test` (its regression fixtures), and is silent on success. It exits 0 when the change passes, 75 when a gate precondition is unmet and the gate could not grade, and any other nonzero when validation or regression fails. A change that does not pass it is not proven, whatever its description says.
+
+Read the gate, never a copy of it. `bin/check-docs` is the single source of truth for the rules it enforces:
+
+- **Indexing** — a doc under `docs/` is indexed only when the root `README.md` **and** its section `README.md` both carry it. A doc in only one of the two is a finding.
+- **Links** — a relative link is resolved against the target file's headings, and the `#fragment` is the slug of the heading text: lowercase, every character that is not a letter, a digit, `-` or `_` deleted, spaces turned into `-`. Emoji, arrows and dashes are deleted, not turned into hyphens; a literal `-` and `_` are kept. So `## ⌨️ Keyboard paths` is `-keyboard-paths`, and `## 6. Merge → deploy without a human bottleneck` is `6-merge--deploy-without-a-human-bottleneck`.
+- **Fences and inline code** are stripped first — a link inside one is an example, not a link.
+
+Never reproduce the slug algorithm in prose or in a one-liner: a copy drifts from the checker, and a drifted copy makes a green tree look red. Run `bin/check-docs` and report what it prints.
 
 ## Review conventions
 
