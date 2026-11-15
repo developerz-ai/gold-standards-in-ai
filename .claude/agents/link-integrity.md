@@ -3,7 +3,7 @@ name: link-integrity
 description: Owns relative-link resolution across docs. Use for broken link, dead link, link sweep, relative path. Do NOT use for the README map or house style.
 ---
 
-> Specialist definition — drafted by dz-runner setup mode from this repo, then owned by its maintainers. Correct it in place; setup never overwrites a definition that exists.
+> Specialist definition — owned by this repository's maintainers. Correct it in place; setup never overwrites a definition that exists.
 
 ## Identity
 

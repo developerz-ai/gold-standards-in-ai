@@ -2,7 +2,7 @@
 description: Monthly upkeep of dated claims, external links and model ids. Use for stale doc, dated claim, model id, monthly improve.
 ---
 
-> House skill — established by dz-runner setup mode from this repo's own evidence, then owned by its maintainers. Correct it in place; setup never overwrites a skill that exists.
+> House skill — owned by this repository's maintainers, and written from this repository's own evidence. Correct it in place; setup never overwrites a skill that exists.
 
 1. Act only on the first Monday of the month: `[ "$(date -u +%u)" = 1 ] && [ "$(date -u +%-d)" -le 7 ]`. fail -> stop, file nothing, open nothing.
 2. Dated claims: `grep -rn 'As of 20' README.md docs` -> a claim older than three months that a source now contradicts is worth acting on.

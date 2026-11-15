@@ -49,6 +49,12 @@ bash "$repo_root/bin/check-docs" "$root" || validator_status=$?
 if [[ $validator_status -ne 0 ]]; then
     exit "$validator_status"
 fi
+# The public-tree guard reads this repository's own tracked files, so it runs for this tree only,
+# never for a fixture tree a test points the gate at.
+if [[ $root == "$repo_root" ]]; then
+    bash "$repo_root/bin/check-public-tree" --self-test
+    bash "$repo_root/bin/check-public-tree"
+fi
 
 if [[ $run_tests -eq 0 ]]; then
     exit 0

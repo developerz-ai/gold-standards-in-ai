@@ -2,7 +2,7 @@
 description: Plan a doc set with /planx into path-disjoint slices. Use for planx, doc plan, status.yml, plan dir, slices.
 ---
 
-> House skill — established by dz-runner setup mode from this repo's own evidence, then owned by its maintainers. Correct it in place; setup never overwrites a skill that exists.
+> House skill — owned by this repository's maintainers, and written from this repository's own evidence. Correct it in place; setup never overwrites a skill that exists.
 
 1. Resolve the plan path: `date +%Y`, `date +%m`, `date +%d` -> `docs/plans/<YYYY>/<MM>/<DD>/`; next number = highest `1NN-*` + 1, else `101`; slug = kebab-case, max 5 words.
 2. Explore read-only over `docs/<section>/`: which section owns the topic, what already covers it (`file:line`), new file vs revision vs delete, which READMEs need a row. fail -> stop: a duplicate needs a revision, not an addition.

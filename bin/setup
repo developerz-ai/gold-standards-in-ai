@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# one-command setup — established by dz-runner setup mode. One command; adjust as the repo grows.
+# one-command setup — owned by this repository's maintainers. One command; adjust as the repo grows.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 command -v mise >/dev/null && mise install

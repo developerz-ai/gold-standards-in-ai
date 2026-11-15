@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# The public tree names nothing private. This repository is public, so every tracked file is a
+# public document: no host on our own domain beyond the public site, no private repository or its
+# tracker, no one's home directory, no name of the setup mode that once wrote agent files, and none
+# of the private words.
+#
+# The private words are never in this file, whole or in parts: fragments joined in a public file
+# are the word to anyone who reads it. They come from the PUBLIC_TREE_PRIVATE_WORDS CI secret
+# (comma- or newline-separated). A run without it says it skipped them; this repository's own CI
+# runs set PUBLIC_TREE_PRIVATE_WORDS_REQUIRED=1, where an empty secret fails. The setup mode's name
+# is already public, so it is assembled here.
+#
+# Reads `git ls-files`, proves it read this file and counts what it read. A failure names the file
+# and the rule, never the matched text: CI logs are public. `--self-test` proves each rule fires.
+#
+#   bin/check-public-tree [--self-test]
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+self=bin/check-public-tree
+min_tracked=80
+domain_re='developerz\.ai'
+org=developerz-ai
+public_repos=" ai-army ai-designer ai-gaming-agent-mcp ai-task-master bun-on-rails cairn claude-and-conquer claude-task-master claudes db-mcp-gateway fast_rspec gold-standards-in-ai magik mcp-ssh mini multi-ai-router nexus-engine open-mmorpg open-remote-ssh-tmux research tessera ts23d ui-debugger-mcp ultimate universal-lsp wurk "
+p1=dz
+p2=runner
+setup_re="${p1}[-_ ]?${p2}"
+tracker_re="(^|[^A-Za-z0-9_./-])(infrastructure|${domain_re}|${p1}) ?#[0-9]"
+home_re='(^|[^A-Za-z0-9_.-])/(home|Users)/[A-Za-z0-9_.-]+'
+home_ok_re='/(home|Users)/(runner|user|app)([^A-Za-z0-9_.-]|$)'
+
+# The rules one text breaks, one per line; never the matched text.
+violations() {
+    local text=$1 words_file=$2 host name hit
+    while IFS= read -r host; do
+        [[ -z $host ]] && continue
+        host=$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')
+        if [[ $host != "www.developerz.ai" ]]; then
+            echo 'internal host on our own domain'
+            break
+        fi
+    done < <(printf '%s' "$text" | grep -oiE "([a-z0-9-]+\.)+${domain_re}" || true)
+    printf '%s' "$text" | grep -qiE "$setup_re" && echo 'setup-mode name'
+    if printf '%s' "$text" | grep -oE "$home_re" | grep -vqE "$home_ok_re"; then
+        echo "someone's home directory"
+    fi
+    hit=0
+    while IFS= read -r name; do
+        [[ -z $name ]] && continue
+        name=$(printf '%s' "${name##*/}" | tr '[:upper:]' '[:lower:]')
+        name=${name%.git}
+        name=${name%%.}
+        [[ $public_repos == *" $name "* ]] || hit=1
+    done < <(printf '%s' "$text" | grep -oiE "(github\.com/|^|[^A-Za-z0-9_./-])${org}/[A-Za-z0-9_.-]+" | grep -oiE "${org}/[A-Za-z0-9_.-]+" || true)
+    if [[ $hit -eq 1 ]] || printf '%s' "$text" | grep -qiE "$tracker_re"; then
+        echo 'private repository'
+    fi
+    if [[ -s $words_file ]] && printf '%s' "$text" | grep -qiF -f "$words_file"; then
+        echo 'private word (from the secret)'
+    fi
+    return 0
+}
+
+words_file=$(mktemp "${TMPDIR:-/tmp}/public-tree.XXXXXXXX")
+trap 'rm -f -- "$words_file"' EXIT
+printf '%s' "${PUBLIC_TREE_PRIVATE_WORDS:-}" | tr ',' '\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | grep -v '^$' > "$words_file" || true
+
+if [[ ${1:-} == --self-test ]]; then
+    fails=0
+    expect() { # expect <rules> <text> [words]
+        local want=$1 text=$2 words=${3:-} wf got
+        wf=$(mktemp "${TMPDIR:-/tmp}/public-tree.XXXXXXXX")
+        printf '%s' "$words" | tr ',' '\n' > "$wf"
+        got=$(violations "$text" "$wf" | tr '\n' '|' | sed 's/|$//')
+        rm -f -- "$wf"
+        if [[ $got != "$want" ]]; then
+            printf 'check-public-tree self-test: expected [%s], got [%s]\n' "$want" "$got" >&2
+            fails=$((fails + 1))
+        fi
+    }
+    expect 'internal host on our own domain' "url: https://mcp.developerz.""ai/v1"
+    expect '' "see https://www.developerz.ai"
+    expect 'setup-mode name' "a ${p1^^}-${p2^^} box"
+    expect "someone's home directory" "cd /ho""me/someone/src"
+    expect '' "runs-on: /home/runner/work"
+    expect 'private repository' "see ${org}/vault#12"
+    expect 'private repository' "(${p1}#1026)"
+    expect '' "${org}/gold-standards-in-ai#3, github.com/${org}/wurk"
+    expect 'private word (from the secret)' "# runs on QUIMTEL" "quimtel,zorblax.io"
+    expect '' "zorblax-io and quim" "quimtel,zorblax.io"
+    if [[ $fails -ne 0 ]]; then exit 1; fi
+    echo 'check-public-tree self-test: every rule fires'
+    exit 0
+fi
+
+if [[ ! -s $words_file ]]; then
+    if [[ ${PUBLIC_TREE_PRIVATE_WORDS_REQUIRED:-} == 1 ]]; then
+        echo 'check-public-tree: PUBLIC_TREE_PRIVATE_WORDS is empty, and PUBLIC_TREE_PRIVATE_WORDS_REQUIRED=1 says this run must check the private words' >&2
+        exit 1
+    fi
+    echo 'check-public-tree: PUBLIC_TREE_PRIVATE_WORDS is unset, private words not checked' >&2
+fi
+
+[[ $(git -C "$repo_root" rev-parse --show-toplevel) == "$repo_root" ]] || { echo "check-public-tree: git answers for another repository's tree" >&2; exit 1; }
+mapfile -d '' files < <(git -C "$repo_root" ls-files -z)
+printf '%s\n' "${files[@]}" | grep -qxF "$self" || { echo 'check-public-tree: the scan does not see this file, so its root is wrong' >&2; exit 1; }
+read=0
+failures=0
+for path in "${files[@]}"; do
+    full=$repo_root/$path
+    [[ -f $full ]] || continue
+    grep -qI . "$full" 2>/dev/null || continue
+    read=$((read + 1))
+    while IFS= read -r rule; do
+        [[ -z $rule ]] && continue
+        printf '%s: %s\n' "$path" "$rule" >&2
+        failures=$((failures + 1))
+    done < <(violations "$(cat "$full")" "$words_file")
+done
+echo "check-public-tree: read $read of ${#files[@]} tracked files, $(wc -l < "$words_file" | tr -d ' ') private words" >&2
+[[ $read -ge $min_tracked ]] || { echo "check-public-tree: read only $read tracked files" >&2; exit 1; }
+[[ $failures -eq 0 ]] || { echo "check-public-tree: $failures finding(s); rule per file, value withheld" >&2; exit 1; }

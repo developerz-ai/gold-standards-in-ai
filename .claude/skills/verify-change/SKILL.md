@@ -4,7 +4,7 @@ description: Prove a change in developerz-ai/gold-standards-in-ai before committ
 
 # Verify a change in developerz-ai/gold-standards-in-ai
 
-> House skill — established by dz-runner setup mode from this repo’s own
+> House skill — owned by this repository's maintainers from this repo’s own
 > detected commands. Correct it in place; setup never overwrites a skill that exists.
 
 ## The one gate
