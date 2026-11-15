@@ -31,7 +31,7 @@ home_ok_re='/(home|Users)/(runner|user|app)([^A-Za-z0-9_.-]|$)'
 
 # The rules one text breaks, one per line; never the matched text.
 violations() {
-    local text=$1 words_file=$2 host name hit
+    local text=$1 words_file=$2 host name hit homes
     while IFS= read -r host; do
         [[ -z $host ]] && continue
         host=$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')
@@ -40,8 +40,10 @@ violations() {
             break
         fi
     done < <(printf '%s' "$text" | grep -oiE "([a-z0-9-]+\.)+${domain_re}" || true)
-    printf '%s' "$text" | grep -qiE "$setup_re" && echo 'setup-mode name'
-    if printf '%s' "$text" | grep -oE "$home_re" | grep -vqE "$home_ok_re"; then
+    grep -qiE "$setup_re" <<< "$text" && echo 'setup-mode name'
+    # Captured first: under pipefail an early-exiting `grep -q` would SIGPIPE its producer.
+    homes=$(grep -oE "$home_re" <<< "$text" || true)
+    if [[ -n $homes ]] && grep -vqE "$home_ok_re" <<< "$homes"; then
         echo "someone's home directory"
     fi
     hit=0
@@ -52,10 +54,10 @@ violations() {
         name=${name%%.}
         [[ $public_repos == *" $name "* ]] || hit=1
     done < <(printf '%s' "$text" | grep -oiE "(github\.com/|^|[^A-Za-z0-9_./-])${org}/[A-Za-z0-9_.-]+" | grep -oiE "${org}/[A-Za-z0-9_.-]+" || true)
-    if [[ $hit -eq 1 ]] || printf '%s' "$text" | grep -qiE "$tracker_re"; then
+    if [[ $hit -eq 1 ]] || grep -qiE "$tracker_re" <<< "$text"; then
         echo 'private repository'
     fi
-    if [[ -s $words_file ]] && printf '%s' "$text" | grep -qiF -f "$words_file"; then
+    if [[ -s $words_file ]] && grep -qiF -f "$words_file" <<< "$text"; then
         echo 'private word (from the secret)'
     fi
     return 0
@@ -88,6 +90,14 @@ if [[ ${1:-} == --self-test ]]; then
     expect '' "${org}/gold-standards-in-ai#3, github.com/${org}/wurk"
     expect 'private word (from the secret)' "# runs on QUIMTEL" "quimtel,zorblax.io"
     expect '' "zorblax-io and quim" "quimtel,zorblax.io"
+    # A match at the top of a file larger than a pipe buffer must still fire (no SIGPIPE under pipefail).
+    big=$(printf '%0200000d' 0)
+    expect 'setup-mode name' "${p1}-${p2}
+$big"
+    expect 'private word (from the secret)' "quimtel
+$big" "quimtel"
+    expect 'private repository' "(${p1}#1026)
+$big"
     # CI must pass the secret and the required flag on live (uncommented) lines: deleting,
     # commenting out or weakening either would switch the private-word check off silently.
     ci=$repo_root/.github/workflows/ci.yml
