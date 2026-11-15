@@ -2,6 +2,8 @@
 
 Zero → running project, fast. Idea → spec → scaffold → a multi-file plan an agent can execute. The faster the gap from "paragraph in a chat" to "agent opening PRs," the more you ship.
 
+This page is what each artifact contains. The order they come in — docs first, then tooling, then code — and the stack proposal → [project-from-zero.md](project-from-zero.md).
+
 ## Idea → spec
 The first artifact is **not code** — it's a tight spec an agent can execute without you in the room. Capture:
 

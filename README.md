@@ -40,16 +40,17 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [writing-for-agents/README.md](docs/writing-for-agents/README.md) — the index
 - [claude-md.md](docs/writing-for-agents/claude-md.md) — 🗂️ `CLAUDE.md`, the project brain
 - [skills-commands-agents.md](docs/writing-for-agents/skills-commands-agents.md) — 🧩 skills, slash commands & subagents
-- [permissions.md](docs/writing-for-agents/permissions.md) — 🔓 **full power, zero prompts** — quality in `bin/check` + CI, never hooks
+- [permissions.md](docs/writing-for-agents/permissions.md) — 🔓 **full power, zero prompts** — quality in `bin/check` + CI; a hook only when a named failure earns it
 - [memory-and-mcp.md](docs/writing-for-agents/memory-and-mcp.md) — 🧠 memory & 🔌 MCP servers
 - [compressed-config.md](docs/writing-for-agents/compressed-config.md) — 🗜️ write config that costs fewer tokens
 - [behavioral-rules.md](docs/writing-for-agents/behavioral-rules.md) — 🎯 steer *how* the agent codes
 - [planning-and-docs.md](docs/writing-for-agents/planning-and-docs.md) — 📐 planning, docs & the initial idea
-- [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature` — the plan-slice → agent → PR seam, and why **no git worktrees**
+- [workflow-commands.md](docs/writing-for-agents/workflow-commands.md) — 🛠️ `/planx` + `/feature` — the plan-slice → agent → PR seam, the **PR cap by repo kind**, and where the worktree decision lives
 - [mcp-json.md](docs/writing-for-agents/mcp-json.md) — 🔌 `.mcp.json` — the repo's MCP servers, committed and secret-free
 - [guards-and-gotchas.md](docs/writing-for-agents/guards-and-gotchas.md) — 🛡️ **make the machine careful** — lint guards, doctor checks, preventive rules vs runbook
 - [output-completeness.md](docs/writing-for-agents/output-completeness.md) — 🧾 **beat model laziness** — no placeholders, no truncation, a guard that rejects `// ...rest`
 - [reviewer-agents.md](docs/writing-for-agents/reviewer-agents.md) — 🔎 **reviewer agents people trust** — precision gate, false-positive skip list, silent-failure lens, fresh-eyes loop
+- [prompts-for-weak-models.md](docs/writing-for-agents/prompts-for-weak-models.md) — 🪶 **prompts a cheaper model can follow** — same rules, flatter shape, unbreakable output contracts
 
 ### 2. 🏗️ Architecture
 - [architecture/README.md](docs/architecture/README.md) — the index
@@ -61,6 +62,9 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [api-contracts.md](docs/architecture/api-contracts.md) — 🔌 HTTP contract — one error registry, status codes, keyset pages, `Idempotency-Key`, retries, versioning
 - [app-security.md](docs/architecture/app-security.md) — 🛡️ app security — authz in the data layer, sessions/CSRF/CSP, uploads, rate limits, log redaction
 - [abstractions-and-growth.md](docs/architecture/abstractions-and-growth.md) — 🪜 **pre-MVP → really big** · declare once, project everywhere · **a guard is the tax paid for not deleting the bypass** · why the rule of three doesn't fire when an AI writes the code
+- [resource-lifetimes.md](docs/architecture/resource-lifetimes.md) — ♻️ **RAII for services** — `using` / `asyncDispose`, the creator releases on every exit, a sweeper is the backstop, bounded drain
+- [memory-and-leaks.md](docs/architecture/memory-and-leaks.md) — 🫗 **memory & leaks** — unit-of-work vs process lifetime, cgroup caps, OOMKill evidence, shallow health checks hide leaks
+- [query-shape.md](docs/architecture/query-shape.md) — 🔎 **query shape & N+1** — one query per page, not per row
 
 ### 3. 🧰 Stack
 - [stack/README.md](docs/stack/README.md) — the index
@@ -84,12 +88,13 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [ai-agents/README.md](docs/ai-agents/README.md) — the index
 - [agent-sdk.md](docs/ai-agents/agent-sdk.md) — 🧬 building agents with the AI Agent SDK
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
-- [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one checkout**: when to hive, the file set as the lock, the WHY + 9-point brief
+- [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one file-set lock**: when to hive, **worktrees: when**, the WHY + 9-point brief
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
 - [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) — 📖 **teach *their* agent to use *your* MCP server** — recipes as advice not scripts, the `docs` tool, editable markdown
 - [mcp-write-safety.md](docs/ai-agents/mcp-write-safety.md) — 🛡️ **MCP writes hosts trust** — read/write/delete split + annotations, `live:false` previews, required `confirmed_by_user` on destructive commits
 - [agent-work-limits.md](docs/ai-agents/agent-work-limits.md) — 🔓 **freedom + access** — never cap the work, stall-fence instead, diagnose the terminator
 - [context-budget.md](docs/ai-agents/context-budget.md) — 🧮 standing context, prompt-cache prefix order, lazy surfaces, chunked external results
+- [harness-techniques.md](docs/ai-agents/harness-techniques.md) — 🧰 **harness techniques** — tokens saved on a strong model, a weak model still finishing; meter first, every clip leaves a door
 - [evals.md](docs/ai-agents/evals.md) — 📏 evals — capability vs regression, **pass@k vs pass^k**, graders, run before merge
 - [untrusted-input.md](docs/ai-agents/untrusted-input.md) — 🧪 **everything an agent reads is data** — lethal trifecta, reader/actor split, repo config as executable surface
 - [media-generation.md](docs/ai-agents/media-generation.md) — 🎬 images, video, audio & speech via OpenRouter
@@ -126,6 +131,9 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 ### 8. 🔄 Workflow
 - [workflow/README.md](docs/workflow/README.md) — the index
 - [project-kickoff.md](docs/workflow/project-kickoff.md) — 🌱 zero → running project, fast
+- [project-from-zero.md](docs/workflow/project-from-zero.md) — 🧭 **the greenfield order** — docs first, then tooling, then code; the stack proposal
+- [bug-sweep.md](docs/workflow/bug-sweep.md) — 🧹 **bug sweeps on a cadence** — find the defects yourself, ship them big, prove each in prod
+- [dz-contract.md](docs/workflow/dz-contract.md) — 🤖 **the `.dz/` contract** — the maintainer bot's policy file, briefs and their caps, pinned in CI
 - [github-issues-milestones.md](docs/workflow/github-issues-milestones.md) — 🎫 issues & milestones at agent speed
 - [shipping-doctrine.md](docs/workflow/shipping-doctrine.md) — 🚢 no legacy, no shims, **no feature flags**, no prod A/B — one path, replaced completely
 - [decision-records.md](docs/workflow/decision-records.md) — 🧭 one record per one-way door — rejected options written down so agents stop re-proposing them

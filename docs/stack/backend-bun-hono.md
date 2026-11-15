@@ -84,22 +84,47 @@ app.get("/readyz", async (c) => {
 ```
 
 ## 🛑 Graceful shutdown on SIGTERM
-Rolling deploys send `SIGTERM`. Exit clean or drop requests and jobs:
+Rolling deploys send `SIGTERM`. Exit clean or drop requests and jobs — and **bound the drain**: an unbounded `await worker.close()` waits for the active job, the orchestrator `SIGKILL`s the pod at its grace period mid-close, and the job is silently re-run by the next pod with no log line saying what died.
 
 ```ts
-// main.ts
+// main.ts — one bounded drain; never a second hand-rolled copy per process
 const server = Bun.serve({ port: Number(process.env.PORT), fetch: app.fetch });
 
+const DRAIN_DEADLINE_MS = 25_000; // under the pod's 30 s terminationGracePeriodSeconds
+const FORCE_AFTER_MS = 15_000;    // stop waiting on in-flight jobs; still close every handle
+let draining = false;
+
 process.on("SIGTERM", async () => {
-  startDraining();                        // 1. /readyz → 503
-  await Bun.sleep(5_000);                 // 2. let the ingress stop routing here
-  await server.stop();                    // 3. refuse new, finish in-flight
-  await Promise.all(workers.map((w) => w.close()));  // 4. BullMQ: finish current jobs
-  await sql.end({ timeout: 5 });          // 5. close the DB pool
-  await redis.quit();
-  process.exit(0);
+  if (draining) { log.warn("drain: second SIGTERM ignored"); return; } // re-entrancy guard
+  draining = true;
+
+  const deadline = setTimeout(() => {                 // last resort: OUR logged exit, not an opaque kill
+    log.error("drain: deadline hit, forcing exit");
+    process.exit(1);
+  }, DRAIN_DEADLINE_MS);
+  deadline.unref();
+
+  startDraining();                                    // 1. /readyz → 503
+  await Bun.sleep(5_000);                             // 2. let the ingress stop routing here
+  const quiesced = Promise.allSettled([               // 3. quiesce: refuse new, finish in-flight —
+    server.stop(),                                    //    pause() stops fetching and waits for the
+    ...workers.map((w) => w.pause()),                 //    active job; it does NOT close the worker
+  ]);
+  await Promise.race([quiesced, Bun.sleep(FORCE_AFTER_MS)]); // force phase: stop waiting here
+  await Promise.allSettled(                           // 4. the ONLY close, always forced: BullMQ's
+    workers.map((w) => w.close(true)),                //    close() returns an in-flight close as-is,
+  );                                                  //    so a close(true) after a close() never forces
+  await Promise.allSettled([                          // 5. close pooled handles even if quiesce threw
+    sql.end({ timeout: 5 }),
+    redis.quit(),
+  ]);
+  clearTimeout(deadline);
+  process.exit(0);                                    // a socket that would not close politely is not a crash
 });
 ```
+As of 2026-11 (BullMQ 6.6): `Worker.close(force)` memoizes its first call, so the force is the one close, after `pause()` has waited as long as the drain allows.
+
+Why each of the four parts exists, and why the drain never writes the abandoned job's terminal state → [../architecture/resource-lifetimes.md](../architecture/resource-lifetimes.md#-bounded-drain-on-shutdown).
 
 Total drain time must fit inside the pod's `terminationGracePeriodSeconds` → [../infrastructure/kubernetes-gitops.md](../infrastructure/kubernetes-gitops.md#-workload-runtime-contract). A job longer than that must be resumable, not "allowed to finish" → [data-and-scale.md](../architecture/data-and-scale.md#-long-jobs-a-lease-is-not-a-timeout).
 

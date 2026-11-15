@@ -5,6 +5,9 @@ How work moves from **idea → plan → issues/milestones → autonomous PRs →
 | File | Topic |
 |---|---|
 | [project-kickoff.md](project-kickoff.md) | 🌱 Zero → running project, fast — spec, scaffold, the `planx` plan pattern |
+| [project-from-zero.md](project-from-zero.md) | 🧭 The greenfield order — docs first, then tooling, then code; the stack proposal |
+| [bug-sweep.md](bug-sweep.md) | 🧹 Bug sweeps on a cadence — find the defects yourself, ship them big, prove each in prod |
+| [dz-contract.md](dz-contract.md) | 🤖 The `.dz/` contract — policy file, briefs and their caps, pinned in CI |
 | [github-issues-milestones.md](github-issues-milestones.md) | 🎫 Issues & milestones at agent speed with the `gh` CLI |
 | [shipping-doctrine.md](shipping-doctrine.md) | 🚢 No legacy, no shims, no feature flags, no prod A/B — one path, replaced completely |
 | [decision-records.md](decision-records.md) | 🧭 One record per one-way door — rejected options written down so agents stop re-proposing them |
