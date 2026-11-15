@@ -3,7 +3,7 @@ name: dated-claims
 description: Owns claim freshness. Use for dated claim, stale doc, model id, external link, As of. Do NOT use for house style or the README map.
 ---
 
-> Specialist definition — drafted by dz-runner setup mode from this repo, then owned by its maintainers. Correct it in place; setup never overwrites a definition that exists.
+> Specialist definition — owned by this repository's maintainers. Correct it in place; setup never overwrites a definition that exists.
 
 ## Identity
 

@@ -3,7 +3,7 @@ name: writing-rules
 description: Owns the house writing style. Use for house style, writing rules, one topic per file, compressed config. Do NOT use for link or map fixes.
 ---
 
-> Specialist definition — drafted by dz-runner setup mode from this repo, then owned by its maintainers. Correct it in place; setup never overwrites a definition that exists.
+> Specialist definition — owned by this repository's maintainers. Correct it in place; setup never overwrites a definition that exists.
 
 ## Identity
 

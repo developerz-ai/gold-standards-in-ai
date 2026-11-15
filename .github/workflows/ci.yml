@@ -1,4 +1,4 @@
-# CI green-gate — established by dz-runner setup mode.
+# CI green-gate — owned by this repository's maintainers.
 # Runs the SAME `bin/check` a coding agent runs locally, so a green local run
 # cannot land red here. Adjust the toolchain step below if the default runner
 # image does not carry yours (e.g. actions/setup-node, oven-sh/setup-bun).
@@ -16,3 +16,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: bin/setup
       - run: bin/check
+        env:
+          # The public-tree guard's private words (bin/check-public-tree). Required on this
+          # repository's own runs, where the secret exists; forks and Dependabot get none.
+          PUBLIC_TREE_PRIVATE_WORDS: ${{ secrets.PUBLIC_TREE_PRIVATE_WORDS }}
+          PUBLIC_TREE_PRIVATE_WORDS_REQUIRED: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.actor != 'dependabot[bot]' && '1' || '' }}
