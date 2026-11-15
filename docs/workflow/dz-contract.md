@@ -107,7 +107,7 @@ function rowsOf(brief: string): string[] {
   for (const line of brief.split(/\r?\n/)) {
     if (/^\s{0,3}(```|~~~)/.test(line)) { fenced = !fenced; continue; }
     if (fenced) continue;
-    if (/^##\s+(?:\d+\.\s+)?rows\s*$/i.test(line)) { inRows = true; continue; }
+    if (/^##\s+(?:\d+\.\s+)?rows\s*$/i.test(line)) { if (inRows) break; inRows = true; continue; } // a second Rows heading ends the section
     if (/^#{1,6}\s/.test(line)) { if (inRows) break; continue; }
     const id = inRows ? /^\s{0,3}[-*+]\s+`([^`]+)`/.exec(line)?.[1] : undefined;
     if (id && ROW_ID.test(id) && !rows.includes(id)) rows.push(id);

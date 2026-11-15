@@ -56,6 +56,8 @@ re-run it if it already ran twice, unless the failure is an infrastructure error
 | CI failed | the same test failed on the last 2 runs | file an issue with the test name and both run URLs | `filed` |
 | CI failed | it passed on re-run | do nothing | `flaky` |
 | CI failed | the log shows a runner/network error | re-run once | `rerun` |
+| CI failed | it already ran twice and the log shows no runner/network error | do not re-run | `rerun_capped` |
+| CI failed | the log is missing or shows no failure line | do not re-run; report the run URL and that the log had no evidence | `no_log_evidence` |
 | PR author is a bot | author is not `dependabot[bot]` | do nothing | `skipped` |
 ```
 

@@ -125,6 +125,7 @@ export async function drain(deps: DrainDeps, { deadlineMs = 25_000, forceAfterMs
 - **Raising the deadline is not the fix.** Sized to the longest job, every deploy blocks that long — and only works if the grace period is raised with it. Raise both together, app deadline under the platform's. A job longer than the grace period must be resumable → [data-and-scale.md](data-and-scale.md#-long-jobs-a-lease-is-not-a-timeout).
 - **A malformed deadline knob throws at boot**, naming the variable and the value — never a silent fallback to the default you meant to raise.
 - **Timers the drain sets are `unref`'d** so they never keep a drained process alive.
+- **The force is never a second call to an idempotent close.** A close that memoizes its first call (BullMQ's `Worker.close()` returns the in-flight close promise) makes a later `close(force)` a no-op: quiesce with a wait that is not a close (`pause()`), then close once, forced → [../stack/backend-bun-hono.md](../stack/backend-bun-hono.md#-graceful-shutdown-on-sigterm).
 - **One drain implementation per repo.** Every long-lived process uses it; a hand-rolled one beside it is refused by a one-implementation guard.
 
 ## 🧪 Testing teardown

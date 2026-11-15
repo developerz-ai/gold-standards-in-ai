@@ -21,11 +21,19 @@ Keyset paging, bounded sweeps and watermarks → [data-and-scale.md](data-and-sc
 ## Batched ports
 
 ```ts
+/** Past this a batch is a different query plan: the caller pages its keys instead. */
+export const RUNNER_STATUS_MAX_KEYS = 500;
+
 /** One statement for N keys. Missing keys map to `undefined`, never dropped silently. */
 export async function findRunnerStatusMany(
   db: Db, accountId: AccountId, ids: readonly RunnerId[],
 ): Promise<Map<RunnerId, RunnerStatus | undefined>> {
   if (ids.length === 0) return new Map();
+  if (ids.length > RUNNER_STATUS_MAX_KEYS) {     // the cap the rule below demands: throw, never truncate
+    throw new Error(
+      `findRunnerStatusMany: ${ids.length} ids > RUNNER_STATUS_MAX_KEYS (${RUNNER_STATUS_MAX_KEYS}); page the keys`,
+    );
+  }
   const rows = await db.select({ id: runners.id, status: runners.status })
     .from(runners)
     .where(and(eq(runners.accountId, accountId), inArray(runners.id, [...ids])))

@@ -425,6 +425,21 @@ printf '# Omitted\n' > "$root/docs/omitted/README.md"
 printf '[Indexed](indexed/README.md)\n' > "$root/docs/README.md"
 assert_validation 'section missing from the docs index reported' 1 './docs/README.md omitted/ section not indexed'
 
+# A link inside a fenced block is an example, not an index row: a section whose
+# only link sits in a fence is still unindexed.
+new_fixture
+mkdir -p "$root/docs/indexed" "$root/docs/fenced"
+printf '# Indexed\n' > "$root/docs/indexed/README.md"
+printf '# Fenced\n' > "$root/docs/fenced/README.md"
+cat > "$root/docs/README.md" <<'MARKDOWN'
+[Indexed](indexed/README.md)
+
+```markdown
+[Fenced](fenced/README.md)
+```
+MARKDOWN
+assert_validation 'section linked only inside a fence reported' 1 './docs/README.md fenced/ section not indexed'
+
 new_fixture
 mkdir -p "$root/docs/indexed" "$root/docs/other"
 printf '# Indexed\n' > "$root/docs/indexed/README.md"

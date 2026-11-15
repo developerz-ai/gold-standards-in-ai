@@ -91,7 +91,7 @@ Rolling deploys send `SIGTERM`. Exit clean or drop requests and jobs — and **b
 const server = Bun.serve({ port: Number(process.env.PORT), fetch: app.fetch });
 
 const DRAIN_DEADLINE_MS = 25_000; // under the pod's 30 s terminationGracePeriodSeconds
-const FORCE_AFTER_MS = 15_000;    // stop waiting on in-flight jobs; still close handles
+const FORCE_AFTER_MS = 15_000;    // stop waiting on in-flight jobs; still close every handle
 let draining = false;
 
 process.on("SIGTERM", async () => {
@@ -103,19 +103,18 @@ process.on("SIGTERM", async () => {
     process.exit(1);
   }, DRAIN_DEADLINE_MS);
   deadline.unref();
-  const force = setTimeout(() => {                    // force phase: abandon in-flight work deliberately
-    for (const w of workers) void w.close(true);      // BullMQ: stop lock renewal, skip waiting on the job
-  }, FORCE_AFTER_MS);
-  force.unref();
 
   startDraining();                                    // 1. /readyz → 503
   await Bun.sleep(5_000);                             // 2. let the ingress stop routing here
-  await Promise.allSettled([                          // 3. quiesce: refuse new, finish in-flight
-    server.stop(),
-    ...workers.map((w) => w.close()),
+  const quiesced = Promise.allSettled([               // 3. quiesce: refuse new, finish in-flight —
+    server.stop(),                                    //    pause() stops fetching and waits for the
+    ...workers.map((w) => w.pause()),                 //    active job; it does NOT close the worker
   ]);
-  clearTimeout(force);
-  await Promise.allSettled([                          // 4. close pooled handles even if quiesce threw
+  await Promise.race([quiesced, Bun.sleep(FORCE_AFTER_MS)]); // force phase: stop waiting here
+  await Promise.allSettled(                           // 4. the ONLY close, always forced: BullMQ's
+    workers.map((w) => w.close(true)),                //    close() returns an in-flight close as-is,
+  );                                                  //    so a close(true) after a close() never forces
+  await Promise.allSettled([                          // 5. close pooled handles even if quiesce threw
     sql.end({ timeout: 5 }),
     redis.quit(),
   ]);
@@ -123,6 +122,7 @@ process.on("SIGTERM", async () => {
   process.exit(0);                                    // a socket that would not close politely is not a crash
 });
 ```
+As of 2026-11 (BullMQ 6.6): `Worker.close(force)` memoizes its first call, so the force is the one close, after `pause()` has waited as long as the drain allows.
 
 Why each of the four parts exists, and why the drain never writes the abandoned job's terminal state → [../architecture/resource-lifetimes.md](../architecture/resource-lifetimes.md#-bounded-drain-on-shutdown).
 
