@@ -47,6 +47,24 @@ Providers cache a **matching prefix**. One variable value placed early invalidat
 - Check your **cache hit rate per model** before optimizing anything else. A model at 0% hits re-bills every byte at full input rates on every step — there, the standing context *is* the bill.
 - Send a stable cache key per conversation/tenant where the provider supports it.
 
+### 🔌 Provider notes — what each host needs (as of 2026-11)
+
+**Decide the hints per DIALLED HOST, never per provider name** — a credential called `anthropic` that dials a gateway is a gateway. One plan function, read by every loop that calls a model; two tables drift.
+
+| Host kind | Send | Watch out |
+|---|---|---|
+| Anthropic wire, first party (`api.anthropic.com`) and facades known to accept marks | block-level `cache_control`: end of the stable system prefix + a moving mark on the newest tool results | **max 4 breakpoints** — a fifth is a refused request; at 4, no top-level automatic mark beside them |
+| Anthropic wire, any other host (a customer proxy, a strict gateway) | nothing — a byte-identical request | a strict gateway answers an unknown `cache_control` with a 400 on every call |
+| Hosts that cache a prefix on their own | nothing | measured on one org's coding runs (7d to 2026-10-08): 83–96% read from cache with no hints |
+| OpenAI, Mistral | `prompt_cache_key` | — |
+| xAI | the key as `x-grok-conv-id` | — |
+| OpenRouter | the key as the `x-session-id` **header** (sticky routing to the upstream holding the cache); on a Claude upstream also the top-level automatic mark | header beat the body `session_id`: 85.0% vs 66.1% cache-read on 200k–1M-token runs (7d to 2026-11-07). Never mark Gemini 2.5+ — it caches implicitly, and a mark switches it to paid writes |
+| A self-hosted multi-provider router | `x-session-id` **per conversation**, not per task — each agent loop mints its own | without a key the router fingerprints the opening bytes, and concurrent conversations collide. Check what it does with client marks: one router keeps block marks and adds its own automatic mark only to a request carrying none — header-only, its Claude-on-OpenAI-chat lane read 10.2% from cache vs 65.7% on its Anthropic wire (7d to 2026-11-14) |
+
+- **Failover is a cold cache.** A step served by another account or key starts from an empty cache; sealed reasoning replays only to the account that minted it.
+- **Pin it on the wire, per row:** a test that each request of one conversation is a full byte prefix of the next, and that every hint is a header, a key or a breakpoint — never a byte the model reads.
+- **TTL — unconfirmed here, check the provider's current docs before relying on it:** Anthropic documents a short default entry lifetime refreshed on each hit and an optional 1-hour TTL at a higher write price; a router may apply a 1-hour TTL itself on some lanes. A loop whose steps are minutes apart (a long test run between tool calls) is the case where the TTL choice decides the hit rate.
+
 ## 🎣 Lazy on both surfaces
 
 **What you author** — tools, skills, prompts. Yours to shrink: list less, keep everything reachable by name or search.
@@ -136,6 +154,8 @@ Reducing the agent's *work* is always wrong. Reducing the *bytes it carries to d
 
 The test is not "is the block smaller" but **"can the agent still find and use the thing."** Which means the gate is an eval, not a byte count.
 
+For any bound, before adding or keeping it, answer in the PR: **what specifically breaks if it is absent?** "It costs more", "it's usually enough", "to be safe" → a cost cap; delete it. A named failure mechanism — a hang on a dead socket, a provider 400, one tenant draining another's quota → a guard; keep it, mechanism in the code. Order when they conflict: **good results > speed > token efficiency.**
+
 ## 📊 Tune by measurement — this part is not deterministic
 
 Thresholds, budgets, how many catalog lines to render, what to inline vs load on demand: **none of these has a provably-correct value**, and a green typecheck tells you nothing. House rules:
@@ -148,9 +168,9 @@ Thresholds, budgets, how many catalog lines to render, what to inline vs load on
 
 ```ts
 // Derivation lives next to the number, or the number is folklore.
-/** Observed healthy max across 30 days of prod turns: 41 steps (p100).
- *  Backstop = 41 × 1.5 ≈ 60. Re-measure before touching. Not a work budget. */
-export const RUNAWAY_STEP_BACKSTOP = 60;
+/** Observed healthy max silence between stream events, 30 days of prod turns: 95 s (p100).
+ *  Stall fence = 95 × 2 = 190 s. Re-measure before touching. A progress fence, not a work budget. */
+export const STREAM_STALL_SILENCE_MS = 190_000;
 ```
 
 ## 🗜️ Compact at phase boundaries — the coding session

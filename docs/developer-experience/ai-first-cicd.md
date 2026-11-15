@@ -74,8 +74,8 @@ An AI-first repo enforces things a unit test can't see. Each is a CI job, each f
 | **Workflow security** | a PR turning CI into a credential leak | static check on `.github/workflows/*.yml` — below |
 | **Agent evals** | a "cheap" prompt change breaking tool routing | **not** in the default gate — see below |
 
-### Evals are a pre-merge gate, never a CI job
-Agent-behavior tests (does the model still pick the right tool? still load the right skill?) call **live models**: they cost money and they're stochastic. Keep them out of `bun test` globs and out of CI; run them deliberately before merging a change to prompts, tools, or skills, and paste the pass rates into the PR. A flaky paid job in the default gate gets muted within a week — and a muted gate is worse than none.
+### Evals are a pre-merge gate, never a blocking CI job
+Agent-behavior tests (does the model still pick the right tool? still load the right skill?) call **live models**: they cost money and they're stochastic. Keep them out of `bun test` globs and out of CI; run them deliberately before merging a change to prompts, tools, or skills, and paste the pass rates into the PR. A flaky paid job in the default gate gets muted within a week — and a muted gate is worse than none. One exception: a scheduled trend-line run on `main` that can never block a merge is fine; its recurring spend is an operator's call → [evals](../ai-agents/evals.md).
 
 Report the right number. A step that passes 70% of single runs passes **at least once in 3** 97% of the time (pass@3) — but **all 3** only 34% of the time (pass^3 = 0.7³). Tool routing and release-critical paths run every turn, so they're judged on pass^k (k ≥ 3); new capability on pass@k. How we build them → [evals](../ai-agents/evals.md).
 
@@ -95,7 +95,7 @@ Report the right number. A step that passes 70% of single runs passes **at least
 
 - **Never push red.** The gate exists so the agent doesn't discover breakage in front of a reviewer.
 - **A PR with 0 checks registered is not a passing PR.** Auto-merge right after a rebase can land red because checks haven't attached yet — wait for them to register.
-- **Cap PR size at ~110–120 changed files.** Automated reviewers skip past a limit (CodeRabbit: >150 → "Review skipped"), so the riskiest PR gets the least review → [workflow-commands](../writing-for-agents/workflow-commands.md#-the-seam--one-continuous-line).
+- **Cap PR size by repo kind** — the one table, with the in-flight rule → [workflow-commands](../writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind).
 - **AI review on every PR** (CodeRabbit or equivalent) with path-scoped instructions, then a human merges → [linting-ci](linting-ci.md#automated-ai-code-review).
 
 ## 5. Failures must be readable by the agent that caused them

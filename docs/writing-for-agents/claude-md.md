@@ -33,8 +33,20 @@ scripts/deploy production    # deploy
 - "N+1 prevention: NEVER write manual eager loading — the ORM plugin handles it."
 - "Always use domain-specific error classes, never generic `Error`/`Exception`."
 
-## Keep it under 600 lines
-It's read every turn — bloat is a token tax forever. 500 well-structured lines cover complex production apps. See [compressed-config.md](compressed-config.md) for how to compress without losing signal.
+## Two ceilings — know which one binds
+It's read every turn, and two different limits cut it. Neither implies the other.
+
+| Ceiling | Whose | Enforced by | Past it |
+|---|---|---|---|
+| **Lines per page** (e.g. 800, every agent page incl. `.claude/**`) | yours — an authoring budget | a script in the gate that fails the page | the check goes red |
+| **Chars of the root brain file** (a loader's floor, e.g. 12,000) | the harness or platform that injects the file into a prompt | the loader, at read time | the file is **truncated** — silently, or behind a marker — mid-sentence |
+
+- **Which binds first is a property of the page's shape.** Dense prose (~70 chars a line) hits a 12,000-char floor around line 170, hundreds of lines under an 800-line cap. A table of short rows does the reverse.
+- **Measure the root file in chars**, with a test against the loader's constant — not by eye, not in lines.
+- **Keep the root an index**; grow the linked page instead. A nested page loaded on demand pays only the line cap.
+- **Never widen the loader's floor to fit your page** — it is the budget every session on the smallest context window runs on.
+
+See [compressed-config.md](compressed-config.md) for how to compress without losing signal.
 
 ## Keep it small — index, don't inline
 The root file is a **router, not an encyclopedia.** Put the always-needed rules + exact commands inline; for everything deep, **point at where it lives** so the agent loads it *only when relevant*. `CLAUDE.md` is read every turn; `docs/` is read on demand — that split is what keeps it lean ([planning-and-docs](planning-and-docs.md)).

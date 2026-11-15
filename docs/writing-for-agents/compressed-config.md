@@ -62,7 +62,7 @@ domain. Controllers should be kept thin...
 Leave verbatim — compression loses information: code blocks, shell commands, file paths, URLs/versions/env-var names, regex/queries/config values, error strings you match against.
 
 ## Size targets
-`CLAUDE.md` < 600 · `SKILL.md` < 80 · agent < 50 · command < 30 lines.
+`CLAUDE.md` under both its ceilings, chars for the root file ([claude-md](claude-md.md#two-ceilings--know-which-one-binds)) · `SKILL.md` < 80 · agent < 50 · command < 30 lines.
 
 ## Self-check before committing a config file
 - [ ] Opens with a constraint/rule, not history

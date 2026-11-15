@@ -25,12 +25,21 @@ What to use instead:
 
 | Want | Use |
 |---|---|
-| per-tenant behavior | an org/tenant **config record** (KV), read at the seam, with a default |
+| per-tenant behavior | an org/tenant **config record** (KV), read at the seam, validated — a bad value throws, never degrades to a laxer default |
 | spend/limit differences | quota overrides |
-| a risky rollout | ship it off, then turn it on by config for one tenant, then default it — and **delete the branch** |
+| a risky rollout | a small PR, a canary deploy, a live probe — never a code branch only some tenants run |
 | "we might want to revert" | a small PR and `git revert` |
 
 The difference between a flag and a config record: the config record is **data with a schema and an owner**, visible in the admin surface. The flag is code with neither.
+
+Retiring one that exists:
+
+| Lesson | Because |
+|---|---|
+| **Delete the branch, not just its switch** | the OFF side of a flag can be a whole second topology; removing the env var leaves it compiled, untested, one revert away |
+| **One place states which branch runs** | a flag defaulted in code, set in a manifest and overridden on the host has three answers to "what does prod run?" |
+| **Audit every writer of the setting**, not one repo | provisioning scripts and host env write flags the app repo never shows |
+| **An env var is read through one typed reader** | a raw read skips boot validation, then disagrees with the schema that validated it |
 
 ## 🚫 Never A/B in production
 

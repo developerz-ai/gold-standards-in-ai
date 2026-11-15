@@ -69,7 +69,7 @@ last_updated: <YYYY-MM-DD>
 - Reference-only: point at docs, don't restate their content.
 - No checkboxes. Plain bullets. `status.yml` is the only tracker.
 - Multiple files always: `overview.md` + `<NN>-<aspect>.md` slices.
-- **Execution happens in this checkout — never plan a `git worktree` step or an `isolation: worktree` agent.** Parallel slices = one doc per agent, disjoint paths; README index rows are edited last, by one agent.
+- **Execution happens in this checkout — never plan a `git worktree` step or an `isolation: worktree` agent** (a docs repo is the one-checkout row of [worktrees: when](../../docs/ai-agents/hive-mind.md#-worktrees-when)). Parallel slices = one doc per agent, disjoint paths; README index rows are edited last, by one agent.
 - One topic per doc. Duplicate of an existing doc → plan a revision, not an addition. Stale doc → plan its deletion.
 - Every new doc gets a row in `README.md` and its section `README.md`. Examples vendor-neutral; latest Claude model IDs. No secrets, private hostnames/IPs, or client names.
 

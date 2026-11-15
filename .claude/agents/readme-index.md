@@ -29,4 +29,5 @@ Wire the section README last, after the doc lands; `README.md` and the section R
 A new section needs its own `docs/<section>/README.md` before any doc goes into it.
 Delete the index row in the same PR that deletes the doc.
 A doc's section index is the `README.md` next to it; a top-level doc has no `docs/<section>/` directory, so its section index is `docs/README.md` — `docs/00-philosophy.md` is indexed in the root `README.md` and in `docs/README.md`, both required indexes, not one. Every other doc needs the root `README.md` AND its section `README.md`.
+`docs/README.md` carries a row per section directory under `docs/`; `bin/check-docs` prints `./docs/README.md <section>/ section not indexed` for a missing one.
 Re-run `bash bin/check`; empty output is the proof that the map is true.

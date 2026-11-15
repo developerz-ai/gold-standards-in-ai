@@ -33,8 +33,8 @@ A turn dies when it **stops getting anywhere**, never because honest work took a
 
 And an agent that cannot finish **stops itself and names what it is missing** — missing access, missing tool, ill-posed task. That is a successful outcome. Grinding, guessing, or fabricating an answer is not.
 
-### Unattended runs keep a backstop — which is the same rule, not an exception
-Nobody is watching a background run, so it gets a **runaway backstop**: sized from an observed healthy **maximum × a margin**, documented with its derivation, and far above the deepest healthy run. Never a work budget. Never sized from an average. → [context-budget](context-budget.md#-tune-by-measurement--this-part-is-not-deterministic)
+### Unattended runs: the same rule, no exception
+Nobody is watching a background run, so its stops must measure **progress**, not volume: a stall fence on *silence* (no stream event for a measured interval — not elapsed time), a loop detector on byte-identical repeated tool-call signatures. No count ends the work by default. A step/turn count backstop exists only when an **operator sets it** — off when unset, sized from an observed healthy **maximum × a margin** with its derivation beside it, never from an average → [context-budget](context-budget.md#-tune-by-measurement--this-part-is-not-deterministic). A removed bound stays auditable: the run record carries the key with `null`, not a missing key.
 
 ### Diagnose the terminator before you touch a ceiling
 Every visible number can point at a wall the agent never hit. A real production turn died after **2 steps of 60, 2 tool calls of 100, $0.053 of $4.00** — no ceiling was involved. The terminator was an upstream error: `finish_reason=error`, **0 tokens in and out**, i.e. the call failed before the model saw it.

@@ -102,7 +102,7 @@ Backend specialist. This project.
 
 Why subagents matter:
 - **Parallelism** — `backend-expert` writes code while `infra-expert` handles deploy, simultaneously.
-- **Isolation** — each has its own context, model, and skills. Not its own checkout: subagents share one working tree and the file set is the lock → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md#-never-git-worktrees).
+- **Isolation** — each has its own context, model, and skills. Not its own checkout: subagents share a working tree and the file set is the lock; when a tree of its own is earned → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md#-worktrees-when).
 - **Model control** — cheap/fast model for simple work, top-tier model for hard work.
 
 ### One subagent per app — the fleet pattern
