@@ -28,7 +28,7 @@ const Plan = z.object({ groups: z.array(z.object({
 ### Worker — group → branch + PR
 Runs in an isolated **git worktree** (no branch trampling). For big PRs, two phases: (1) plan a file manifest via `submit`, (2) run per-file editors in parallel. Then format → run changed-file tests → push. The orchestrator opens the PR.
 
-> ⚠️ **Worktrees are for THIS machine only** — an unattended orchestrator whose workers each own a branch and a PR, with no human working the tree. Inside an interactive session, **never**: one checkout, many hands, the file set is the lock. See [hive-mind.md](hive-mind.md).
+> ⚠️ **A worktree per worker fits this machine** — an unattended orchestrator whose workers each own a branch and a PR. Inside an interactive session the default is one checkout, the file set is the lock; when a tree is earned there → [hive-mind.md](hive-mind.md#-worktrees-when).
 
 ### Reviewer — threads → fixes
 For each unresolved review thread: decide `fixed` (make the change, push), `replied` (answer), or `wontfix` (justify) — and resolve the thread via the platform API.
@@ -39,7 +39,7 @@ Owns a `StateStore` (resumable across crashes), spawns N workers concurrently (o
 ## Autonomous loop patterns
 - **Loop-until-goal:** keep working until acceptance criteria pass.
 - **Loop-until-count:** accumulate to a target (e.g. find 10 bugs).
-- **State machine:** `SETUP → PLANNING → CODING → REVIEW → COMPLETE/FAILED`, with a runaway backstop sized from observed healthy max × margin ([agent-work-limits](agent-work-limits.md#unattended-runs-keep-a-backstop--which-is-the-same-rule-not-an-exception)) that escalates instead of spinning forever.
+- **State machine:** `SETUP → PLANNING → CODING → REVIEW → COMPLETE/FAILED`, with progress-measuring stops (stall on silence, loop detector) and a count backstop only when an operator sets one ([agent-work-limits](agent-work-limits.md#unattended-runs-the-same-rule-no-exception)) that escalates instead of spinning forever.
 - **Mailbox:** inject plan updates while it runs (mid-run guidance from [agent-sdk](agent-sdk.md#memory-across-turns)).
 
 ## 🎯 The loop's exit — "done" a machine can judge

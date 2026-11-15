@@ -84,6 +84,10 @@ bun run eval --baseline main          # diff pass rates vs the merge base
 - Name files `*.eval.ts` so `bun test` never picks them up.
 - Prompt, tool description and eval change **in the same PR**. An eval that lags the prompt tests nothing.
 - `baselines/` updates only in a PR that explains the delta.
+- **The harness is code, and it runs in CI.** Case loading, scoring and the baseline diff are deterministic — test them in the normal gate with a mock model, so a broken case→score wiring is not discovered by a paid run.
+- **Run on the product's own provider path** — the same provider factory and key the product uses. An eval over a friendlier wire measures a product nobody ships.
+- **Zero is never green.** An empty suite, an empty corpus, a `0/0` rate: throw, never render a percentage.
+- **"Could not compare" blocks.** A baseline on another model, a missing baseline: the verdict is *unknown*, never *no worse*.
 
 ## 🎯 Cases — where they come from
 
@@ -115,7 +119,7 @@ cost/success: $0.041 → $0.038
 | Happy-path only | the router that always calls tool X scores 100% |
 | Score only the final answer | right answer via the wrong tools is a routing bug waiting |
 | LLM judge where a regex would do | slower, costlier, flakier |
-| Run evals as a nightly/continuous job | nobody reads it; run them on the change that needs them, paste results in the PR |
+| Run evals as a nightly/continuous **gate** | a flaky paid job in the default gate gets muted within a week; run them on the change that needs them, paste results in the PR. A trend line on `main` that can never block a merge is fine — a recurring spend is an operator's call |
 | One run per case, report as reliability | n=1 is an anecdote |
 | Chase pass rate, ignore cost and latency | a 2% gain at 3× cost is usually a loss |
 | A/B the prompt in production instead | → [shipping-doctrine](../workflow/shipping-doctrine.md) — one path, measured before merge |

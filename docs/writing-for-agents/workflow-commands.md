@@ -91,20 +91,30 @@ last_updated: 2026-07-21
 
 ```
 /planx slice          →   agent file set        →   PR
-01-data-model.md          exclusive paths           one concern, ≤~110–120 files
+01-data-model.md          exclusive paths           one concern, under the PR cap
 02-backend-service.md     exclusive paths           …
 ```
 
 That is why the plan split is not cosmetic. Split by *separable area of work* and the boundaries come free at build time: disjoint by construction, so no two agents ever contend, and each slice becomes a PR with no extra carving. Split by chapter and you invent boundaries the code does not have — and pay for it twice.
 
-**Cap a PR at ~110–120 changed files**, which is what keeps the last hop reviewable:
+## 📏 PR cap by repo kind
 
-- Automated reviewers refuse outright past a limit (CodeRabbit: >150 changed files → "Review skipped"), so the biggest, riskiest PR gets the *least* review — exactly backwards.
+**One table, one home.** Every other page that sizes a PR links here.
+
+| Repo kind | Cap (changed files) | PRs in flight | Why this number |
+|---|---|---|---|
+| **Docs / markdown repo** | **~25–30** | **one** — every slice ends in the shared index file (`README.md`), so two PRs are never independent | nobody proofreads 100 docs; one disputed claim holds the set hostage; a "when did this go stale?" bisect lands on one enormous commit |
+| **Product monorepo** | **~110–120** (fat-PR band ~80–100, below) | **one**, or **two when independent** (below) | automated reviewers skip past a limit (CodeRabbit: >150 changed files → "Review skipped"), so the riskiest PR gets the least review |
+
+Both rows, the same mechanism:
+
 - A human cannot hold 279 files either. Approval becomes a formality, which is the same as no review.
 - One red CI job blocks everything: a 279-file PR failing two specs holds ~90 fixes hostage; four 70-file PRs would have landed three of them.
 - Bisecting a later production issue lands on one enormous commit instead of a slice.
 
-Exceeding the cap? Split it **even if the user asked for one PR**, and say why.
+Exceeding the cap? Split it **even if the user asked for one PR**, and say why. A repo states its own row in its `CLAUDE.md`, linking here.
+
+**Two PRs in flight only when independent:** neither branch contains the other's commits, and at most one touches the migrations directory. The second merges only on a head that contains `main`'s tip, with CI green **on that head** — that check is what stops one bad merge turning the other PR red unseen. A third waits. Two branches at once need two trees → [worktrees: when](../ai-agents/hive-mind.md#-worktrees-when).
 
 ### PR mode is read from the prompt — the merge queue is not
 Two shapes, chosen before you brief anyone; it changes *how work is grouped*, never the build discipline:
@@ -118,7 +128,7 @@ Two shapes, chosen before you brief anyone; it changes *how work is grouped*, ne
 - **"It's all one coherent concern" is not a licence to bundle without limit** — that rationalization is how a 300-file PR nobody reviews happens. Neither "well under the cap" nor "splitting would need rebases" earns a bundle on its own: the cap is a ceiling, not a target, and rebasing is ordinary cost.
 - **If it lands at 150 anyway — ship it**, and note the reduced review coverage in the body. A merged 150-file PR beats an unmerged one being tidied. Finding problems is the work; the work has to land.
 
-**In every mode the merge queue is depth 1.** The thing that must never happen is **two PRs in flight at once** — each merge rebases `main` under the other, and CI results go stale silently. Merge, confirm, fetch, then start the next. A fat PR merged and confirmed is safe; two small PRs racing each other is not.
+**In every mode the merge is sequential.** The thing that must never happen is **two dependent PRs racing** — each merge moves `main` under the other, and CI results go stale silently. Merge, confirm, fetch, then start the next; a second PR in flight only under the [independence rule](#-pr-cap-by-repo-kind). A fat PR merged and confirmed is safe; two small PRs racing each other is not.
 
 ## 🕵️ Distrust the paperwork
 
@@ -137,17 +147,8 @@ Merged PR titles for the area are the cheapest ground truth. **State plainly whi
 
 `/planx` explores read-only; `/feature` builds. Both fan out, both do it in **one checkout** — the coordinator owns git and the merge, every brief names its exclusive paths, and agents are re-tasked with `SendMessage` rather than replaced. Full doctrine, the 9-point brief, and the failure modes: [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 
-## 🚫 No git worktrees — agents share the checkout
-Fan-out is for reading and building, not for cloning the repo N times. Worktrees look like free parallelism and aren't:
-
-- Work lands in a directory you aren't looking at — `git status` reads clean while three branches of real work sit elsewhere.
-- Each worktree needs its own install, its own copied `.env*`, its own test DB. Minutes and gigabytes per agent on any real monorepo.
-- Commits get stranded — remove a worktree before its branch is pushed and the work goes with it.
-- Your language server, test watcher, and dev stack point at one directory. Agents elsewhere run half-blind.
-
-One checkout, one branch at a time. Parallel agents coordinate over disjoint file sets — a scheduling problem you can see, not an isolation problem you can't. Genuine isolation (destructive migration rehearsal, a dependency bump you expect to explode) is a container or a throwaway clone, not a worktree hanging off the repo you're working in.
-
-State the rule inside the command file, not only in `CLAUDE.md` — the agent reading `/feature` is the one about to spawn the fan-out.
+## 🌳 Worktrees — one decision, one home
+Default: agents share one checkout and the file set is the lock. When a worktree is earned (a second branch in flight), who creates it and how it is cleaned up → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md#-worktrees-when). State the rule inside the command file, not only in `CLAUDE.md` — the agent reading `/feature` is the one about to spawn the fan-out.
 
 ## Keep them adapted, keep them short
 Command budget from [compressed-config.md](compressed-config.md) is <30 lines; these two are the justified exception, but the pressure stands — link to skills and docs instead of inlining them. A `/feature` that restates the deploy runbook rots the day the runbook changes.

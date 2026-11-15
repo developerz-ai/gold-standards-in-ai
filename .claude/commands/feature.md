@@ -17,13 +17,13 @@ $ARGUMENTS
 
 **Pick the PR mode before you brief anyone.** Slice-per-PR (default, one topic or section each) vs one fat PR ("do it in 1 PR" — legitimate for a coherent section rewrite). Path-disjointness still governs the *writing* either way; it just stops governing the *commit*.
 
-**Cap a PR at ~25–30 changed files** — lower than a code repo on purpose: nobody proofreads 100 docs. Past that review is a formality, one disputed claim holds the set hostage, and a later "when did this go stale?" bisect lands on one enormous commit. Split even if the user asked for one PR, and say why — the agent boundaries were disjoint by construction, so each is already a PR. Land shared vocabulary (a new section `README.md`, a term everything links to) **first**, then the docs citing it.
+**Cap a PR at ~25–30 changed files** — the docs-repo row of [PR cap by repo kind](../../docs/writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind), which says why. Split even if the user asked for one PR, and say why — the agent boundaries were disjoint by construction, so each is already a PR. Land shared vocabulary (a new section `README.md`, a term everything links to) **first**, then the docs citing it.
 
 ## Work as a hive mind, in one checkout
 
 **Hiving is a judgement call, not a ritual.** Two things justify it: **searching** (a broad sweep across `docs/**` where you want conclusions, not file dumps) and **scale** (several independent docs, separable by path). Nothing else. One doc, one paragraph, a correction you already understand — write it yourself; briefing + collision management + report-reading costs more than the edit, and you pay it in the one context that must survive to the merge.
 
-**Never use git worktrees** — no `isolation: worktree` on the `Agent` tool, no `git worktree add`, no per-agent directories, ever. Nothing to install here, which makes the real cost clearer rather than smaller: a second tree hides half-written docs from the link gate and from `git status`, and **`README.md` is a single shared file every slice must eventually touch** — editable only in the tree everyone else is in. One checkout, many hands; the file set is the only lock.
+**Never use git worktrees inside the team** — no `isolation: worktree` on the `Agent` tool, no `git worktree add`, no per-agent directories; this repo is the one-checkout row of [worktrees: when](../../docs/ai-agents/hive-mind.md#-worktrees-when). Nothing to install here, which makes the real cost clearer rather than smaller: a second tree hides half-written docs from the link gate and from `git status`, and **`README.md` is a single shared file every slice must eventually touch** — editable only in the tree everyone else is in. One checkout, many hands; the file set is the only lock.
 
 - **You coordinate; you do not write.** You own git, the ledger and the merge, and you are the only participant who must survive to the end — spend that context on routing, not on reading docs an agent will report back. Drafting prose yourself means you took a slice from someone who had room for it.
 - **The file set is the lock.** Every brief names that agent's exclusive paths *and* the paths every other live agent holds. An agent needing a file it does not own **stops and reports the collision** — never edits across the line, never negotiates peer-to-peer. You mediate: hand it to the owner, or re-cut the boundary.
@@ -123,7 +123,7 @@ Each hit is a merge blocker on its own.
 
 ## Hard rules (from CLAUDE.md — non-negotiable)
 
-The writing rules in step 7 are the house style and are not negotiable per-doc. On top of them: **no secrets, no private hostnames/IPs, no client names**; every doc linked from `README.md` *and* its section `README.md`; delete stale docs rather than let them rot. Never `--force`, never `git stash`, never a git worktree.
+The writing rules in step 7 are the house style and are not negotiable per-doc. On top of them: **no secrets, no private hostnames/IPs, no client names**; every doc linked from `README.md` *and* its section `README.md`; delete stale docs rather than let them rot. Never `--force`, never `git stash`, never a second branch inside the team's checkout.
 
 ## Output
 

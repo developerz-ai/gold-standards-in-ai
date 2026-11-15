@@ -50,6 +50,8 @@ Attach a `verify:` to each step. Verifiable criteria let the agent loop to compl
 ### Multi-file plans (the `planx` pattern)
 For anything non-trivial, write the plan as **multiple files**, not one `plan.md`: an `overview.md` index plus one `<NN>-<aspect>.md` slice per separable area (data-model, backend, api, frontend, tests), in a dated dir `docs/plans/<YYYY>/<MM>/<DD>/<NN>-<slug>/`, with a machine-readable `status.yml` tracker. This decouples **author from executor** (one agent plans, another implements) and lets slices parallelize across workers. Full spec, `status.yml` schema (incl. `tried_failed`, `next_step`): [workflow-commands.md](workflow-commands.md); kickoff templates: [../workflow/project-kickoff.md](../workflow/project-kickoff.md).
 
+**A slice declares its file set, never that it is "parallel-safe".** Concurrency is derived from provable disjointness of the declared sets, checked again when the work is claimed. An author-asserted parallel flag waives that check — including against work the plan never saw — so the flag throws away the very proof the plan just minted. The whole list, or none of it.
+
 ## The initial idea → spec
 For a brand-new project, capture the idea as a tight spec the agent can execute against. An `/initial-idea` command turns a paragraph into: problem, users, core flows, data model sketch, tech choices (default to the [stack](../architecture/tech-stack.md)), and a milestone list. Then `/plan` each milestone. See [../workflow/project-kickoff.md](../workflow/project-kickoff.md).
 

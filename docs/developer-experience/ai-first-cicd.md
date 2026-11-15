@@ -95,7 +95,7 @@ Report the right number. A step that passes 70% of single runs passes **at least
 
 - **Never push red.** The gate exists so the agent doesn't discover breakage in front of a reviewer.
 - **A PR with 0 checks registered is not a passing PR.** Auto-merge right after a rebase can land red because checks haven't attached yet — wait for them to register.
-- **Cap PR size at ~110–120 changed files.** Automated reviewers skip past a limit (CodeRabbit: >150 → "Review skipped"), so the riskiest PR gets the least review → [workflow-commands](../writing-for-agents/workflow-commands.md#-the-seam--one-continuous-line).
+- **Cap PR size by repo kind** — the one table, with the in-flight rule → [workflow-commands](../writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind).
 - **AI review on every PR** (CodeRabbit or equivalent) with path-scoped instructions, then a human merges → [linting-ci](linting-ci.md#automated-ai-code-review).
 
 ## 5. Failures must be readable by the agent that caused them

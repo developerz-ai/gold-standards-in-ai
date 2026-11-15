@@ -31,7 +31,7 @@ Run from the repo root; each script resolves the repo root itself.
 | `bin/setup` | `mise install` when mise is present; echoes `gold-standards-in-ai: markdown only, no dependencies to install` | once, after clone |
 | `bin/dev` | echoes `gold-standards-in-ai: no app to run - read README.md for the map` | every session |
 | `bin/check` | the gate — `bin/check-docs` + `bin/test`; silent on success; exit 0 pass, exit 75 an unmet precondition, any other nonzero red | before every commit |
-| `bin/check-docs` | map + relative-link validation, including `#fragment` resolution against the target's headings; one line per finding; exit 1 on a finding, exit 75 when it cannot grade — a missing `docs/` tree | while editing docs |
+| `bin/check-docs` | map + relative-link validation, including `#fragment` resolution against the target's headings and a `docs/README.md` row per section directory; one line per finding; exit 1 on a finding, exit 75 when it cannot grade — a missing `docs/` tree | while editing docs |
 | `bin/test` | regression fixtures for the validator; no downloaded dependencies | when `bin/check-docs` changes |
 | `bin/stop` | no-op — nothing to stop, never removes data | session end (the platform runs it) |
 
@@ -78,7 +78,7 @@ Long form and self-check list: [docs/writing-for-agents/compressed-config.md](do
 | No secrets, no private hostnames/IPs, no client names. | a doc names a token, an internal host or a customer |
 | Every doc is linked from `README.md` *and* its section `README.md`. | `bin/check-docs` prints the path for a doc missing from either index |
 | Delete stale docs rather than let them rot — a wrong doc costs more than a missing one. | a doc contradicts the tree it describes |
-| Never `--force`, never `git stash`, never a git worktree. | another writer's checkout moves under them |
+| Never `--force`, never `git stash`; one checkout per team, never a worktree inside it — this repo is the one-checkout row of [worktrees: when](docs/ai-agents/hive-mind.md#-worktrees-when). | another writer's checkout moves under them |
 
 ## Where to look
 
@@ -106,6 +106,6 @@ Long form and self-check list: [docs/writing-for-agents/compressed-config.md](do
 | Name the paths on `git add`; never `git add -A`. | an editor's scratch file ships |
 | Wait for every writer before committing. | a half-written doc lands |
 | `git fetch` before each slice; a file that moved on `main` is three-way merged, never overwritten wholesale. | `main`'s index rows vanish silently |
-| One PR in flight; cap a PR at ~25–30 changed files. | review becomes a formality |
+| One PR in flight; cap a PR at ~25–30 changed files — the docs-repo row of [PR cap by repo kind](docs/writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind). | review becomes a formality |
 | Scratch notes, draft plans and agent summaries never ship. | the PR carries files nobody meant to add |
 | Merge only on a green gate — `bin/check` local, CI green, review approved. | a red check is merged around |

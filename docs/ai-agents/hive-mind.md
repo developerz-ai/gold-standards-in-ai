@@ -1,4 +1,4 @@
-# 🐝 Hive Mind — many agents, one checkout
+# 🐝 Hive Mind — many agents, one file-set lock
 
 A big task is not one agent doing more. It is a **team sharing one working tree**, with you as coordinator. The file set is the only lock.
 
@@ -21,14 +21,28 @@ Hiving is a judgement call, not a ritual. **Two things justify it. Nothing else 
 
 You pay the overhead **in the coordinator's context** — the one participant that must survive to the merge. Three agents on a two-file change is a net loss, every time.
 
-## 🚫 Never git worktrees
+## 🌳 Worktrees: when
 
-**One checkout, many hands.** Never pass `isolation: "worktree"` to the `Agent` tool, never `git worktree add`, never per-agent directories.
+**Default: one checkout, many hands — the file set is the lock.** A worktree is earned by one named need: **a second branch in flight at the same time.** One checkout holds one branch; two independent PRs in flight need two trees.
 
-- The tree fragments: `git status` reads clean while real work sits in a directory you are not looking at — and the final gate never sees it.
-- Each worktree costs a full dependency install + copied `.env*` + its own test DB. Minutes and gigabytes **per agent**.
+| Situation | Checkout |
+|---|---|
+| One team, one PR at a time — and every docs/markdown repo, where every slice ends in the one shared index file, so two PRs are never independent | **one checkout.** No `isolation: "worktree"`, no `git worktree add`, no per-agent directories |
+| A product monorepo with two **independent** PRs in flight ([PR cap and in-flight rule](../writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind)) | **one worktree per branch**, created by the coordinator; several seats share each tree |
+| A second coordinator working the same repo | its **own** worktree or clone — never a second branch switched in under the first team |
+| An unattended orchestrator, one branch + PR per worker | a worktree per worker → [orchestration.md](orchestration.md) |
+| Genuine isolation — a destructive migration rehearsal, a dependency bump you expect to explode | a container or a throwaway clone |
 
-Full reasoning (and the genuine-isolation exceptions) in [../writing-for-agents/workflow-commands.md](../writing-for-agents/workflow-commands.md#-no-git-worktrees--agents-share-the-checkout). State the rule inside the command file that spawns the fan-out, not only in `CLAUDE.md`.
+When worktrees are in play, the costs they carry become rules:
+
+| Cost | Rule |
+|---|---|
+| `git status` reads clean in one tree while real work sits in another | the coordinator alone runs `git worktree`; seats run no git at all; the gate runs in **every** tree before its PR |
+| Each tree pays a dependency install, copied `.env*`, its own test DB | count trees against box RAM/disk; fixtures per tree, never shared |
+| A removed tree strands unpushed commits | clean up with a command that archives a dirty tree (commits, diff, untracked files) and verifies the archive **before** removing it; never touches a tree with a live seat or an open PR |
+| Disjointness is per tree, not per repo | two seats in one tree writing one file: the last writer silently wins — a worktree separates trees, not the merge |
+
+State the rule inside the command file that spawns the fan-out, not only in `CLAUDE.md` — the agent reading `/feature` is the one about to spawn it.
 
 ## 👑 The coordinator coordinates; it does not code
 

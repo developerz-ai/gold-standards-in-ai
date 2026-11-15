@@ -9,4 +9,4 @@ description: Plan a doc set with /planx into path-disjoint slices. Use for planx
 3. Write `overview.md` plus one `<NN>-<aspect>.md` per doc or cluster — never one big `plan.md`.
 4. Write `status.yml` in the plan dir: `plan`, `title`, `status` (not_started | in_progress | blocked | complete | superseded), `created_by`, `worked_by`, `owner`, `percent`, `current_focus`, `slices`, `evidence`, `notes`, `last_updated`.
 5. Plan only — write nothing outside the plan dir; the executor needs nothing but the plan and the files it cites.
-6. No worktrees in the plan: never a `git worktree` step, never `isolation: worktree`. Parallel slices = one doc per slice, disjoint paths; README index rows are edited last, by one agent.
+6. No worktrees in the plan: never a `git worktree` step, never `isolation: worktree` — a docs repo is the one-checkout row of [worktrees: when](../../../docs/ai-agents/hive-mind.md#-worktrees-when). Parallel slices = one doc per slice, disjoint paths; README index rows are edited last, by one agent.
