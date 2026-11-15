@@ -416,6 +416,22 @@ printf 'target.md\n' > "$root/docs/section/README.md"
 printf '[Fourth](docs/section/target.md#topic-3)\n' >> "$root/README.md"
 assert_validation 'suffix past the advanced collision is dead' 1 './README.md docs/section/target.md#topic-3 dead anchor'
 
+# docs/README.md is the docs index: every section directory under docs/ needs
+# a row there, or a whole section is invisible from it.
+new_fixture
+mkdir -p "$root/docs/indexed" "$root/docs/omitted"
+printf '# Indexed\n' > "$root/docs/indexed/README.md"
+printf '# Omitted\n' > "$root/docs/omitted/README.md"
+printf '[Indexed](indexed/README.md)\n' > "$root/docs/README.md"
+assert_validation 'section missing from the docs index reported' 1 './docs/README.md omitted/ section not indexed'
+
+new_fixture
+mkdir -p "$root/docs/indexed" "$root/docs/other"
+printf '# Indexed\n' > "$root/docs/indexed/README.md"
+printf '# Other\n' > "$root/docs/other/README.md"
+printf '[Indexed](indexed/README.md)\n[Other](other/)\n' > "$root/docs/README.md"
+assert_validation 'every section in the docs index passes' 0 ''
+
 # A link may carry a title - validate the target and fragment, never the
 # quoted title.
 new_fixture

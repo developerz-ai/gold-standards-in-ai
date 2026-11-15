@@ -10,16 +10,17 @@ The throughline: **an agent is only as good as the context and tooling you hand 
 |---|---|---|
 | 1 | [claude-md.md](claude-md.md) | 🗂️ `CLAUDE.md` — the project brain, read every session · path-scoped `.claude/rules/` |
 | 2 | [skills-commands-agents.md](skills-commands-agents.md) | 🧩 Skills (domain expertise), slash commands (workflows), subagents (specialists) |
-| 3 | [permissions.md](permissions.md) | 🔓 Full power, zero prompts — quality in `bin/check` + CI, never hooks |
+| 3 | [permissions.md](permissions.md) | 🔓 Full power, zero prompts — quality in `bin/check` + CI; when a hook is earned |
 | 4 | [memory-and-mcp.md](memory-and-mcp.md) | 🧠 Cross-session memory · 🔌 MCP servers · the split meta-tool MCP pattern |
 | 5 | [compressed-config.md](compressed-config.md) | 🗜️ Write config files that cost fewer tokens, same signal |
 | 6 | [behavioral-rules.md](behavioral-rules.md) | 🎯 Steer *how* the agent codes (assumptions, simplicity, surgical diffs) |
 | 7 | [planning-and-docs.md](planning-and-docs.md) | 📐 Plan before coding · docs vs CLAUDE.md · the initial idea |
-| 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, the plan-slice→agent→PR seam, why no worktrees |
+| 8 | [workflow-commands.md](workflow-commands.md) | 🛠️ `/planx` + `/feature` — plans as files, idea-to-deployed, the plan-slice→agent→PR seam, PR cap by repo kind |
 | 9 | [mcp-json.md](mcp-json.md) | 🔌 `.mcp.json` — the repo's MCP servers, committed, secret-free, paired with skills |
 | 10 | [guards-and-gotchas.md](guards-and-gotchas.md) | 🛡️ Make the machine careful — lint guards, doctor checks, preventive rules vs the runbook |
 | 11 | [output-completeness.md](output-completeness.md) | 🧾 Beat model laziness — no placeholders, no truncation, a guard that rejects them |
 | 12 | [reviewer-agents.md](reviewer-agents.md) | 🔎 Reviewer agents people trust — precision gate, false-positive skip list, silent-failure lens, parallel specialist lenses, fresh-eyes loop |
+| 13 | [prompts-for-weak-models.md](prompts-for-weak-models.md) | 🪶 Prompts a cheaper model can follow — same rules, flatter shape, output contracts, before/after |
 
 Building with a team of agents inside one of those commands? → [../ai-agents/hive-mind.md](../ai-agents/hive-mind.md).
 
@@ -33,7 +34,7 @@ Building with a team of agents inside one of those commands? → [../ai-agents/h
 5. **A committed `.mcp.json`** — every agent on the repo reaches issues, errors, the DB and the browser with zero setup.
 
 ## Anti-patterns
-- `CLAUDE.md` over 600 lines — read every turn, trim ruthlessly.
+- A root `CLAUDE.md` past its loader's char floor — truncated mid-sentence every session → [claude-md.md](claude-md.md#two-ceilings--know-which-one-binds).
 - Pasting whole files into `CLAUDE.md` — reference paths instead.
 - A skill for every task — only for repeated, complex workflows.
 - No tests — the agent's biggest edge is verifying its own work.

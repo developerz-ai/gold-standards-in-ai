@@ -132,6 +132,21 @@ diagnostics=$(
                     echo "$file $link dead anchor"
             done
     done
+
+    # docs/README.md is the docs index: every section directory under docs/
+    # needs a link to it there (`<section>/README.md` or `<section>/`), or the
+    # whole section is invisible from the index. Graded when the index exists;
+    # deleting it unindexes every top-level doc, which the rule above reports.
+    if [[ -f docs/README.md ]]; then
+        for section_dir in docs/*/; do
+            [[ -d $section_dir ]] || continue
+            section=${section_dir#docs/}
+            section=${section%/}
+            sed '/^ *```/,/^ *```/d;s/`[^`]*`//g' docs/README.md |
+                grep -qF -e "]($section/README.md" -e "]($section/)" ||
+                echo "./docs/README.md $section/ section not indexed"
+        done
+    fi
     true
 )
 
