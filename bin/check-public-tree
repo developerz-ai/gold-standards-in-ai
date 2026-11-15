@@ -91,8 +91,10 @@ if [[ ${1:-} == --self-test ]]; then
     # CI must pass the secret and the required flag on live (uncommented) lines: deleting,
     # commenting out or weakening either would switch the private-word check off silently.
     ci=$repo_root/.github/workflows/ci.yml
+    # The exact condition: a weaker one (`false && '1'`, a renamed repo check) never sets the flag.
+    required_line="PUBLIC_TREE_PRIVATE_WORDS_REQUIRED: \${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.actor != 'dependabot[bot]' && '1' || '' }}"
     if ! grep -qE '^[[:space:]]+PUBLIC_TREE_PRIVATE_WORDS: \$\{\{ secrets\.PUBLIC_TREE_PRIVATE_WORDS \}\}[[:space:]]*$' "$ci" \
-        || ! grep -qE "^[[:space:]]+PUBLIC_TREE_PRIVATE_WORDS_REQUIRED: \\$\\{\\{ .*&& '1' \\|\\| '' \\}\\}[[:space:]]*$" "$ci"; then
+        || ! sed 's/^[[:space:]]*//; s/[[:space:]]*$//' "$ci" | grep -qxF "$required_line"; then
         echo 'check-public-tree self-test: ci.yml does not pass the secret and the required flag' >&2
         fails=$((fails + 1))
     fi
