@@ -53,7 +53,7 @@ violations() {
         name=${name%.git}
         name=${name%%.}
         [[ $public_repos == *" $name "* ]] || hit=1
-    done < <(printf '%s' "$text" | grep -oiE "(github\.com/|^|[^A-Za-z0-9_./-])${org}/[A-Za-z0-9_.-]+" | grep -oiE "${org}/[A-Za-z0-9_.-]+" || true)
+    done < <(printf '%s' "$text" | grep -oiE "(github\.com/|^|[^A-Za-z0-9_./@-])${org}/[A-Za-z0-9_.-]+" | grep -oiE "${org}/[A-Za-z0-9_.-]+" || true)
     if [[ $hit -eq 1 ]] || grep -qiE "$tracker_re" <<< "$text"; then
         echo 'private repository'
     fi
@@ -88,6 +88,7 @@ if [[ ${1:-} == --self-test ]]; then
     expect 'private repository' "see ${org}/vault#12"
     expect 'private repository' "(${p1}#1026)"
     expect '' "${org}/gold-standards-in-ai#3, github.com/${org}/wurk"
+    expect '' "*  @${org}/admin  (a team, not a repository)"
     expect 'private word (from the secret)' "# runs on QUIMTEL" "quimtel,zorblax.io"
     expect '' "zorblax-io and quim" "quimtel,zorblax.io"
     # A match at the top of a file larger than a pipe buffer must still fire (no SIGPIPE under pipefail).
@@ -104,7 +105,7 @@ $big"
     # The exact condition: a weaker one (`false && '1'`, a renamed repo check) never sets the flag.
     required_line="PUBLIC_TREE_PRIVATE_WORDS_REQUIRED: \${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.actor != 'dependabot[bot]' && '1' || '' }}"
     if ! grep -qE '^[[:space:]]+PUBLIC_TREE_PRIVATE_WORDS: \$\{\{ secrets\.PUBLIC_TREE_PRIVATE_WORDS \}\}[[:space:]]*$' "$ci" \
-        || ! sed 's/^[[:space:]]*//; s/[[:space:]]*$//' "$ci" | grep -qxF "$required_line"; then
+        || ! grep -qxF "$required_line" <<< "$(sed 's/^[[:space:]]*//; s/[[:space:]]*$//' "$ci")"; then
         echo 'check-public-tree self-test: ci.yml does not pass the secret and the required flag' >&2
         fails=$((fails + 1))
     fi
@@ -123,7 +124,8 @@ fi
 
 [[ $(git -C "$repo_root" rev-parse --show-toplevel) == "$repo_root" ]] || { echo "check-public-tree: git answers for another repository's tree" >&2; exit 1; }
 mapfile -d '' files < <(git -C "$repo_root" ls-files -z)
-printf '%s\n' "${files[@]}" | grep -qxF "$self" || { echo 'check-public-tree: the scan does not see this file, so its root is wrong' >&2; exit 1; }
+# A here-string, not a pipe: under pipefail an early \`grep -q\` match would SIGPIPE a long listing.
+grep -qxF "$self" <<< "$(printf '%s\n' "${files[@]}")" || { echo 'check-public-tree: the scan does not see this file, so its root is wrong' >&2; exit 1; }
 read=0
 failures=0
 for path in "${files[@]}"; do
