@@ -2,7 +2,7 @@
 
 **Unit tests check your code. Evals check what the model does with your prompts, tools and skills.** Any change to those is a behavior change with no type error and no red test — only an eval sees it.
 
-> Run evals **before merge** on any prompt/tool/skill/model change. Never in the default CI gate — they call live models, cost money, and are stochastic → [ai-first-cicd](../developer-experience/ai-first-cicd.md#evals-are-a-pre-merge-gate-never-a-ci-job).
+> Run evals **before merge** on any prompt/tool/skill/model change. Never in the default CI gate — they call live models, cost money, and are stochastic → [ai-first-cicd](../developer-experience/ai-first-cicd.md#evals-are-a-pre-merge-gate-never-a-blocking-ci-job).
 
 ## 🚦 When an eval is required
 

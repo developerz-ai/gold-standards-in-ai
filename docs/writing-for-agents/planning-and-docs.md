@@ -91,7 +91,7 @@ Pattern: `services/auth/authenticator.ts`, `services/auth/registrar.ts`
 Tests: `test/services/auth/`
 Deps: injected via constructor.
 ```
-Same info, 80% fewer tokens. Rules: lead with the answer · file paths over descriptions · tables over paragraphs · no filler · `SKILL.md` < 80 lines · `CLAUDE.md` < 600.
+Same info, 80% fewer tokens. Rules: lead with the answer · file paths over descriptions · tables over paragraphs · no filler · `SKILL.md` < 80 lines · `CLAUDE.md` under both its ceilings, the root file measured in chars → [claude-md](claude-md.md#two-ceilings--know-which-one-binds).
 
 ## <a name="docs-decay"></a>Docs decay — write for the next session
 - **Write for the next action, not posterity.** "Stripe webhook → `src/payments/stripe_webhook.ts`" earns its tokens; "comprehensive payments overview" is a liability.

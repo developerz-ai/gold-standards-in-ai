@@ -74,8 +74,8 @@ An AI-first repo enforces things a unit test can't see. Each is a CI job, each f
 | **Workflow security** | a PR turning CI into a credential leak | static check on `.github/workflows/*.yml` — below |
 | **Agent evals** | a "cheap" prompt change breaking tool routing | **not** in the default gate — see below |
 
-### Evals are a pre-merge gate, never a CI job
-Agent-behavior tests (does the model still pick the right tool? still load the right skill?) call **live models**: they cost money and they're stochastic. Keep them out of `bun test` globs and out of CI; run them deliberately before merging a change to prompts, tools, or skills, and paste the pass rates into the PR. A flaky paid job in the default gate gets muted within a week — and a muted gate is worse than none.
+### Evals are a pre-merge gate, never a blocking CI job
+Agent-behavior tests (does the model still pick the right tool? still load the right skill?) call **live models**: they cost money and they're stochastic. Keep them out of `bun test` globs and out of CI; run them deliberately before merging a change to prompts, tools, or skills, and paste the pass rates into the PR. A flaky paid job in the default gate gets muted within a week — and a muted gate is worse than none. One exception: a scheduled trend-line run on `main` that can never block a merge is fine; its recurring spend is an operator's call → [evals](../ai-agents/evals.md).
 
 Report the right number. A step that passes 70% of single runs passes **at least once in 3** 97% of the time (pass@3) — but **all 3** only 34% of the time (pass^3 = 0.7³). Tool routing and release-critical paths run every turn, so they're judged on pass^k (k ≥ 3); new capability on pass@k. How we build them → [evals](../ai-agents/evals.md).
 

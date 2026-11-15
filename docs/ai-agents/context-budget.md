@@ -169,8 +169,8 @@ Thresholds, budgets, how many catalog lines to render, what to inline vs load on
 ```ts
 // Derivation lives next to the number, or the number is folklore.
 /** Observed healthy max silence between stream events, 30 days of prod turns: 95 s (p100).
- *  Stall fence = 95 × 2 ≈ 180 s. Re-measure before touching. A progress fence, not a work budget. */
-export const STREAM_STALL_SILENCE_MS = 180_000;
+ *  Stall fence = 95 × 2 = 190 s. Re-measure before touching. A progress fence, not a work budget. */
+export const STREAM_STALL_SILENCE_MS = 190_000;
 ```
 
 ## 🗜️ Compact at phase boundaries — the coding session
