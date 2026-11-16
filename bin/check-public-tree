@@ -86,7 +86,7 @@ if [[ ${1:-} == --self-test ]]; then
     expect "someone's home directory" "cd /ho""me/someone/src"
     expect '' "runs-on: /home/runner/work"
     expect 'private repository' "see ${org}/vault#12"
-    expect 'private repository' "(${p1}#1026)"
+    expect 'private repository' "(${p1}#12)"
     expect '' "${org}/gold-standards-in-ai#3, github.com/${org}/wurk"
     expect '' "*  @${org}/admin  (a team, not a repository)"
     expect 'private word (from the secret)' "# runs on QUIMTEL" "quimtel,zorblax.io"
@@ -97,7 +97,7 @@ if [[ ${1:-} == --self-test ]]; then
 $big"
     expect 'private word (from the secret)' "quimtel
 $big" "quimtel"
-    expect 'private repository' "(${p1}#1026)
+    expect 'private repository' "(${p1}#12)
 $big"
     # CI must pass the secret and the required flag on live (uncommented) lines: deleting,
     # commenting out or weakening either would switch the private-word check off silently.
