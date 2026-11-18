@@ -13,6 +13,10 @@ updates:
       interval: "weekly"
       day: "saturday"
       time: "21:00"
+    # A release waits 14 days before its update PR opens; security updates ignore this.
+    # docs/developer-experience/dependency-updates.md
+    cooldown:
+      default-days: 14
     groups:
       github-actions-minor-and-patch:
         patterns: ["*"]

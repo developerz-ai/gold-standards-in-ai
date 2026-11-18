@@ -10,6 +10,7 @@
 | [codegraph.md](codegraph.md) | 🕸️ A knowledge graph of your code, for agents |
 | [linting-ci.md](linting-ci.md) | ✨ Biome · 🔨 Blacksmith CI |
 | [ai-first-cicd.md](ai-first-cicd.md) | 🤖 CI as the agent's feedback channel — one gate, parity, agent-readable failures |
+| [dependency-updates.md](dependency-updates.md) | 📦 Two hands — routine updates wait 14 days, a CVE fix ships now |
 | [smart-builds.md](smart-builds.md) | 🧠 Detect what changed, cache what didn't, restart only what executes it |
 
 ## The DX bar

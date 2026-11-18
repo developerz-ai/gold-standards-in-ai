@@ -123,4 +123,4 @@ Wire the error monitor into the loop: a new issue → an agent reads the trace, 
 
 ---
 
-**Related:** [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [../ai-agents/evals.md](../ai-agents/evals.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)
+**Related:** [dependency-updates.md](dependency-updates.md) — the 14-day wait and the CVE fast lane · [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [../ai-agents/evals.md](../ai-agents/evals.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)
