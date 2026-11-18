@@ -20,7 +20,7 @@ Think of it as **the judgment of a senior engineer with 30 years of experience w
 | Pick the stack & structure | [docs/architecture/](docs/architecture/README.md) · [docs/stack/](docs/stack/README.md) |
 | Grow a project from pre-MVP to really big | [abstractions & growth](docs/architecture/abstractions-and-growth.md) · [shape now, capacity later](docs/architecture/data-and-scale.md) |
 | Get fast feedback loops (DX) | [docs/developer-experience/](docs/developer-experience/README.md) · [inner loop](docs/developer-experience/inner-loop.md) |
-| Set up CI/CD for agents | [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) |
+| Set up CI/CD for agents | [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) · [dependency updates](docs/developer-experience/dependency-updates.md) |
 | Build AI agents | [docs/ai-agents/](docs/ai-agents/README.md) · [freedom & access](docs/ai-agents/agent-work-limits.md) |
 | Ship an MCP server others' agents can actually use | [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) · [write safety + directory-ready](docs/ai-agents/mcp-write-safety.md) |
 | Deploy & operate | [docs/infrastructure/](docs/infrastructure/README.md) |
@@ -82,6 +82,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [inner-loop.md](docs/developer-experience/inner-loop.md) — ⏱️ scoped checks vs the full gate — the loop the agent actually runs
 - [linting-ci.md](docs/developer-experience/linting-ci.md) — ✨ Biome · 🔨 Blacksmith CI
 - [ai-first-cicd.md](docs/developer-experience/ai-first-cicd.md) — 🤖 **AI-first CI/CD** — one gate ≡ CI, parity tests, gates that aren't tests, agent-readable failures
+- [dependency-updates.md](docs/developer-experience/dependency-updates.md) — 📦 **two hands** — routine updates wait 14 days at the merge gate, a CVE fix ships now; unwatched ecosystems listed, never silent
 - [smart-builds.md](docs/developer-experience/smart-builds.md) — 🧠 **smart change detection & caching** — one detector, build-vs-roll content hashes, per-unit images, cache keys
 
 ### 5. 🤖 AI agents
