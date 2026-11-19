@@ -89,6 +89,7 @@ Pin a model per tier — the **z.ai subscription** is a cost-effective default f
 | fast | review, triage, mechanical | cheap fast model |
 
 ## Cost & safety
+- **Admit workers; do not assume N fits.** Each heavy step takes a slot from [one machine-wide memory ledger and a core cap](multi-agent-ops.md). Auto-merge is not the end of a task: [verify the merge commit](multi-agent-ops.md#-merged-is-not-finished), and clean up what the worker left.
 - **Track `totalUsage` per phase**, attach a cost table to the PR body.
 - **Retry transient, fail fast on credits-exhausted** ([agent-sdk](agent-sdk.md#streaming-retries-cost-control)).
 - **Read the repo's `CLAUDE.md`/`AGENTS.md`** and feed it to every sub-agent as a system-prompt prefix — the agent inherits your conventions for free.

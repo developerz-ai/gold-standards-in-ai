@@ -7,6 +7,7 @@ Patterns for building agents — the systems that *do the work* — with the AI 
 | [agent-sdk.md](agent-sdk.md) | 🧬 The agent loop, tools, structured output, streaming, retries |
 | [orchestration.md](orchestration.md) | 🎼 Multi-agent: Planner → Worker → Reviewer, autonomous loops, model tiers, z.ai subs |
 | [hive-mind.md](hive-mind.md) | 🐝 Running a team of agents — when to hive, worktrees: when, the file set as the lock, the WHY + 9-point brief, interrogate the report |
+| [multi-agent-ops.md](multi-agent-ops.md) | 🧰 Many agents on one machine — memory ledger, core cap, load and pressure, branch and image hygiene, verifying `main` after merge |
 | [tools-and-mcp.md](tools-and-mcp.md) | 🔧 Tool design + MCP integration + audited capability access |
 | [mcp-docs-for-agents.md](mcp-docs-for-agents.md) | 📖 Teach *their* agent to use *your* MCP server — recipes as prose (branches, bounded loops, retries), the `docs` tool, editable markdown |
 | [mcp-write-safety.md](mcp-write-safety.md) | 🛡️ MCP writes that hosts and directories trust — read/write/delete split + annotations, `live:false` previews, required `confirmed_by_user` on destructive commits, audited claims |
