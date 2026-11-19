@@ -23,10 +23,10 @@ As of 2026-11 every script here ran on Linux 7.0 with bash 5.2, util-linux 2.39 
 |---|---|
 | **One ledger per machine and user**, at a fixed path, never under `$TMPDIR` | a tool can set `$TMPDIR` per session; two ledgers are two budgets |
 | **Reserve the measured peak**, never typical use | a typical figure bounds nothing |
-| **`flock`, not pid files** | the kernel releases the lock when the holder dies by any signal. No stale lock, no liveness probe, no two waiters both taking over one dead pid. Local filesystems only |
+| **`flock`, not pid files** | the kernel releases the lock when the last process holding it is gone, by any signal. No stale lock, no liveness probe, no two waiters both taking over one dead pid. Local filesystems only |
 | **Admit up to 50% of RAM** | derived on a 46 GB box idling at 12.7 GB: half leaves about 10 GB for the sessions and editors the ledger cannot see. Re-derive it from your idle figure |
 | **Read the cgroup**: the lowest `memory.max` up the chain, not just host RAM | a ledger sized from the host admits work into a cgroup OOM kill. Above the limit, refuse with exit 75 before starting |
-| **Children inherit the hold, not the lock** | the holder marks children through the environment, so a nested run does not reserve again and wait on its own ancestor. The lock descriptor stays out of children, so a leftover daemon cannot pin the reservation |
+| **Children inherit the hold** | through the lock descriptor, so killing the wrapper does not free memory the workload still uses; through the environment, so a nested run does not reserve again and wait on its own ancestor. A process that closes inherited descriptors drops out of the hold |
 | **Oversized work runs alone**, never refused | clamp to capacity, wait for an empty ledger |
 | **The waiter at the gate keeps it** | a stream of small jobs cannot starve a large one |
 
@@ -79,25 +79,30 @@ while :; do
   sleep 0.2
 done
 
-# The kernel drops this lock when the process dies, by any signal. No stale state.
-hold=$dir/holds/$$
+# The kernel drops this lock when the last process holding fd 9 is gone, by any signal.
+hold=$dir/holds/$$-${label//[^A-Za-z0-9_.-]/_}
 exec 9>"$hold"
 flock 9
 echo "$weight" >"$hold"
 exec 8>&-
 
-# 9>&- : a daemon the command leaves behind must not keep the reservation alive.
+# The command inherits fd 9: if this wrapper is killed, the reservation lasts as long as
+# the workload does. Anything it leaves running keeps holding memory, and the reservation.
 status=0
-BOX_LEDGER_HOLDER=$$ "$@" 9>&- || status=$?
-rm -f "$hold"
+BOX_LEDGER_HOLDER=$$ "$@" || status=$?
+exec 9>&-
+flock -n "$hold" rm -f "$hold" || true
 exit "$status"
 ```
 
 ```bash
 box-run 5120 typecheck -- npm run typecheck
 box-run 2048 "tests:$PWD" -- npm test -- src/orders.test.ts
-ls "/tmp/box-ledger-$(id -u)/holds"     # one file per live or not-yet-swept reservation, holding its MB
+ls "/tmp/box-ledger-$(id -u)/holds"              # <pid>-<label>, each file holding its MB
+fuser -v "/tmp/box-ledger-$(id -u)/holds/"*      # which processes keep each reservation alive
 ```
+
+A queue that never drains usually means a daemon left running: it still holds its memory and its reservation. `fuser` names it.
 
 **Measure the weight; do not guess it.** `/usr/bin/time -v` reports the largest single process: two 60 MB processes read 73 MB, and this script read 147 MB.
 
@@ -246,8 +251,13 @@ while read -r branch tip <&3; do
     --json headRefOid,isCrossRepository \
     --jq "[.[] | select(.headRefOid == \"$tip\" and (.isCrossRepository | not))] | length")
   if [ "$merged" = 0 ]; then echo "keep   $branch (tip not merged through a PR)"; continue; fi
-  echo "delete $branch"
-  if [ "${1:-}" = --apply ]; then git push --quiet origin --delete "$branch"; fi
+  if [ "${1:-}" != --apply ]; then echo "delete $branch"; continue; fi
+  # Compare-and-delete: the server refuses if the branch moved after the check above.
+  if git push --quiet --force-with-lease="refs/heads/$branch:$tip" origin ":refs/heads/$branch"; then
+    echo "deleted $branch"
+  else
+    echo "keep   $branch (delete refused)"
+  fi
 done 3< <(git for-each-ref --format='%(refname:strip=3) %(objectname)' refs/remotes/origin)
 ```
 
@@ -257,10 +267,14 @@ done 3< <(git for-each-ref --format='%(refname:strip=3) %(objectname)' refs/remo
 set -euo pipefail
 dir=$1
 [ -d "$dir/.git" ] || { echo "keep $dir: not a standalone clone" >&2; exit 1; }
+[ ! -d "$dir/.git/worktrees" ] || { echo "keep $dir: it has worktrees" >&2; exit 1; }
 dirty=$(git -C "$dir" status --porcelain)
-unpushed=$(git -C "$dir" log --branches --not --remotes --oneline)
-stashed=$(git -C "$dir" stash list)
-if [ -n "$dirty$unpushed$stashed" ]; then echo "keep $dir: unsaved work" >&2; exit 1; fi
+# Local refs, HEAD and the reflog: branches, tags, stashes and detached commits.
+unpushed=$(git -C "$dir" log --all --reflog HEAD --not --remotes --oneline)
+# Ignored files can be the only copy (.env). Only rebuildable directories may go.
+ignored=$(git -C "$dir" ls-files --others --ignored --exclude-standard --directory |
+  grep -Ev '(^|/)(node_modules|dist|build|target|\.cache)/$' || true)
+if [ -n "$dirty$unpushed$ignored" ]; then echo "keep $dir: unsaved work" >&2; exit 1; fi
 rm -rf -- "$dir"
 ```
 
