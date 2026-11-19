@@ -90,6 +90,7 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [agent-sdk.md](docs/ai-agents/agent-sdk.md) — 🧬 building agents with the AI Agent SDK
 - [orchestration.md](docs/ai-agents/orchestration.md) — 🎼 Planner → Worker → Reviewer, AI Task Master, z.ai subs
 - [hive-mind.md](docs/ai-agents/hive-mind.md) — 🐝 many agents, **one file-set lock**: when to hive, **worktrees: when**, the WHY + 9-point brief
+- [multi-agent-ops.md](docs/ai-agents/multi-agent-ops.md) — 🧰 **many agents, one machine** — memory ledger, core cap, PSI, branch/image hygiene, verify `main` after merge
 - [tools-and-mcp.md](docs/ai-agents/tools-and-mcp.md) — 🔧 tool design + MCP integration
 - [mcp-docs-for-agents.md](docs/ai-agents/mcp-docs-for-agents.md) — 📖 **teach *their* agent to use *your* MCP server** — recipes as advice not scripts, the `docs` tool, editable markdown
 - [mcp-write-safety.md](docs/ai-agents/mcp-write-safety.md) — 🛡️ **MCP writes hosts trust** — read/write/delete split + annotations, `live:false` previews, required `confirmed_by_user` on destructive commits
