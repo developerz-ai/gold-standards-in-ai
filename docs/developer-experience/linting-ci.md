@@ -115,6 +115,25 @@ The agent waits on CI before it can merge or deploy, so CI latency taxes every l
     cache-to:   type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image }}:buildcache,mode=max
 ```
 
+### ⚡ Four measured techniques
+Each is a number before and after on one of our repos (As of 2026-09). Measure yours the same way before you copy the change.
+
+| Technique | Mechanism | Measured |
+|---|---|---|
+| **Size the runner per job, by measurement** | bench the gate on 2, 4 and 8 vCPU; keep the size where the wall stops falling. A parallel test runner on 2 vCPU waits on the CPU, not on the tests | gate job 215 s → 84 s on 8 vCPU |
+| **Boot each test database from a migrated template** | migrate once, dump the migrated data dir, key the dump by the DB engine version + every migration file's hash; each test file loads the dump instead of `initdb` + migrations. A new migration changes the key, so a stale schema cannot be served | unit suite 107.9 s → 56.7 s wall; 816 s → 402 s summed file time (8 workers) |
+| **Split cache restore from cache save; save on the default branch only** | `actions/cache/restore` on every run, `actions/cache/save` only `if: github.ref == 'refs/heads/main'`. A run reads caches from its own branch and the default branch; a PR-saved cache serves that PR alone and its entries count against the repository's cache quota, evicting the entries every PR reads | — (structural: one shared warm cache, no per-PR churn) |
+| **Verify the deploy by the served build id** | the app serves its build sha (`/version`, a meta tag, the pod's image digest); the deploy job polls until the live answer equals the sha it built, and fails otherwise. A non-HTTP worker reports its build id in its heartbeat, so its roll is verified too → [ai-first-cicd](ai-first-cicd.md#6-merge--deploy-without-a-human-bottleneck) | — (catches a roll that never happened, which a green deploy job hides) |
+
+```yaml
+- uses: actions/cache/restore@<sha>   # every run
+  with: { path: ~/.bun/install/cache, key: bun-${{ hashFiles('bun.lock') }} }
+- run: bun install --frozen-lockfile
+- uses: actions/cache/save@<sha>      # the default branch only
+  if: github.ref == 'refs/heads/main'
+  with: { path: ~/.bun/install/cache, key: bun-${{ hashFiles('bun.lock') }} }
+```
+
 ## Detect changes — only do the work that's needed
 Don't test or build the whole monorepo on every PR. Detect which packages/apps changed (path filters, `turbo --filter`, or `git diff` against the merge base) and run only the affected pipelines. The full treatment — one shared detector, build-vs-roll content hashing, per-unit image repos, cache-key design — is [smart-builds.md](smart-builds.md).
 
