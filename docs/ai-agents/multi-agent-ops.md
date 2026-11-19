@@ -269,12 +269,16 @@ dir=$1
 [ -d "$dir/.git" ] || { echo "keep $dir: not a standalone clone" >&2; exit 1; }
 [ ! -d "$dir/.git/worktrees" ] || { echo "keep $dir: it has worktrees" >&2; exit 1; }
 dirty=$(git -C "$dir" status --porcelain)
-# Local refs, HEAD and the reflog: branches, tags, stashes and detached commits.
+# Local refs, HEAD and the reflog: branches, stashes and detached commits.
 unpushed=$(git -C "$dir" log --all --reflog HEAD --not --remotes --oneline)
+# A tag on a pushed commit is still unique: compare names and tag objects with the remote.
+remote_tags=$(git -C "$dir" ls-remote --tags --refs origin | awk '{ print $1, $2 }' | sort)
+local_tags=$(git -C "$dir" for-each-ref --format='%(objectname) %(refname)' refs/tags | sort)
+tags=$(comm -23 <(printf '%s\n' "$local_tags") <(printf '%s\n' "$remote_tags"))
 # Ignored files can be the only copy (.env). Only rebuildable directories may go.
 ignored=$(git -C "$dir" ls-files --others --ignored --exclude-standard --directory |
   grep -Ev '(^|/)(node_modules|dist|build|target|\.cache)/$' || true)
-if [ -n "$dirty$unpushed$ignored" ]; then echo "keep $dir: unsaved work" >&2; exit 1; fi
+if [ -n "$dirty$unpushed$tags$ignored" ]; then echo "keep $dir: unsaved work" >&2; exit 1; fi
 rm -rf -- "$dir"
 ```
 
