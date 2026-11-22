@@ -214,7 +214,7 @@ Sections 3, 9, 10, and 13 are what a generic "good practices" file lacks — the
 ## Architecture
 - Business logic → `src/services/<domain>/`
 - Controllers: thin. Models: persistence only.
-- Custom errors only. Files ≤500 LOC.
+- Custom errors only. Files ≤800 lines.
 
 ## Commands
 bun test            # tests

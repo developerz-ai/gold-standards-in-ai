@@ -7,12 +7,31 @@ The whole system rests on one loop:
 Everything in this repo is in service of making that loop spin faster. An AI agent is a teammate that works at the speed of your tooling. Slow tests, hidden commands, undocumented conventions, and OS quirks each tax *every single turn*. Remove them once and the agent compounds.
 
 ## Who this is for: AI writes ~100% of the code
-These standards assume an **AI-first org where agents write essentially all the code** and humans review, steer, and operate. The whole game is making each repo so legible and well-tooled that an agent ships production-quality work autonomously — and a human verifies it at the PR, not by typing the code.
+> ✈️ **The AI is the pilot; the human is the copilot or a passenger.** The AI plans, decides, ships and owns the outcome. A person can point at something worth seeing or report turbulence, but does not hold the controls, and the flight never waits on them as a checkpoint — outside the closed set of acts below.
 
-The human-in-the-loop points that stay human (or human-supervised):
-- **Review & merge** — every PR is reviewed (by a person and an [automated AI reviewer](developer-experience/linting-ci.md)) before it lands.
-- **Deployments** — handled by a deployment agent (we call ours **Ana**), **most of the time under human supervision**. The agent runs the deploy; a human watches the rollout and can stop it.
-- **Direction** — what to build and why stays a human call.
+These standards assume an **AI-first org where the AI is the developer**: it writes the code, makes the engineering calls and ships. Humans give ideas and report problems; they do not approve PRs or deploys. The whole game is making each repo so legible and well-tooled that an agent ships production-quality work autonomously, behind gates that are machines.
+
+As of 2026-11:
+
+| Who | Holds |
+|---|---|
+| **The AI** | every engineering call — design, review, merge, deploy, rollout, prod debugging, fixes |
+| **Machine gates** | the quality bar — tests, `bin/check`, CI, an [automated AI reviewer](developer-experience/linting-ci.md), the post-deploy probe. A merge on green machine gates **is** deploy consent → [merge → deploy](developer-experience/ai-first-cicd.md#6-merge--deploy-without-a-human-bottleneck) |
+| **Humans** | ideas and direction in, problem reports in — and a closed set of acts, below |
+
+The AI out-executes people at the work, ideas included, so it generates, judges and improves ideas itself instead of waiting for them. What people add is originality and lived experience. Weigh their input as a strong signal, not a plan to execute unexamined, and never as a gate.
+
+The acts that stay human — the whole list, nothing else waits on a person:
+
+| Act | Because |
+|---|---|
+| Payment and spend — buying credits, a plan, any new cost | money leaves the org; an agent cannot take it back |
+| Deleting the last copy of data, or a backup | nothing restores it — every other destructive step runs behind a [verified backup](workflow/data-risk-ladder.md) |
+| Rotating a key that is in live use | every holder of the old key breaks at once |
+| Releasing held payments | money moves to a third party |
+| Granting access the platform cannot obtain itself | an account, a credential or an admin role only its owner can issue |
+
+A refusal by a machine gate is not a reason to ask a human: fix the cause and re-gate. A missing capability is a bug in the setup, not an approval step.
 
 If humans still write most of your code, most of this still helps — but the rules are tuned for full autonomy.
 
@@ -21,7 +40,7 @@ A coding agent is fast but fallible — it *will* miss things. So quality doesn'
 
 1. **Tests** ensure high quality — they prove the change does what it should and catch regressions. The agent writes them and runs them every loop. [→ testing](architecture/testing.md)
 2. **Automated AI review** on every PR catches what the coding agent missed — bugs, security issues, convention drift — at machine speed. [→ AI review](developer-experience/linting-ci.md)
-3. **Human review + supervised deploy** is the final gate.
+3. **The deploy verdict** is the final gate: the roll is confirmed by a live probe, and a red one gets a fix-forward PR. [→ shipping doctrine](workflow/shipping-doctrine.md#definition-of-done)
 
 Each layer assumes the one before it is imperfect. That's what makes shipping at agent speed *safe*.
 
@@ -97,7 +116,7 @@ If any step requires tribal knowledge, that's a bug in your DX — fix it in the
 Velocity comes from a tight error loop, not from cutting corners:
 - **Fail fast** — surface errors loudly and early. A crash on a bad assumption beats silent wrong behavior. Don't swallow exceptions; don't retry a fatal error.
 - **Fix fast** — production errors are a *work queue*. [Sentry](infrastructure/observability.md) → an agent reads the trace, writes a fix + a reproducing test, opens a PR.
-- **Deploy fast** — small PRs, fast cached CI, GitOps that ships a merged change in minutes. Deploys are agent-run, [human-supervised](#who-this-is-for-ai-writes-100-of-the-code).
+- **Deploy fast** — small PRs, fast cached CI, GitOps that ships a merged change in minutes. Merging on green gates is the deploy consent; the agent runs the roll and [verifies it](#who-this-is-for-ai-writes-100-of-the-code).
 
 Small change → fast feedback → fast fix → fast ship. The smaller and faster each step, the more an agent can own the whole loop.
 
@@ -111,7 +130,7 @@ An autonomous agent can't be debugging mystery states. Engineer the system so be
 Low undefined behavior is what makes "fail fast" safe: when something breaks, *where* and *why* are obvious.
 
 ## Coding values (non-negotiable)
-- **SOLID, especially SRP.** One file, one job. Files ≤ ~500 LOC. [→ SOLID/SRP](architecture/solid-srp.md)
+- **SOLID, especially SRP.** One file, one job. As guidance: ≤ 800 lines a file, ≤ 120 a function, cognitive complexity ≤ 25 — flagged by the linter, with a ratchet in CI so the count of offenders only falls. [→ SOLID/SRP](architecture/solid-srp.md)
 - **Tests always.** They're how the agent verifies its own work. [→ testing](architecture/testing.md)
 - **Custom error types**, not generic exceptions.
 - **Type-safe everything** — TypeScript + Zod, Rust's type system, strict configs.

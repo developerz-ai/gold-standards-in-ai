@@ -47,7 +47,7 @@ LLMs are exceptionally good at looping until they meet a *specific goal*. Give s
 |---|---|
 | "Make search faster" | "Search p95 < 100ms, via `bin/bench search`" |
 | "Fix the auth bug" | "Test: password change invalidates old sessions. Make it pass." |
-| "Clean up the user model" | "User model split to ≤500 LOC each. `bin/test` green before and after." |
+| "Clean up the user model" | "User model split to ≤800 lines each. `bin/test` green before and after." |
 | "Add rate limiting" | "11th request in 60s returns 429. Test proves it." |
 
 Strong criteria let the agent loop independently — edit, run, check, repeat — without you adjudicating "done."

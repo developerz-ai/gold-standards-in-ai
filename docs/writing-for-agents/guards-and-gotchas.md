@@ -26,7 +26,7 @@ Biome catches style. **Guards catch your repo's specific ways of dying.** One fi
 scripts/lint/
 ├── no-bare-error.ts            # every throw uses a domain error class
 ├── no-bare-error.test.ts       # the guard's own test: flags bad, passes good
-├── max-file-loc.ts             # files ≤500 LOC
+├── max-file-loc.ts             # files ≤800 lines
 ├── no-unbounded-sweep-read.ts  # a background read without a LIMIT/window
 ├── no-seed-in-migration.ts     # migrations are DDL; business rows go to the seed layer
 ├── api-service-wiring.ts       # every service the routes need is actually injected

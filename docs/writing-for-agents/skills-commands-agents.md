@@ -97,7 +97,7 @@ Backend specialist. This project.
 - Services under `app/services/<domain>/`.
 - Custom errors only. No generic Exception.
 - Tests required. TDD where possible.
-- Files ≤500 LOC. Split → nested modules.
+- Files ≤800 lines. Split → nested modules.
 ```
 
 Why subagents matter:
