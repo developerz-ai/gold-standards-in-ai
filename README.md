@@ -9,7 +9,7 @@ Point any agent at this repo before it starts a new project. The more an agent k
 
 Think of it as **the judgment of a senior engineer with 30 years of experience who also tracks the latest tech** — distilled into docs. An agent that reads it inherits that judgment by default: it reaches for the right tool, the modern pattern, and the boring-correct choice without being told each time. 🧓⚡
 
-> 🎯 **Who this is for:** AI-first orgs where **agents write ~100% of the code** and humans review, steer, and operate. Every standard here optimizes for that reality — make the repo so legible and so well-tooled that an agent ships production-quality work autonomously, and a human verifies it at the PR. If humans still write most of your code, much of this still helps, but the rules are tuned for full autonomy.
+> 🎯 **Who this is for:** AI-first orgs where **agents write ~100% of the code** and the AI makes the engineering calls; humans bring ideas and report problems. Every standard here optimizes for that reality — make the repo so legible and so well-tooled that an agent ships production-quality work autonomously, and machine gates — not a human — decide whether it lands. If humans still write most of your code, much of this still helps, but the rules are tuned for full autonomy.
 
 ## 🧭 Start here
 
@@ -138,6 +138,8 @@ Distilled from years of running Claude Code daily. Make every repo a place an ag
 - [dz-contract.md](docs/workflow/dz-contract.md) — 🤖 **the `.dz/` contract** — the maintainer bot's policy file, briefs and their caps, pinned in CI
 - [github-issues-milestones.md](docs/workflow/github-issues-milestones.md) — 🎫 issues & milestones at agent speed
 - [shipping-doctrine.md](docs/workflow/shipping-doctrine.md) — 🚢 no legacy, no shims, **no feature flags**, no prod A/B — one path, replaced completely
+- [opportunistic-improvement.md](docs/workflow/opportunistic-improvement.md) — 🎯 **take the opportunity** — fold in what rides a cost already paid; never schema, id schemes, renames or money code; never add risk to a cutover
+- [data-risk-ladder.md](docs/workflow/data-risk-ladder.md) — 🪜 **the data-risk ladder** — stop writers, prove zero writes, back up, verify by restore, switch; fix forward, never revert
 - [decision-records.md](docs/workflow/decision-records.md) — 🧭 one record per one-way door — rejected options written down so agents stop re-proposing them
 
 ## 🤝 How to use this repo

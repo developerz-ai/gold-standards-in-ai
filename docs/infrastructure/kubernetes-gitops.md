@@ -105,6 +105,6 @@ bun scripts/argocd/sync.ts <app>
 Render-check manifests before pushing: `kubectl kustomize stacks/apps/<app>/manifests`.
 
 ## Deploys are supervised
-The deploy itself is agent-run (the "Ana" pattern), with a human watching the rollout and able to stop it. Single environment, no staging — validate pre-DNS-flip with `curl --resolve` against the ingress node.
+The deploy itself is agent-run: a merge on green gates is the consent, and the agent confirms the roll. Single environment, no staging — validate pre-DNS-flip with `curl --resolve` against the ingress node.
 
-After every roll, smoke the live URL before calling it done: key routes return `200`, `/readyz` is `ok`, the page loads with **zero console errors** and its key assets (JS, CSS, fonts) resolve. Failure → `git revert` the PR, don't patch forward blind → [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md#definition-of-done).
+After every roll, smoke the live URL before calling it done: key routes return `200`, `/readyz` is `ok`, the page loads with **zero console errors** and its key assets (JS, CSS, fonts) resolve. Failure → a fix-forward PR written from the evidence (logs, the failing probe), never a blind patch and never a revert → [../workflow/data-risk-ladder.md](../workflow/data-risk-ladder.md#-fix-forward-never-revert) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md#definition-of-done).

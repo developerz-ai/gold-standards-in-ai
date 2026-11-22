@@ -28,7 +28,7 @@ What to use instead:
 | per-tenant behavior | an org/tenant **config record** (KV), read at the seam, validated — a bad value throws, never degrades to a laxer default |
 | spend/limit differences | quota overrides |
 | a risky rollout | a small PR, a canary deploy, a live probe — never a code branch only some tenants run |
-| "we might want to revert" | a small PR and `git revert` |
+| "we might want to revert" | a small PR, and a fix-forward PR if it goes red → [data-risk-ladder.md](data-risk-ladder.md#-fix-forward-never-revert) |
 
 The difference between a flag and a config record: the config record is **data with a schema and an owner**, visible in the admin surface. The flag is code with neither.
 

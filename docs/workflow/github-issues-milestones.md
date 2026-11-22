@@ -105,11 +105,11 @@ idea
         └─ /planx ─▶ multi-file plan + status.yml
               └─ gh ─▶ milestone + issues (one per slice)
                     └─ Planner / Worker / Reviewer ─▶ PRs ("Closes #N")
-                          └─ automated AI review + human review
-                                └─ supervised deploy
+                          └─ machine gates: CI + automated AI review
+                                └─ merge = deploy consent → verified roll
 ```
 
 - Plan: [project-kickoff.md](project-kickoff.md)
 - Autonomous execution: [../ai-agents/orchestration.md](../ai-agents/orchestration.md)
-- The review gate (AI + human): [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md)
-- Why deploy stays human-supervised: [../00-philosophy.md](../00-philosophy.md)
+- The review gate (machine, AI review included): [../developer-experience/linting-ci.md](../developer-experience/linting-ci.md)
+- Why no gate is a human: [../00-philosophy.md](../00-philosophy.md#who-this-is-for-ai-writes-100-of-the-code)

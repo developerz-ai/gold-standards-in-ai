@@ -12,7 +12,7 @@
 | [🤖 AI agents](ai-agents/README.md) | Building agents — the loop, orchestration, hive mind, tools, context budget, evals, [harness techniques](ai-agents/harness-techniques.md). |
 | [☸️ Infrastructure](infrastructure/README.md) | k3s + GitOps, servers and DNS, SSO, secrets, observability. |
 | [🎨 Frontend craft](frontend-craft/README.md) | i18n, theming, accessibility, design taste, motion, SEO, assets. |
-| [🔄 Workflow](workflow/README.md) | Idea → plan → issues → PRs → deploy; shipping doctrine, [project from zero](workflow/project-from-zero.md), [bug sweeps](workflow/bug-sweep.md), [the `.dz/` contract](workflow/dz-contract.md). |
+| [🔄 Workflow](workflow/README.md) | Idea → plan → issues → PRs → deploy; shipping doctrine, [project from zero](workflow/project-from-zero.md), [bug sweeps](workflow/bug-sweep.md), [the `.dz/` contract](workflow/dz-contract.md), [opportunistic improvement](workflow/opportunistic-improvement.md), [the data-risk ladder](workflow/data-risk-ladder.md). |
 
 The brain itself is the repo root's [`CLAUDE.md`](../CLAUDE.md); the
 commands are `bin/{setup,dev,check,stop}`.

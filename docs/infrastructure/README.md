@@ -23,4 +23,4 @@ Don't reach for Kubernetes until the project actually needs it — a VPS with Co
 - **GitOps is the source of truth.** The cluster reflects git; you change infra by merging a PR.
 - **One SSO perimeter.** Every internal UI sits behind Zitadel (federated to GitHub + MFA).
 - **No plaintext secrets, ever.** Sealed-secrets in-cluster, Vaultwarden for humans, `.env.example` as the only committed env file.
-- **Deploys are agent-run, human-supervised** (the "Ana" pattern) → [../00-philosophy.md](../00-philosophy.md).
+- **Deploys are agent-run; a merge on green gates is the consent** → [../00-philosophy.md](../00-philosophy.md).
