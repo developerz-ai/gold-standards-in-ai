@@ -6,8 +6,8 @@
 
 | # | Rung | Proof before the next rung |
 |---|---|---|
-| 1 | **Stop the writers** — scale them to zero, close the queue, set the source read-only | the process list or replica count shows none running |
-| 2 | **Prove zero writes** | a write counter, the WAL position or a row count read twice, minutes apart, unchanged |
+| 1 | **Stop and fence the writers** — scale them to zero, close the queue, then revoke write grants or set the database or role read-only | none running, and a test write is refused |
+| 2 | **Prove zero writes** — never by row count: updates, and inserts balanced by deletes, leave it unchanged | a write-sensitive signal read twice, minutes apart, unchanged: the WAL/LSN position, the per-table insert/update/delete counters, or a checksum over the data |
 | 3 | **Back up** | the backup exists in a second place, with a size and a timestamp after rung 2 |
 | 4 | **Verify the backup by restoring it** | restored into a scratch target; row counts and a checksum or spot query match the source |
 | 5 | **Switch** — point the readers and writers at the new target | a live probe reads and writes through the new path; the old one takes no traffic |
