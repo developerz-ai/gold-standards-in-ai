@@ -1,6 +1,6 @@
 # 🔁 Workflow
 
-How work moves from **idea → plan → issues/milestones → autonomous PRs → review → supervised deploy** — at agent speed. A human writes a paragraph; an agent turns it into a spec and a multi-file execution plan; the plan becomes GitHub issues under a milestone; autonomous workers pick up issues and open PRs; an automated AI reviewer plus a human gate each PR; a deploy agent ships under supervision. Humans steer and review — they don't type the code.
+How work moves from **idea → plan → issues/milestones → autonomous PRs → machine gates → deploy** — at agent speed. A human writes a paragraph; an agent turns it into a spec and a multi-file execution plan; the plan becomes GitHub issues under a milestone; autonomous workers pick up issues and open PRs; CI and an automated AI reviewer gate each PR; the merge is the deploy consent and the agent verifies the roll. Humans bring ideas and report problems — they don't type the code or approve it.
 
 | File | Topic |
 |---|---|
@@ -10,6 +10,8 @@ How work moves from **idea → plan → issues/milestones → autonomous PRs →
 | [dz-contract.md](dz-contract.md) | 🤖 The `.dz/` contract — policy file, briefs and their caps, pinned in CI |
 | [github-issues-milestones.md](github-issues-milestones.md) | 🎫 Issues & milestones at agent speed with the `gh` CLI |
 | [shipping-doctrine.md](shipping-doctrine.md) | 🚢 No legacy, no shims, no feature flags, no prod A/B — one path, replaced completely |
+| [opportunistic-improvement.md](opportunistic-improvement.md) | 🎯 Take the opportunity a paid cost opens — fold in what has a switch back and a gate, file the rest |
+| [data-risk-ladder.md](data-risk-ladder.md) | 🪜 Stop writers, prove zero writes, back up, restore-test, switch — never lose data, fix forward |
 | [decision-records.md](decision-records.md) | 🧭 One record per one-way door — rejected options written down so agents stop re-proposing them |
 
 ## The loop

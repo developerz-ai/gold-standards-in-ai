@@ -19,7 +19,8 @@ src/services/user/
 ```
 Smaller files → one-shot reads, isolated changes, focused tests. Every class has *one reason to change*.
 
-## Small files — ~500 LOC max
+## Small files — ≤ 800 lines a file, ≤ 120 a function
+Guidance as of 2026-11: ≤ 800 lines a file, ≤ 120 lines a function, cognitive complexity ≤ 25. The linter flags each; a CI ratchet on the offender count means it can fall, never rise.
 - A 200-line file = one read, full context.
 - A 2000-line file = chunked reads, lost context, mistakes.
 - Split when: multiple private methods doing distinct work, complex validation, large test files.
