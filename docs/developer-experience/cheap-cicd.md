@@ -104,7 +104,8 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
           verdict=""
           if [ -n "$run" ]; then
             # Every page, every attempt: re-running one failed job leaves ci-ok in an earlier attempt.
-            # The newest ci-ok decides, whatever it says.
+            # The newest ci-ok decides, whatever it says. A verdict belongs to the commit: a green ci-ok from an
+            # earlier attempt stands while a full re-run is still queued - same code, already graded.
             verdict=$(gh api --paginate -X GET "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" \
               -f filter=all -f per_page=100 \
               --jq '.jobs[] | select(.name == "ci-ok") | [.run_attempt, .conclusion // "pending"] | @tsv' \
