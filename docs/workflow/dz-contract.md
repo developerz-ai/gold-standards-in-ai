@@ -38,7 +38,7 @@ schedules:
 | Unknown key → refused by name, with the nearest known key | a typo (`automerge`) once parsed `ok` and the written opt-out never existed; only keys the platform deleted are dropped silently |
 | `schedules[]` is a closed shape: `name`, `days`, `hours_utc`, `weeks_of_month`, `brief_file`, `repos` | no `cron:` — a typo'd cron fires every minute and each firing holds a box on the tenant's key |
 | At most 10 schedules | every entry that comes due holds one of the account's boxes for its whole run |
-| Fortnightly or monthly goes in `weeks_of_month`, never in the brief | a brief that says "act only in the first week" still fires, and bills, every other week → [maintainer-token-spend](../ai-agents/maintainer-token-spend.md#-cadence--weekly-fortnightly-monthly) |
+| Twice-monthly or monthly goes in `weeks_of_month` with one weekday, never in the brief | a brief that says "act only in the first week" still fires, and bills, every other week → [maintainer-token-spend](../ai-agents/maintainer-token-spend.md#-cadence--weekly-twice-a-month-monthly) |
 | `name`, `days`, `hours_utc`, `weeks_of_month`, `repos` unique | checked semantically, after the shape |
 
 ## Briefs — `## Rows` and the size cap

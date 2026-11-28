@@ -18,6 +18,7 @@ Why a cap is the wrong tool → [agent-work-limits.md](agent-work-limits.md). Ha
 | Scheduled checkups | 2,654M | 5% |
 | Setup | 1,124M | 2% |
 | Triage | 64M | 0.1% |
+| Not attributed to a lane above | 108M | 0.2% |
 
 The sweep started from "the schedules waste tokens". True, and small: the schedule waste measured **1.3%** of tokens. The big pools were PR shepherding and failed coding runs. Cut by the table, not by the hunch.
 
@@ -57,7 +58,7 @@ The largest removable pool. PR shepherding ran **453 fix rounds on 146 PRs — 1
 
 | Rule | Mechanism |
 |---|---|
-| **No new round until an input changes** | fingerprint what the round reads — head SHA, check conclusions, unresolved thread ids; same fingerprint as the last round that changed nothing → no run |
+| **No new round until an input changes** | fingerprint what the round reads — head SHA, check conclusions, and each unresolved thread's id **with its newest comment id**; same fingerprint as the last round that changed nothing → no run. Thread ids alone suppress the round a new reply should start |
 | A round that pushed nothing records why | the next wake-up reads the reason instead of re-deriving it |
 | A blocked item waits on an event, not a poll | the wake-up is the push, the check result, the reply |
 
@@ -74,15 +75,15 @@ Issue-driven coding spent 37% of its tokens on runs that failed or were cancelle
 
 Keep early retries. By the third attempt on the same input the run is a same-input rerun: change what it starts from — the failure, what was tried, a narrower task — or hand it up with that record.
 
-## 🗓️ Cadence — weekly, fortnightly, monthly
+## 🗓️ Cadence — weekly, twice a month, monthly
 
 Schedule keys → [the `.dz/` contract](../workflow/dz-contract.md#the-policy-file).
 
 | Schedule | Cadence | Config |
 |---|---|---|
 | Release-due check | weekly, Monday — **only in a repo that publishes** | `days: [mon]` |
-| Improvement pass, active repo | fortnightly | `days: [mon]` + `weeks_of_month: [1, 3]` |
-| Improvement pass, idle repo | monthly | `weeks_of_month: [1]` |
+| Improvement pass, active repo | twice a month — the 1st and 3rd Monday | `days: [mon]` + `weeks_of_month: [1, 3]` |
+| Improvement pass, idle repo | monthly — the 1st Monday | `days: [mon]` + `weeks_of_month: [1]` |
 | Survey of an idea-stage repo | off | nothing is broken in a repo with nothing running |
 | Any daily checkup | only with a record of merges | — |
 
@@ -95,7 +96,11 @@ schedules:
     brief_file: .dz/schedules/improve.md
 ```
 
-Put the cadence in the schedule, not in the brief. A brief that opens "act only on the first Monday" still fires — and bills — the other three.
+| Rule | Fails when |
+|---|---|
+| `weeks_of_month` narrows `days`, it does not replace it — pair it with **one** weekday | `[1]` over seven `days` fires seven times in the first week |
+| `[1, 3]` is twice a month, not every 14 days | the 3rd Monday to the next 1st Monday is three weeks in a month with five Mondays |
+| The cadence lives in the schedule, not in the brief | a brief that opens "act only on the first Monday" still fires — and bills — the other three |
 
 ## 🧯 Why a cap is the wrong tool
 
@@ -133,15 +138,31 @@ A fleet-wide sweep — ~10 agents, ~60 PRs open at once — is its own load test
 | Agents polled "still blocked?" every few minutes | hand the wait to a token-free shell loop that wakes the agent on the event → [harness-techniques](harness-techniques.md#the-techniques-ranked) row 13 |
 | A scripted merge loop merged 16 PRs carrying 36 open review findings, several of them real bugs | "mergeable" is not "reviewed" — see below |
 
-`mergeStateStatus: CLEAN` ignores unresolved review threads on a repo without required conversation resolution. A scripted merge checks the threads itself, and pins the commit it checked:
+`mergeStateStatus: CLEAN` ignores unresolved review threads on a repo without required conversation resolution — and zero open threads is also what a PR **nobody reviewed yet** looks like.
+
+| Gate | Enforced by |
+|---|---|
+| A review verdict for the current head | the forge: the reviewer's verdict is a **required status check**, so a PR whose review has not run cannot merge |
+| Zero unresolved threads | the script below — on top of the gate above, never instead of it |
+| The commit that was checked is the commit that merges | `--match-head-commit` |
+
+The script refuses what it cannot see: no review on this head, or more threads than one page.
 
 ```bash
-unresolved=$(gh api graphql -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" -f query='
+state=$(gh api graphql -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" -f query='
   query($owner: String!, $repo: String!, $pr: Int!) {
     repository(owner: $owner, name: $repo) {
-      pullRequest(number: $pr) { reviewThreads(first: 100) { nodes { isResolved } } }   # page past 100
+      pullRequest(number: $pr) {
+        reviews(last: 100) { nodes { commit { oid } } }
+        reviewThreads(first: 100) { pageInfo { hasNextPage } nodes { isResolved } }
+      }
     }
-  }' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved | not)] | length')
+  }' --jq '.data.repository.pullRequest')
+jq -e --arg sha "$HEAD_SHA" 'any(.reviews.nodes[]; .commit.oid == $sha)' <<< "$state" > /dev/null \
+  || { echo "PR $PR: no review on $HEAD_SHA - not merging"; exit 1; }
+jq -e '.reviewThreads.pageInfo.hasNextPage | not' <<< "$state" > /dev/null \
+  || { echo "PR $PR: more than 100 review threads - page them before deciding"; exit 1; }
+unresolved=$(jq '[.reviewThreads.nodes[] | select(.isResolved | not)] | length' <<< "$state")
 [ "$unresolved" = 0 ] || { echo "PR $PR: $unresolved unresolved review threads - not merging"; exit 1; }
 gh pr merge "$PR" --squash --match-head-commit "$HEAD_SHA"
 ```

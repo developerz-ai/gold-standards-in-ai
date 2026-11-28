@@ -8,13 +8,13 @@ The pipeline's shape → [ai-first-cicd.md](ai-first-cicd.md). What to build and
 
 | Runner | Billed | Consequence |
 |---|---|---|
-| GitHub-hosted, **public** repo | free | the default for open source; pay elsewhere only for measured wall-clock |
+| GitHub-hosted **standard** runner, **public** repo | free (As of 2026-11); a larger hosted runner is billed even there | the default for open source; pay elsewhere only for measured wall-clock |
 | GitHub-hosted, **private** repo | per minute; macOS and Windows cost the most | an OS matrix is the most expensive thing a PR can run |
-| Third-party per-minute runner | per minute, price scales with vCPU: 2 vCPU = 1×, 4 = 2×, 8 = 4×, 16 = 8× | a bigger runner pays only when the wall-clock falls by more than the multiplier |
+| Third-party per-minute runner | per minute, by size. The one measured here scales with vCPU: 2 vCPU = 1×, 4 = 2×, 8 = 4×, 16 = 8× | a bigger runner pays only when the wall-clock falls by more than the multiplier |
 
-**Billing minute** = wall minute × vCPU ÷ 2. Count in billing minutes, never runs or wall minutes: a 1-minute job on 16 vCPU costs what an 8-minute job costs on 2.
+**Billing minute** = wall minute × the runner's price multiplier — on the provider measured here, vCPU ÷ 2. It is a normalization for that price list, not a universal formula: read your provider's multipliers and substitute them. Count in billing minutes, never runs or wall minutes: there, a 1-minute job on 16 vCPU costs what an 8-minute job costs on 2.
 
-One monorepo measured **≈145,000 billing min/week (~$180/week)**: 1,098 PR runs/week at ~110 billing min each. Free runners are not free either — a slow free run is paid in the agent's waiting.
+One monorepo measured **≈145,000 billing min/week (~$180/week)** in total. PR runs were ≈121,000 of it: 1,098 runs/week at ~110 billing min each. Free runners are not free either — a slow free run is paid in the agent's waiting.
 
 ## 🕳️ Where the minutes went
 
@@ -62,7 +62,13 @@ concurrency:
 
 **The trap:** `group: ci-${{ github.ref }}` with `cancel-in-progress: false` looks safe for `main` and is not. A group holds **one running and one pending** run; a third push replaces the pending one. Three merges in a row and the middle commit never gets a verdict — and `cancel-in-progress: true` on `main` is the same loss, sooner. A merged commit with no verdict is a red `main` nobody can bisect.
 
-A job that **promotes** — moves `latest`, deploys, publishes — gets its own per-environment group, and re-checks inside it that it is still the tip. Runs do not reach `promote` in commit order: without the check an older run whose build finished late overwrites `latest` after a newer one.
+A job that **promotes** — moves `latest`, deploys, publishes — gets its own per-environment group, and inside it promotes **the tip's image, not its own**. Runs do not reach `promote` in commit order, and the group's one pending slot goes to whichever run arrived last:
+
+| Written as | Fails when |
+|---|---|
+| "promote my image" | an older run whose build finished late overwrites `latest` after a newer one |
+| "promote my image if I am still the tip" | the older run takes the pending slot from the tip's run, then declines — neither image ships |
+| "promote the tip's image if it exists" | — any run that holds the lock does the right thing, whichever one it is |
 
 ```yaml
   promote:
@@ -76,22 +82,29 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
     permissions:
       contents: read
       packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
     steps:
-      - name: Still the tip of main?
-        id: tip
+      - uses: docker/login-action@<sha>     # a fresh runner is logged in to nothing; `packages: write` alone pushes nothing
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Move latest to the tip's image
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tip=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
-          if [ "$tip" = "$GITHUB_SHA" ]; then echo "is_tip=true" >> "$GITHUB_OUTPUT"
-          else echo "superseded by $tip - not promoting"; echo "is_tip=false" >> "$GITHUB_OUTPUT"; fi
-      - name: Move latest
-        if: steps.tip.outputs.is_tip == 'true'
-        run: docker buildx imagetools create -t "$IMAGE:latest" "$IMAGE:sha-$GITHUB_SHA"
+          # Another commit is the tip and its image is not pushed yet: its own run promotes it.
+          if [ "$tip" != "$GITHUB_SHA" ] && ! docker buildx imagetools inspect "$IMAGE:sha-$tip" > /dev/null 2>&1; then
+            echo "tip $tip has no image yet - leaving latest for its run"; exit 0
+          fi
+          # This run IS the tip, or the tip's image exists: a failure here is a real one and fails the job.
+          docker buildx imagetools create -t "$IMAGE:latest" "$IMAGE:sha-$tip"
 ```
 
-The tip check assumes every `main` commit reaches `promote`. Where builds are skipped by input ([below](#-images--build-only-when-inputs-changed)), compare against the commit `latest` was built from instead: promote only when that commit is an ancestor of yours.
+This assumes every `main` commit builds an image. Where builds are skipped by input ([below](#-images--build-only-when-inputs-changed)), promote the image carrying the tip's **build hash** instead of `sha-$tip`.
 
 ## 🚪 Change detection that fails closed
 
@@ -118,7 +131,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail            # any error fails this job - and a failed job runs everything
-          files=$(git diff --name-only HEAD^1 HEAD)
+          # --no-renames: a source file moved INTO docs/ must list its old path too, or the move skips the tests
+          files=$(git diff --no-renames --name-only HEAD^1 HEAD)
           # code=false only when EVERY changed path is one named here; an empty list counts as code
           if grep -qvE '^(docs/|README\.md$|LICENSE$)' <<< "$files"; then code=true; else code=false; fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
@@ -141,7 +155,7 @@ jobs:
 
 `push` to `main` skips detection and runs everything: the verdict on a merged commit is not the place to save a minute.
 
-With several gated jobs, require one aggregator instead of each job — it also survives a job being added:
+With several gated jobs, require one aggregator instead of each job: one check context, so adding or renaming a job never touches the branch rule. It grades **only** the jobs in its `needs` — a gated job left out can fail while the required check stays green, so pin the list with a test:
 
 ```yaml
   ci-ok:
@@ -162,7 +176,8 @@ With several gated jobs, require one aggregator instead of each job — it also 
 | Name the skippable paths; never skip by extension | a docs site *is* markdown → [the markdown trap](smart-builds.md#the-markdown-trap) |
 | Check what the tests read before a docs-only skip | a test that reads `docs/` or the README makes "docs-only" a code change |
 | One detector, shared with the local gate | CI and `:changed` disagree → [smart-builds](smart-builds.md#1-one-detector-three-consumers) |
-| **Observe it red**: break the `changes` step on a throwaway PR | the gated jobs skip instead of run |
+| Every job except `ci-ok` is in `ci-ok.needs`, asserted by a test that parses the workflow | a new job fails and the one required check stays green |
+| **Observe it red**: break the `changes` step on a throwaway PR and assert **both** results | the gated jobs skip instead of run, **or** they run and `ci-ok` still reports success |
 
 ## 📐 Runners — size by the real constraint
 
@@ -213,8 +228,9 @@ The floor is not optional. One library's PR runs dropped its minimum supported r
 | Rule | Mechanism |
 |---|---|
 | No image build on a PR unless the PR changed that image's inputs | Dockerfile, lockfile, the paths it `COPY`s — the build hash → [smart-builds](smart-builds.md#2-build-vs-roll-are-two-different-questions) |
-| On `main`, compare against the **last published image**, not the previous commit | a failed or skipped build on the previous commit would otherwise never be retried — the change never ships and nothing errors |
-| Promote `latest` in its own serialized job, tip-checked | → [concurrency](#-concurrency--and-the-third-push-trap) |
+| **Build?** — does an image with this build hash exist in the registry. Never "did the previous commit change it" | a failed or skipped build on the previous commit is never retried — the change never ships and nothing errors |
+| **Promote?** — does `latest` point at that image. A separate question, asked on every `main` run | a build that pushed and then failed to promote leaves the next unchanged commit to skip both — the rollout stays pending forever |
+| Promote `latest` in its own serialized job, reconciling to the tip | → [concurrency](#-concurrency--and-the-third-push-trap) |
 | `latest` is a channel, the content tag is the identity | → [three tag meanings](smart-builds.md#3-one-repository-per-rollable-unit) |
 
 ## 🚦 Merge-main reruns and merge queues
@@ -235,14 +251,14 @@ The queue is the direction, not yet a measured result here (As of 2026-11-28). I
 |---|---|
 | Billing minutes per week, by workflow and by job | a number with its date and query |
 | Triggers | `pull_request` + `push: [main]` (+ `merge_group`); no duplicate run on a PR commit |
-| Concurrency | PR runs cancel superseded; a non-PR run's group is unique; promotion is serialized and tip-checked |
-| Change detection | a failed or truncated detector runs everything; observed red once |
+| Concurrency | PR runs cancel superseded; a non-PR run's group is unique; promotion is serialized and promotes the tip's image |
+| Change detection | a failed or truncated detector runs everything; every gated job is in the aggregator's `needs`; observed red once |
 | Required checks | no workflow-level `paths:` filter; job names unchanged |
 | Runner size | each label above the smallest carries its constraint in a comment |
 | Matrix | PR: one cell + the declared minimum; full matrix on `main`, tags, weekly |
 | Timeouts | `timeout-minutes` on every job |
 | Crons | each has a cadence reason; none nightly by default; flaky ones retried before believed |
-| Images | built only on changed inputs since the last published image |
+| Images | built only when no image carries the build hash; `latest` checked separately on every `main` run |
 | Merge rule | a merge queue, or a counted share of merge-`main` reruns |
 | Local parity | one `bin/check` that CI also calls; toolchain pinned once (`.bun-version`, `.ruby-version`, `rust-toolchain.toml`) and read by CI → [dx-scripts](dx-scripts.md) |
 
