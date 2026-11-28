@@ -2,7 +2,7 @@
 
 Fired on the first Monday of the month by `schedules: improve` (`weeks_of_month: [1]`).
 
-Once a month, keep what agents read here true. `CLAUDE.md` binds every change, and `non_goals` in the policy file are off limits. A red `main` belongs to the platform's red-main ask; broken links and an unindexed doc belong to the gate (`bin/check`).
+Once a month, keep what agents read here true. `CLAUDE.md` binds every change, and `non_goals` in the policy file are off limits. A red `main` belongs to the platform's red-main ask; broken relative links and an unindexed doc belong to the gate (`bin/check`); external links stay here.
 
 ## Signals
 
