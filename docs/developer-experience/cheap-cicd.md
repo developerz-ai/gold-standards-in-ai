@@ -10,7 +10,7 @@ The pipeline's shape → [ai-first-cicd.md](ai-first-cicd.md). What to build and
 |---|---|---|
 | GitHub-hosted, **public** repo | free | the default for open source; pay elsewhere only for measured wall-clock |
 | GitHub-hosted, **private** repo | per minute; macOS and Windows cost the most | an OS matrix is the most expensive thing a PR can run |
-| Third-party per-minute runner (ours: Ubicloud) | per minute, price scales with vCPU: 2 vCPU = 1×, 4 = 2×, 8 = 4×, 16 = 8× | a bigger runner pays only when the wall-clock falls by more than the multiplier |
+| Third-party per-minute runner | per minute, price scales with vCPU: 2 vCPU = 1×, 4 = 2×, 8 = 4×, 16 = 8× | a bigger runner pays only when the wall-clock falls by more than the multiplier |
 
 **Billing minute** = wall minute × vCPU ÷ 2. Count in billing minutes, never runs or wall minutes: a 1-minute job on 16 vCPU costs what an 8-minute job costs on 2.
 
@@ -176,7 +176,7 @@ With several gated jobs, require one aggregator instead of each job — it also 
 **Write the constraint next to the label.** One E2E job stays on 4 vCPU for the 40 GiB of free disk, not the cores; unlabelled, the next cost sweep downsizes it and it fails on space.
 
 ```yaml
-    runs-on: ubicloud-standard-4   # DISK: the stack needs 40 GiB free. Not a CPU choice - do not downsize by utilization.
+    runs-on: <provider>-4vcpu   # DISK: the stack needs 40 GiB free. Not a CPU choice - do not downsize by utilization.
 ```
 
 ## 🧱 Matrices
