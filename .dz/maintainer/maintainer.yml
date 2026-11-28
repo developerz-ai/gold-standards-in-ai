@@ -57,11 +57,6 @@ escalate:
   ask_before_acting: []
 
 schedules:
-  - name: health
-    days: [mon, tue, wed, thu, fri, sat, sun]
-    hours_utc: [7]
-    # Consumes the health brief, including its dependency-advisory signal for the MCP package pin.
-    brief_file: .dz/schedules/health.md
   - name: improve
     days: [mon]
     weeks_of_month: [1] # the first Monday: the cadence lives here, so the other Mondays never fire

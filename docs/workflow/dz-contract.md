@@ -25,11 +25,11 @@ pr:
   auto_merge: true
 
 schedules:
-  - name: health               # unique in the file; keys the firing, its tasks, its audit rows
+  - name: improve              # unique in the file; keys the firing, its tasks, its audit rows
     days: [mon, thu]           # non-empty subset of mon..sun, UTC
     hours_utc: [6]             # non-empty, whole hours 0-23
     # weeks_of_month: [1, 3]   # optional, 1-4; week n = UTC days 7n-6..7n. Omit to fire every week
-    brief_file: .dz/schedules/health.md
+    brief_file: .dz/schedules/improve.md
     # repos: [owner/other]     # optional, at most 4 more; never the repo holding this file
 ```
 
