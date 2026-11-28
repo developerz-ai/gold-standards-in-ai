@@ -64,6 +64,7 @@ schedules:
     brief_file: .dz/schedules/health.md
   - name: improve
     days: [mon]
+    weeks_of_month: [1] # the first Monday: the cadence lives here, so the other Mondays never fire
     hours_utc: [8]
     brief_file: .dz/schedules/improve.md
 

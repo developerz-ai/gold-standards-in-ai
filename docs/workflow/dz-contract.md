@@ -28,6 +28,7 @@ schedules:
   - name: health               # unique in the file; keys the firing, its tasks, its audit rows
     days: [mon, thu]           # non-empty subset of mon..sun, UTC
     hours_utc: [6]             # non-empty, whole hours 0-23
+    # weeks_of_month: [1, 3]   # optional, 1-4; week n = UTC days 7n-6..7n. Omit to fire every week
     brief_file: .dz/schedules/health.md
     # repos: [owner/other]     # optional, at most 4 more; never the repo holding this file
 ```
@@ -35,9 +36,10 @@ schedules:
 | Rule | Mechanism |
 |---|---|
 | Unknown key → refused by name, with the nearest known key | a typo (`automerge`) once parsed `ok` and the written opt-out never existed; only keys the platform deleted are dropped silently |
-| `schedules[]` is a closed shape: `name`, `days`, `hours_utc`, `brief_file`, `repos` | no `cron:` — a typo'd cron fires every minute and each firing holds a box on the tenant's key |
+| `schedules[]` is a closed shape: `name`, `days`, `hours_utc`, `weeks_of_month`, `brief_file`, `repos` | no `cron:` — a typo'd cron fires every minute and each firing holds a box on the tenant's key |
 | At most 10 schedules | every entry that comes due holds one of the account's boxes for its whole run |
-| `name`, `days`, `hours_utc`, `repos` unique | checked semantically, after the shape |
+| Twice-monthly or monthly goes in `weeks_of_month` with one weekday, never in the brief | a brief that says "act only in the first week" still fires, and bills, every other week → [maintainer-token-spend](../ai-agents/maintainer-token-spend.md#-cadence--weekly-twice-a-month-monthly) |
+| `name`, `days`, `hours_utc`, `weeks_of_month`, `repos` unique | checked semantically, after the shape |
 
 ## Briefs — `## Rows` and the size cap
 
@@ -156,7 +158,6 @@ Write these in prose where the agent reads them — not as invented keys, which 
 | Want | Schema today | Write it in |
 |---|---|---|
 | A PR size cap / one PR in flight | only `pr.large_threshold_lines` — a hold-for-a-human on merge, not a bound on what the agent produces | `CLAUDE.md` ([../writing-for-agents/workflow-commands.md](../writing-for-agents/workflow-commands.md)) |
-| A monthly cadence | `days` + `hours_utc` only | the brief: state the window in the row itself ("only in the first week of the month; otherwise passing") |
 | A performance / N+1 / leak review lens | review passes are `correctness`, `security`, `tests`, `api_contract`, `style_nits` | `.dz/maintainer/reviewer.md` — including the opposite ("do not flag N+1 here, preloading is global") |
 | Where specs, plans and standards live | no key | `CLAUDE.md`, an index into `docs/` ([../writing-for-agents/claude-md.md](../writing-for-agents/claude-md.md)) |
 | Services beyond the closed `services` vocabulary (`redis`, `postgres`) | closed enum, on purpose — a free-form value would start arbitrary processes | the repo's own `bin/setup` / `services: {up, down}` commands |

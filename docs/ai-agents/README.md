@@ -12,6 +12,7 @@ Patterns for building agents — the systems that *do the work* — with the AI 
 | [mcp-docs-for-agents.md](mcp-docs-for-agents.md) | 📖 Teach *their* agent to use *your* MCP server — recipes as prose (branches, bounded loops, retries), the `docs` tool, editable markdown |
 | [mcp-write-safety.md](mcp-write-safety.md) | 🛡️ MCP writes that hosts and directories trust — read/write/delete split + annotations, `live:false` previews, required `confirmed_by_user` on destructive commits, audited claims |
 | [agent-work-limits.md](agent-work-limits.md) | 🔓 Freedom + access — never cap the work, wire it to everything, stall-fence instead |
+| [maintainer-token-spend.md](maintainer-token-spend.md) | 🪙 AI-maintainer token spend — measure by lane, kill no-op schedules and same-input reruns, cadence over caps |
 | [context-budget.md](context-budget.md) | 🧮 The standing context, prompt-cache prefix order, lazy surfaces, chunked external results |
 | [harness-techniques.md](harness-techniques.md) | 🧰 Harness techniques — tokens saved and weak models finishing, meter first, every clip leaves a door |
 | [evals.md](evals.md) | 📏 Evals — capability vs regression, pass@k vs pass^k, graders from code checks to LLM judge, run before merge |

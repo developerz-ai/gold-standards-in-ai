@@ -50,9 +50,13 @@ jobs:
           filters: |
             api:    ['apps/api/**', 'packages/**']
             router: ['apps/router/**']
-  api:    { needs: detect, if: needs.detect.outputs.api == 'true',    uses: ./.github/workflows/ts.yml }
-  router: { needs: detect, if: needs.detect.outputs.router == 'true', uses: ./.github/workflows/rust.yml }
+  # A skipped required job counts as passing, so a bare `outputs.api == 'true'` FAILS OPEN when
+  # `detect` errors or its file list is truncated. A detector that did not succeed runs everything.
+  api:    { needs: detect, if: "!cancelled() && (needs.detect.result != 'success' || needs.detect.outputs.api == 'true')",    uses: ./.github/workflows/ts.yml }
+  router: { needs: detect, if: "!cancelled() && (needs.detect.result != 'success' || needs.detect.outputs.router == 'true')", uses: ./.github/workflows/rust.yml }
 ```
+
+The fail-closed gate, the truncation limits, triggers, concurrency and what each of these costs → [cheap-cicd.md](cheap-cicd.md).
 
 Cache everything else ([linting-ci](linting-ci.md#cicd-is-the-bottleneck--cache-everything)). Target: **push → green in < 5 min**, because that number multiplies by every PR an agent opens.
 
@@ -95,6 +99,7 @@ Report the right number. A step that passes 70% of single runs passes **at least
 
 - **Never push red.** The gate exists so the agent doesn't discover breakage in front of a reviewer.
 - **A PR with 0 checks registered is not a passing PR.** Auto-merge right after a rebase can land red because checks haven't attached yet — wait for them to register.
+- **A mergeable PR is not a reviewed PR.** `mergeStateStatus: CLEAN` ignores unresolved review threads unless the repo requires conversation resolution; a scripted merge counts them itself → [the check](../ai-agents/maintainer-token-spend.md#-bursts-and-shared-keys).
 - **Cap PR size by repo kind** — the one table, with the in-flight rule → [workflow-commands](../writing-for-agents/workflow-commands.md#-pr-cap-by-repo-kind).
 - **AI review on every PR** (CodeRabbit or equivalent) with path-scoped instructions; the merge is the agent's once every machine gate is green → [linting-ci](linting-ci.md#automated-ai-code-review).
 
@@ -105,7 +110,7 @@ CI output *is* a prompt. Optimize it:
 - **Fail fast, one cause per job** — don't bury the real error under 400 lines of a second failure.
 - **Name the fix in the message**: `apps/api/src/routes/x.ts:42 threw a bare Error — use an AppError subclass (src/errors/). scripts/lint/no-bare-error.ts`.
 - **Expose logs to the agent**: `gh run view --log-failed` in the allow list, and a `/fix-ci` command that pulls the failing job, reproduces locally with the *scoped* command, fixes, pushes.
-- **Flaky ≠ acceptable.** A flaky job trains the agent to re-run instead of read. Quarantine it with an issue, not a `continue-on-error`.
+- **Flaky ≠ acceptable.** A flaky job trains the agent to re-run instead of read. Quarantine it with an issue, not a `continue-on-error`. A flaky **scheduled** job is worse: every red becomes a fix task for whichever agent watches it → [maintainer-token-spend](../ai-agents/maintainer-token-spend.md#-flaky-schedulers-feed-agents).
 
 ## 6. Merge → deploy without a human bottleneck
 
@@ -123,4 +128,4 @@ Wire the error monitor into the loop: a new issue → an agent reads the trace, 
 
 ---
 
-**Related:** [dependency-updates.md](dependency-updates.md) — the 14-day wait and the CVE fast lane · [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [../ai-agents/evals.md](../ai-agents/evals.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)
+**Related:** [cheap-cicd.md](cheap-cicd.md) — where the CI minutes go · [dependency-updates.md](dependency-updates.md) — the 14-day wait and the CVE fast lane · [inner-loop.md](inner-loop.md) · [linting-ci.md](linting-ci.md) · [../ai-agents/evals.md](../ai-agents/evals.md) · [guards-and-gotchas.md](../writing-for-agents/guards-and-gotchas.md) · [../workflow/shipping-doctrine.md](../workflow/shipping-doctrine.md)

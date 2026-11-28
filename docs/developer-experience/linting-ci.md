@@ -60,9 +60,9 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request:
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:   # a PR cancels its superseded run; a run on main is never cancelled or dropped
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   check:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -104,6 +104,8 @@ The agent waits on CI before it can merge or deploy, so CI latency taxes every l
 - **Cache test/compile artifacts** — Rust `target/`, TS build info, incremental builders (esbuild/swc over webpack).
 - **Pre-built base images** — bake system deps into a base image; don't `apt-get install` on every run.
 - **Blacksmith** runners give fast SSDs + sticky caches out of the box → fewer cold starts.
+
+Fast is half of it. What each run costs, and which runs should not start → [cheap-cicd.md](cheap-cicd.md).
 
 ```yaml
 - uses: useblacksmith/setup-bun@v2          # cached bun
@@ -147,6 +149,7 @@ Don't test or build the whole monorepo on every PR. Detect which packages/apps c
       web: ['apps/web/**', 'packages/ui/**']
 # downstream jobs gate on steps.changes.outputs.<name> == 'true'
 ```
+A gate on a job's output fails open when the detector errors — a skipped required job counts as passing. The fail-closed form → [cheap-cicd.md](cheap-cicd.md#-change-detection-that-fails-closed).
 Combine with the deploy matrix so an unchanged app is never rebuilt — the single biggest CI win on a large monorepo.
 
 ## Parallel tests — super fast

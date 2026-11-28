@@ -89,7 +89,7 @@ Current upstream majors (As of 2026-11): [`actions/cache@v6`](https://github.com
 
 Also worth the config:
 - **Size the runner per job.** A lint job on 2 vCPU, a full test job on 8–16. Paying for 16 vCPU to run a formatter is waste; running the heavy suite on 2 is the queue.
-- **`concurrency: cancel-in-progress`** per ref — an agent pushing twice in a minute shouldn't run two full pipelines.
+- **`concurrency: cancel-in-progress`** per **pull request**, never per ref — an agent pushing twice in a minute shouldn't run two full pipelines, and a run on `main` must never be cancelled or dropped → [cheap-cicd](cheap-cicd.md#-concurrency--and-the-third-push-trap).
 - **A timeout on every job.** A hung job is worse than a failed one: it holds the merge and teaches nothing.
 - **Dynamic matrices from the plan.** Emit the matrix as JSON from the detect/plan job so a leg *exists* only for a unit that must be built — a matrix leg that spawns a runner just to gate itself off still costs a minute.
 - **Guard the plan job itself.** If the plan can't be computed, fail loudly with a readable error — never let downstream `always()` jobs read a half-written plan and deploy a subset.
