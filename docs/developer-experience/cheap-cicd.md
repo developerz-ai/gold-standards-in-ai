@@ -82,7 +82,7 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
     timeout-minutes: 10
     permissions:
       contents: read
-      checks: read
+      actions: read
       packages: write
     steps:
       - uses: docker/login-action@<sha>     # a fresh runner is logged in to nothing; `packages: write` alone pushes nothing
@@ -98,14 +98,22 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
           image="ghcr.io/${GITHUB_REPOSITORY,,}"      # an image reference is lowercase; an owner name need not be
           tip=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
           # The tag existing proves a build, not a verdict: only the tip's own green ci-ok makes it promotable.
-          verdict=$(gh api -X GET "repos/$GITHUB_REPOSITORY/commits/$tip/check-runs" -f check_name=ci-ok \
-            --jq '.check_runs[0].conclusion // "pending"')
+          # Bound to THIS workflow's push run on main - a check that merely shares the name proves nothing.
+          run=$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" \
+            -f head_sha="$tip" -f event=push -f branch=main --jq '.workflow_runs[0].id // empty')
+          verdict=pending
+          if [ -n "$run" ]; then
+            verdict=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" \
+              --jq '[.jobs[] | select(.name == "ci-ok")][0].conclusion // "pending"')
+          fi
           if [ "$verdict" != success ]; then
             echo "tip $tip: ci-ok is $verdict - not promotable; its own run promotes it when it is"; exit 0
           fi
           # Verified, so the image must exist: any failure from here is real and fails the job.
           docker buildx imagetools create -t "$image:latest" "$image:sha-$tip"
 ```
+
+The lock serializes promoters, not pushes. The guarantee is a snapshot: `latest` is the verified tip **as read inside the lock**, it never moves backwards, and a push that lands after the read is promoted by its own run. Exact-tip at every instant needs the branch update itself coordinated with promotion — a merge queue, not a tag.
 
 This assumes every `main` commit builds an image. Where builds are skipped by input ([below](#-images--build-only-when-inputs-changed)), promote the image carrying the tip's **build hash** instead of `sha-$tip`.
 

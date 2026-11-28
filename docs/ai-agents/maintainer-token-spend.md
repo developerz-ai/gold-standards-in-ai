@@ -146,12 +146,13 @@ A fleet-wide sweep — ~10 agents, ~60 PRs open at once — is its own load test
 | Zero unresolved threads | the forge: **required conversation resolution** — a thread opened after any script read still blocks the merge |
 | The commit that was checked is the commit that merges | `--match-head-commit` |
 
-The script is the early read of the same gates, and the only read on a repo that has not switched them on yet. It refuses what it cannot see: a verdict that is not green on this head, or more threads than one page.
+**Switch both forge rules on before a script merges anything.** The script is an early read of the same gates, never a substitute: without the rules, a thread opened after its read does not move the head, and the merge goes through. It refuses what it cannot see: a verdict that is not green on this head, or more threads than one page.
 
 ```bash
-# REVIEW_CHECK: the reviewer's check-run name. A check, not a submitted review - a reviewer may post only one of the two.
-verdict=$(gh api -X GET "repos/$OWNER/$REPO/commits/$HEAD_SHA/check-runs" -f check_name="$REVIEW_CHECK" \
-  --jq '.check_runs[0].conclusion // "missing"')
+# REVIEW_CHECK + REVIEW_APP_ID: the reviewer's check-run name AND the app that owns it - any app can post a
+# check under any name. A check, not a submitted review: a reviewer may post only one of the two.
+verdict=$(gh api -X GET "repos/$OWNER/$REPO/commits/$HEAD_SHA/check-runs" \
+  -f check_name="$REVIEW_CHECK" -F app_id="$REVIEW_APP_ID" --jq '.check_runs[0].conclusion // "missing"')
 [ "$verdict" = success ] || { echo "PR $PR: $REVIEW_CHECK is $verdict on $HEAD_SHA - not merging"; exit 1; }
 threads=$(gh api graphql -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" -f query='
   query($owner: String!, $repo: String!, $pr: Int!) {
