@@ -62,17 +62,18 @@ concurrency:
 
 **The trap:** `group: ci-${{ github.ref }}` with `cancel-in-progress: false` looks safe for `main` and is not. A group holds **one running and one pending** run; a third push replaces the pending one. Three merges in a row and the middle commit never gets a verdict — and `cancel-in-progress: true` on `main` is the same loss, sooner. A merged commit with no verdict is a red `main` nobody can bisect.
 
-A job that **promotes** — moves `latest`, deploys, publishes — gets its own per-environment group, and inside it promotes **the tip's image, not its own**. Runs do not reach `promote` in commit order, and the group's one pending slot goes to whichever run arrived last:
+A job that **promotes** — moves `latest`, deploys, publishes — gets its own per-environment group, and inside it promotes **the tip's verified image, not its own**. Runs do not reach `promote` in commit order, and the group's one pending slot goes to whichever run arrived last:
 
 | Written as | Fails when |
 |---|---|
 | "promote my image" | an older run whose build finished late overwrites `latest` after a newer one |
 | "promote my image if I am still the tip" | the older run takes the pending slot from the tip's run, then declines — neither image ships |
-| "promote the tip's image if it exists" | — any run that holds the lock does the right thing, whichever one it is |
+| "promote the tip's image if it exists" | an older run publishes the tip before the tip's own checks finish — or after they failed |
+| "promote the tip's image once the tip's own verdict is green" | — any run that holds the lock does the right thing, whichever one it is |
 
 ```yaml
   promote:
-    needs: build
+    needs: [build, ci-ok]            # ci-ok needs build too: a green ci-ok means the image is pushed
     if: github.ref == 'refs/heads/main'
     concurrency:
       group: promote-production      # one writer per environment; the newest pending run wins
@@ -81,27 +82,29 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
     timeout-minutes: 10
     permissions:
       contents: read
+      checks: read
       packages: write
-    env:
-      IMAGE: ghcr.io/${{ github.repository }}
     steps:
       - uses: docker/login-action@<sha>     # a fresh runner is logged in to nothing; `packages: write` alone pushes nothing
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: Move latest to the tip's image
+      - name: Move latest to the tip's verified image
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"      # an image reference is lowercase; an owner name need not be
           tip=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
-          # Another commit is the tip and its image is not pushed yet: its own run promotes it.
-          if [ "$tip" != "$GITHUB_SHA" ] && ! docker buildx imagetools inspect "$IMAGE:sha-$tip" > /dev/null 2>&1; then
-            echo "tip $tip has no image yet - leaving latest for its run"; exit 0
+          # The tag existing proves a build, not a verdict: only the tip's own green ci-ok makes it promotable.
+          verdict=$(gh api -X GET "repos/$GITHUB_REPOSITORY/commits/$tip/check-runs" -f check_name=ci-ok \
+            --jq '.check_runs[0].conclusion // "pending"')
+          if [ "$verdict" != success ]; then
+            echo "tip $tip: ci-ok is $verdict - not promotable; its own run promotes it when it is"; exit 0
           fi
-          # This run IS the tip, or the tip's image exists: a failure here is a real one and fails the job.
-          docker buildx imagetools create -t "$IMAGE:latest" "$IMAGE:sha-$tip"
+          # Verified, so the image must exist: any failure from here is real and fails the job.
+          docker buildx imagetools create -t "$image:latest" "$image:sha-$tip"
 ```
 
 This assumes every `main` commit builds an image. Where builds are skipped by input ([below](#-images--build-only-when-inputs-changed)), promote the image carrying the tip's **build hash** instead of `sha-$tip`.

@@ -58,7 +58,7 @@ The largest removable pool. PR shepherding ran **453 fix rounds on 146 PRs — 1
 
 | Rule | Mechanism |
 |---|---|
-| **No new round until an input changes** | fingerprint what the round reads — head SHA, check conclusions, and each unresolved thread's id **with its newest comment id**; same fingerprint as the last round that changed nothing → no run. Thread ids alone suppress the round a new reply should start |
+| **No new round until an input changes** | fingerprint what the round reads — head SHA, check conclusions, and each unresolved thread's id **with a digest of its comments' bodies**; same fingerprint as the last round that changed nothing → no run. Thread ids alone suppress the round a new reply should start; comment ids alone miss an edited comment |
 | A round that pushed nothing records why | the next wake-up reads the reason instead of re-deriving it |
 | A blocked item waits on an event, not a poll | the wake-up is the push, the check result, the reply |
 
@@ -143,26 +143,25 @@ A fleet-wide sweep — ~10 agents, ~60 PRs open at once — is its own load test
 | Gate | Enforced by |
 |---|---|
 | A review verdict for the current head | the forge: the reviewer's verdict is a **required status check**, so a PR whose review has not run cannot merge |
-| Zero unresolved threads | the script below — on top of the gate above, never instead of it |
+| Zero unresolved threads | the forge: **required conversation resolution** — a thread opened after any script read still blocks the merge |
 | The commit that was checked is the commit that merges | `--match-head-commit` |
 
-The script refuses what it cannot see: no review on this head, or more threads than one page.
+The script is the early read of the same gates, and the only read on a repo that has not switched them on yet. It refuses what it cannot see: a verdict that is not green on this head, or more threads than one page.
 
 ```bash
-state=$(gh api graphql -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" -f query='
+# REVIEW_CHECK: the reviewer's check-run name. A check, not a submitted review - a reviewer may post only one of the two.
+verdict=$(gh api -X GET "repos/$OWNER/$REPO/commits/$HEAD_SHA/check-runs" -f check_name="$REVIEW_CHECK" \
+  --jq '.check_runs[0].conclusion // "missing"')
+[ "$verdict" = success ] || { echo "PR $PR: $REVIEW_CHECK is $verdict on $HEAD_SHA - not merging"; exit 1; }
+threads=$(gh api graphql -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" -f query='
   query($owner: String!, $repo: String!, $pr: Int!) {
     repository(owner: $owner, name: $repo) {
-      pullRequest(number: $pr) {
-        reviews(last: 100) { nodes { commit { oid } } }
-        reviewThreads(first: 100) { pageInfo { hasNextPage } nodes { isResolved } }
-      }
+      pullRequest(number: $pr) { reviewThreads(first: 100) { pageInfo { hasNextPage } nodes { isResolved } } }
     }
-  }' --jq '.data.repository.pullRequest')
-jq -e --arg sha "$HEAD_SHA" 'any(.reviews.nodes[]; .commit.oid == $sha)' <<< "$state" > /dev/null \
-  || { echo "PR $PR: no review on $HEAD_SHA - not merging"; exit 1; }
-jq -e '.reviewThreads.pageInfo.hasNextPage | not' <<< "$state" > /dev/null \
+  }' --jq '.data.repository.pullRequest.reviewThreads')
+jq -e '.pageInfo.hasNextPage | not' <<< "$threads" > /dev/null \
   || { echo "PR $PR: more than 100 review threads - page them before deciding"; exit 1; }
-unresolved=$(jq '[.reviewThreads.nodes[] | select(.isResolved | not)] | length' <<< "$state")
+unresolved=$(jq '[.nodes[] | select(.isResolved | not)] | length' <<< "$threads")
 [ "$unresolved" = 0 ] || { echo "PR $PR: $unresolved unresolved review threads - not merging"; exit 1; }
 gh pr merge "$PR" --squash --match-head-commit "$HEAD_SHA"
 ```
