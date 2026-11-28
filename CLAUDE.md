@@ -19,7 +19,7 @@
 | Content | Markdown only — no runtime, no dependencies |
 | Scripts | bash under `bin/` |
 | Gate | `bin/check` — the same gate CI runs |
-| CI | `.github/workflows/ci.yml` — `bin/setup` + `bin/check` on push and pull_request |
+| CI | `.github/workflows/ci.yml` — `bin/setup` + `bin/check` on pull_request and on push to `main` |
 | Pre-commit | `.githooks/pre-commit` → `bin/check`; activate once per clone: `git config core.hooksPath .githooks` |
 
 ## Commands

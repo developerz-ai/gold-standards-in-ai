@@ -4,7 +4,17 @@
 # image does not carry yours (e.g. actions/setup-node, oven-sh/setup-bun).
 name: check
 
-on: [push, pull_request]
+# One run per PR commit: `on: [push, pull_request]` ran every PR commit twice.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A PR's newer push cancels its superseded run; a run on main gets a group of its own, so no
+# merged commit loses its verdict (docs/developer-experience/cheap-cicd.md).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -12,6 +22,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: bin/setup

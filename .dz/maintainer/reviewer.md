@@ -54,7 +54,7 @@ Never reproduce the slug algorithm in prose or in a one-liner: a copy drifts fro
 
 ## Gates that matter
 
-- The `check` job in `.github/workflows/ci.yml` (workflow `check`), which runs `bin/setup` then `bin/check` on push and pull_request. It is the one required check (`required_checks: ["check"]` in `.dz/maintainer/maintainer.yml`); a red or missing `check` is not proven.
+- The `check` job in `.github/workflows/ci.yml` (workflow `check`), which runs `bin/setup` then `bin/check` on pull_request and on push to `main`. It is the one required check (`required_checks: ["check"]` in `.dz/maintainer/maintainer.yml`); a red or missing `check` is not proven.
 - On this repository's own (non-fork, non-Dependabot) runs the public-tree guard requires the `PUBLIC_TREE_PRIVATE_WORDS` secret; a fork or Dependabot PR skipping the private-word pass is expected, not a finding.
 - `bin/test` is the proof for a validator change; `bin/check-docs` output is the proof for a links or index claim — cite what it prints, not a hand-computed slug.
 
