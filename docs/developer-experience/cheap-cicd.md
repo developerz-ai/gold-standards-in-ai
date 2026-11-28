@@ -101,11 +101,16 @@ A job that **promotes** — moves `latest`, deploys, publishes — gets its own 
           # Bound to THIS workflow's push run on main - a check that merely shares the name proves nothing.
           run=$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" \
             -f head_sha="$tip" -f event=push -f branch=main --jq '.workflow_runs[0].id // empty')
-          verdict=pending
+          verdict=""
           if [ -n "$run" ]; then
-            verdict=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" \
-              --jq '[.jobs[] | select(.name == "ci-ok")][0].conclusion // "pending"')
+            # Every page, every attempt: re-running one failed job leaves ci-ok in an earlier attempt.
+            # The newest ci-ok decides, whatever it says.
+            verdict=$(gh api --paginate -X GET "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" \
+              -f filter=all -f per_page=100 \
+              --jq '.jobs[] | select(.name == "ci-ok") | [.run_attempt, .conclusion // "pending"] | @tsv' \
+              | sort -n | tail -1 | cut -f2)
           fi
+          verdict=${verdict:-pending}
           if [ "$verdict" != success ]; then
             echo "tip $tip: ci-ok is $verdict - not promotable; its own run promotes it when it is"; exit 0
           fi
